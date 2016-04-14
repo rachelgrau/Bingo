@@ -79,7 +79,7 @@ var AnswerBox = React.createClass({
 var DoneButton = React.createClass({
 	render: function() {
 		return (
-			<input className="button blueButtonInactive" id="editorButton" type="submit" value="Done" />
+			<input className="button blueButtonInactive" id="editorButton" type="submit" value="Done" disabled/>
 		);
 	}
 });
@@ -129,7 +129,7 @@ var Footer = React.createClass({
 			<div id="footer">
 				<div id="footerButtons">
     				<input className="button footerButton greenButtonActive" id="footerSaveButton" type="submit" value="Save & Exit" />
-    				<input className="button footerButton blueButtonInactive" id="footerCreateButton" type="submit" value="Create" />
+    				<input className="button footerButton blueButtonInactive" id="footerCreateButton" type="submit" value="Create" disabled/>
     			</div>
     		</div>
 		);

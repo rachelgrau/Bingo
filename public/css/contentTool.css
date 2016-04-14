@@ -86,6 +86,13 @@
 	background-color: white;
 	border: 1px solid #cdd3d7;
 	border-radius: 2px;
+	color: #787e83;
+	font-family: "Avenir LT Std";
+	font-size: 16px;
+	font-weight: 500;
+	line-height: 67px;  /* same as bingoCard height*/
+	text-align: center;
+	vertical-align: middle;
 }
 
 .bingoCardHover {
