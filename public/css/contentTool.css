@@ -1,0 +1,142 @@
+#header {
+	font-family: "Avenir LT Std";
+	font-size: 38px;
+	font-weight: 500;
+	line-height: 46px;
+}
+
+#footer {
+	background-color: #f8fafb;
+	border: 1px solid #eaeef1;
+	border-radius: 0 4px 4px 0;
+	clear: left;
+	width: 800px;
+	height: 130px;
+}
+
+.contentTool {
+	background-color: white;
+}
+
+.editor {
+	float: left;
+	background-color: #f8fafb;
+	border: 1px solid #cdd3d7;
+	border-radius: 2px;
+	width: 292px;
+	height: 390px;
+	padding: 15px 21px 32px 21px;
+	margin: 0px 24px 25px 0px;
+}
+
+.questionBox {
+	font-family: "Avenir LT Std";
+	color: #5b6d79;
+	font-size: 22px;
+	font-weight: 800;
+	line-height: 22px;
+}
+
+.answerBox {
+	font-family: "Avenir LT Std";
+	color: #5b6d79;
+	font-size: 22px;
+	font-weight: 800;
+	line-height: 22px;
+	margin-top: 21px;
+}
+
+.doneButton {
+
+}
+
+.bingoBoard {
+	float: left;
+	background-color: #f8fafb;
+	border: 1px solid #cdd3d7;
+	border-radius: 2px;
+	width: 401px;
+	height: 401px;
+	padding: 18px;
+	margin: 0px 0px 25px 0px;
+}
+
+.bingoCard {
+	float: left;
+	margin-left: 5px;
+	margin-right: 5px;
+	margin-top: 5px;
+	margin-bottom: 5px;
+	width: 67px;
+	height: 67px;
+}
+
+.editorInput {
+	width: 288px;
+	height: 102px;
+	margin-top: 10px;
+	padding-left:0px;
+	padding-top:0px;
+	padding-bottom:0.4em;
+	padding-right: 0.4em;l
+}
+
+/* Bingo cards */
+.bingoCardEntered {
+	background-color: white;
+	border: 1px solid #cdd3d7;
+	border-radius: 2px;
+}
+
+.bingoCardHover {
+	background-color: #eaeef1;
+	border: 1px solid #06aaff;
+	border-radius: 2px;
+}
+
+.bingoCardEmpty {
+	background-color: #eaeef1;
+	border: 1px solid #cdd3d7;
+	border-radius: 2px;
+}
+
+/* Buttons */
+.button {
+	width: 294px;
+	height: 63px;
+	color: white;
+	font-family: "Avenir LT Std";
+	font-size: 22px;
+	font-weight: 500;
+	line-height: 22px;
+	border-radius: 2px;
+	border: none;
+	outline: none;
+}
+
+.blueButtonActive {
+	background-color: #00a8ff;
+}
+
+.blueButtonInactive {
+	background-color: #bce9ff;
+}
+
+.greenButtonActive {
+	background-color: #5fd598;
+}
+
+.footerButton {
+	margin-left: 10px;
+	margin-right: 10px;
+}
+
+#editorButton {
+	margin-top: 36px;
+}
+
+#footerButtons {
+	float: right;
+	margin-right: 10px;
+	margin-top: 34px;
+}
