@@ -71,6 +71,10 @@
 	height: 67px;
 }
 
+.wildCardImage {
+	padding-top: 15px;
+}
+
 .editorInput {
 	width: 288px;
 	height: 102px;

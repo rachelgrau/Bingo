@@ -22,8 +22,7 @@ var cards = [
   {id: 21, answer: "", question: "", completed: "false"},
   {id: 22, answer: "", question: "", completed: "false"},
   {id: 23, answer: "", question: "", completed: "false"},
-  {id: 24, answer: "", question: "", completed: "false"},
-  {id: 25, answer: "", question: "", completed: "false"}
+  {id: 24, answer: "", question: "", completed: "false"}
 ];
 
 var ContentTool = React.createClass({
@@ -91,10 +90,14 @@ var BingoBoard = React.createClass({
 		for (var i=0; i < this.props.cards.length; i++) {
 			var currAnswer = this.props.cards[i].answer;
 			var isCompleted = this.props.cards[i].completed;
+			if (i==Math.floor(this.props.cards.length/2)) {
+				/* Bingo wild card */
+				bingoCards.push(<BingoCard answer="WILD" completed="true" isWild="true"/>);
+			}
 			if (isCompleted=="true") {	
-				bingoCards.push(<BingoCard answer={currAnswer} completed="true"/>);
+				bingoCards.push(<BingoCard answer={currAnswer} completed="true" isWild="false"/>);
 			} else {
-				bingoCards.push(<BingoCard answer="" completed="false"/>);
+				bingoCards.push(<BingoCard answer="" completed="false" isWild="false"/>);
 			}
 		}		
 		return (
@@ -107,7 +110,14 @@ var BingoBoard = React.createClass({
 
 var BingoCard = React.createClass({
 	render: function() {
-		if (this.props.completed == "false") {
+		if (this.props.isWild == "true") {
+			/* Wild card */
+			return (
+				<div className="bingoCard bingoCardEntered">
+					<img src="nearpodIcon.png" className="wildCardImage"/>
+				</div>
+			);
+		} else if (this.props.completed == "false") {
 			return (
 				<div className="bingoCard bingoCardEmpty">
 					{this.props.answer}
