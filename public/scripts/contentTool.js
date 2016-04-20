@@ -1,30 +1,6 @@
-// var cards = [
-//   {id: 1, answer: "Blatant", question: "Brazenly obvious; flagrant; offensively noisy or loud", completed: "true"},
-//   {id: 2, answer: "Abate", question: "To reduce in amount, degree, intensity, etc", completed: "true"},
-//   {id: 3, answer: "", question: "", completed: "false"},
-//   {id: 4, answer: "", question: "", completed: "false"},
-//   {id: 5, answer: "", question: "", completed: "false"},
-//   {id: 6, answer: "", question: "", completed: "false"},
-//   {id: 7, answer: "", question: "", completed: "false"},
-//   {id: 8, answer: "", question: "", completed: "false"},
-//   {id: 9, answer: "", question: "", completed: "false"},
-//   {id: 10, answer: "", question: "", completed: "false"},
-//   {id: 11, answer: "", question: "", completed: "false"},
-//   {id: 12, answer: "", question: "", completed: "false"},
-//   {id: 13, answer: "", question: "", completed: "false"},
-//   {id: 14, answer: "", question: "", completed: "false"},
-//   {id: 15, answer: "", question: "", completed: "false"},
-//   {id: 16, answer: "", question: "", completed: "false"},
-//   {id: 17, answer: "", question: "", completed: "false"},
-//   {id: 18, answer: "", question: "", completed: "false"},
-//   {id: 19, answer: "", question: "", completed: "false"},
-//   {id: 20, answer: "", question: "", completed: "false"},
-//   {id: 21, answer: "", question: "", completed: "false"},
-//   {id: 22, answer: "", question: "", completed: "false"},
-//   {id: 23, answer: "", question: "", completed: "false"},
-//   {id: 24, answer: "", question: "", completed: "false"}
-// ];
-
+/*
+ * State for the content tool: the cards themselves, and the # of the card that is currently selected (or -1) if none
+ */
 var ContentTool = React.createClass({
 	loadCardsFromServer: function() {
     $.ajax({
@@ -40,34 +16,104 @@ var ContentTool = React.createClass({
 	    });
   	},
   	getInitialState: function() {
-		return {cards:[]};
+		return {cards:[], selectedCard:-1};
 	},
   	componentDidMount: function() {
     	this.loadCardsFromServer();
-    	setInterval(this.loadCardsFromServer, this.props.pollInterval);
+    	// setInterval(this.loadCardsFromServer, this.props.pollInterval);
+  	},
+  	handleCardSubmit: function(card) {
+  		/* Update state[cards]: edited card should contain new question/answer */
+  		/* Update state[selectedCard] -- no longer have a card selected */
+  		var cardToUpdate = this.state.cards[this.state.selectedCard];
+  		cardToUpdate["question"] = card.question;
+  		cardToUpdate["answer"] = card.answer;
+  		cardToUpdate["completed"] = "true";
+  		this.state.cards[this.state.selectedCard] = cardToUpdate;
+  		this.setState({selectedCard: -1});
+  	},
+  	handleSaveBoard: function(card) {
+  		/* TO DO: save all cards from current state to server */
+  		$.ajax({
+	      url: this.props.url,
+	      dataType: 'json',
+	      type: 'POST',
+	      data: card,
+	      success: function(cards) {
+	        this.setState({cards: cards});
+	      }.bind(this),
+	      error: function(xhr, status, err) {
+	        console.error(this.props.url, status, err.toString());
+	      }.bind(this)
+	    });	
+  	},
+  	handleSelectCard: function(cardNumber) {
+  		/* Called when the user clicks on one of the cards. */
+  		this.setState({selectedCard: cardNumber});
   	},
 	render: function() {
-		return (
-			<div className="contentTool">
-				<Editor />
-				<BingoBoard cards={this.state.cards}/>
-				<Footer />
-			</div>
-		);
+		if (this.state.selectedCard == -1) {	
+			return (
+				<div className="contentTool">
+					<Editor onCardSubmit={this.handleCardSubmit} isSelected="false"/>
+					<BingoBoard cards={this.state.cards} onSelectCard={this.handleSelectCard}/>
+					<Footer />
+				</div>
+			);
+		} else {
+			return (
+				<div className="contentTool">
+					<Editor onCardSubmit={this.handleCardSubmit} isSelected="true" card={this.state.cards[this.state.selectedCard]}/>
+					<BingoBoard cards={this.state.cards} onSelectCard={this.handleSelectCard} selectedCard={this.state.selectedCard}/>
+					<Footer />
+				</div>
+			);
+		}
 	}
 });
 
 var Editor = React.createClass({
+	getInitialState: function () {
+		return {question:'', answer:''};
+	},
+	handleQuestionChange: function(e) {
+		this.setState({question: e.target.value});
+	},
+	handleAnswerChange: function(e) {
+		this.setState({answer: e.target.value});
+	},
+	handleSubmit: function(e) {
+	    e.preventDefault();
+	    var question = this.state.question.trim();
+	    var answer = this.state.answer.trim();
+	    if (!question || !answer) {
+	      return;
+	    }
+	    this.props.onCardSubmit({question:this.state.question, answer:this.state.answer});
+	    this.setState({question: '', answer: '', completed:'false'});
+	  },
 	render: function() {
-		return (
-			<div className="editor">
-				<form className="bingoCardForm">
-					<QuestionBox />
-					<AnswerBox />
-					<DoneButton />
-				</form>
-			</div>
-		);
+		if (this.props.isSelected=="true") {
+			return (
+				<div className="editor">
+					<form className="bingoCardForm" onSubmit={this.handleSubmit}>
+						<div className="questionBox">
+							<input className="editorInput" type="text" placeholder="Enter question" value={this.state.question} onChange={this.handleQuestionChange}/>
+						</div>
+						<div className="answerBox">
+							<input className="editorInput" type="text" placeholder="Enter answer" value={this.state.answer} onChange={this.handleAnswerChange} />
+						</div>
+						<input className="button blueButtonActive" id="editorButton" type="submit" value="Done"/>
+					</form>
+				</div>
+			);
+		} else {
+			return (
+				<div className="editor">
+					Select any tile to edit the question and answer associated with it.
+				</div>
+			);
+		}
 	}
 });
 
@@ -79,6 +125,84 @@ var QuestionBox = React.createClass({
 				<br />
 				<input className="editorInput" type="text" placeholder="Enter question" />
 			</div>
+		);
+	}
+});
+
+var BingoBoard = React.createClass({
+	handleCardClicked: function(cardNumber) {
+		/* Tell content tool component that card with |cardNumber| was selected */
+		this.props.onSelectCard(cardNumber);
+	},
+	render: function() {
+		var bingoCards = []; // will become array of bingo card components
+		/* add a bingo card component for every card with a word */
+		for (var i=0; i < this.props.cards.length; i++) {
+			var currAnswer = this.props.cards[i].answer;
+			var isCompleted = this.props.cards[i].completed;
+			if (i==Math.floor(this.props.cards.length/2)) {
+				/* Bingo wild card */
+				bingoCards.push(<BingoCard answer="WILD" completed="true" isWild="true"/>);
+			}
+			if (this.props.selectedCard == i) {
+				bingoCards.push(<BingoCard isSelected="true" index={i} answer={currAnswer} completed="true" isWild="false" onCardClick={this.handleCardClicked}/>);
+			} else if (isCompleted=="true") {	
+				bingoCards.push(<BingoCard isSelected="false" index={i} answer={currAnswer} completed="true" isWild="false" onCardClick={this.handleCardClicked}/>);
+			} else {
+				bingoCards.push(<BingoCard  isSelected="false" index={i} answer="" completed="false" isWild="false" onCardClick={this.handleCardClicked}/>);
+			}
+		}		
+		return (
+			<div className="bingoBoard">
+				{bingoCards}
+			</div>
+		);
+	}
+});
+
+var BingoCard = React.createClass({
+	handleClick: function(e) {
+		this.props.onCardClick(this.props.index);
+	},
+	render: function() {
+		if (this.props.isWild == "true") {
+			/* Wild card */
+			return (
+				<div className="bingoCard bingoCardEntered">
+					<img src="nearpodIcon.png" className="wildCardImage"/>
+				</div>
+			);
+		} else if (this.props.isSelected == "true") {
+			return (
+				<div className="bingoCard bingoCardSelected" onClick={this.handleClick}>
+					{this.props.answer}
+				</div>
+			);
+		} else if (this.props.completed == "false") {
+			return (
+				<div className="bingoCard bingoCardEmpty" onClick={this.handleClick}>
+					{this.props.answer}
+				</div>
+			);
+		} else {
+			return (
+				<div className="bingoCard bingoCardEntered" onClick={this.handleClick}>
+					{this.props.answer}
+				</div>
+			);
+		}
+	}
+});
+
+var Footer = React.createClass({
+	render: function() {
+		return (
+			<div id="footer">
+				<div id="footerButtons">
+    				<input className="button footerButton greenButtonActive" id="footerSaveButton" type="submit" value="Save & Exit" />
+    				<input className="button footerButton blueButtonInactive" id="footerCreateButton" type="submit" value="Create"/>
+    			</div>
+    		</div>
 		);
 	}
 });
@@ -98,70 +222,7 @@ var AnswerBox = React.createClass({
 var DoneButton = React.createClass({
 	render: function() {
 		return (
-			<input className="button blueButtonInactive" id="editorButton" type="submit" value="Done" disabled/>
-		);
-	}
-});
-
-var BingoBoard = React.createClass({
-	render: function() {
-		var bingoCards = []; // will become array of bingo card components
-		/* add a bingo card component for every card with a word */
-		for (var i=0; i < this.props.cards.length; i++) {
-			var currAnswer = this.props.cards[i].answer;
-			var isCompleted = this.props.cards[i].completed;
-			if (i==Math.floor(this.props.cards.length/2)) {
-				/* Bingo wild card */
-				bingoCards.push(<BingoCard answer="WILD" completed="true" isWild="true"/>);
-			}
-			if (isCompleted=="true") {	
-				bingoCards.push(<BingoCard answer={currAnswer} completed="true" isWild="false"/>);
-			} else {
-				bingoCards.push(<BingoCard answer="" completed="false" isWild="false"/>);
-			}
-		}		
-		return (
-			<div className="bingoBoard">
-				{bingoCards}
-			</div>
-		);
-	}
-});
-
-var BingoCard = React.createClass({
-	render: function() {
-		if (this.props.isWild == "true") {
-			/* Wild card */
-			return (
-				<div className="bingoCard bingoCardEntered">
-					<img src="nearpodIcon.png" className="wildCardImage"/>
-				</div>
-			);
-		} else if (this.props.completed == "false") {
-			return (
-				<div className="bingoCard bingoCardEmpty">
-					{this.props.answer}
-				</div>
-			);
-		} else {
-			return (
-				<div className="bingoCard bingoCardEntered">
-					{this.props.answer}
-				</div>
-			);
-		}
-	}
-});
-
-var Footer = React.createClass({
-	render: function() {
-		return (
-			<div id="footer">
-				<div id="footerButtons">
-    				<input className="button footerButton greenButtonActive" id="footerSaveButton" type="submit" value="Save & Exit" />
-    				<input className="button footerButton blueButtonInactive" id="footerCreateButton" type="submit" value="Create" disabled/>
-    			</div>
-    		</div>
+			<input className="button blueButtonInactive" id="editorButton" type="submit" value="Done"/>
 		);
 	}
 });

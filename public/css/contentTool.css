@@ -61,16 +61,6 @@
 	margin: 0px 0px 25px 0px;
 }
 
-.bingoCard {
-	float: left;
-	margin-left: 5px;
-	margin-right: 5px;
-	margin-top: 5px;
-	margin-bottom: 5px;
-	width: 67px;
-	height: 67px;
-}
-
 .wildCardImage {
 	padding-top: 15px;
 }
@@ -86,6 +76,16 @@
 }
 
 /* Bingo cards */
+.bingoCard {
+	float: left;
+	margin-left: 5px;
+	margin-right: 5px;
+	margin-top: 5px;
+	margin-bottom: 5px;
+	width: 67px;
+	height: 67px;
+}
+
 .bingoCardEntered {
 	background-color: white;
 	border: 1px solid #cdd3d7;
@@ -101,6 +101,12 @@
 
 .bingoCardHover {
 	background-color: #eaeef1;
+	border: 1px solid #06aaff;
+	border-radius: 2px;
+}
+
+.bingoCardSelected {
+	background-color: white;
 	border: 1px solid #06aaff;
 	border-radius: 2px;
 }
