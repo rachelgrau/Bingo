@@ -1,36 +1,56 @@
-var cards = [
-  {id: 1, answer: "Blatant", question: "Brazenly obvious; flagrant; offensively noisy or loud", completed: "true"},
-  {id: 2, answer: "Abate", question: "To reduce in amount, degree, intensity, etc", completed: "true"},
-  {id: 3, answer: "", question: "", completed: "false"},
-  {id: 4, answer: "", question: "", completed: "false"},
-  {id: 5, answer: "", question: "", completed: "false"},
-  {id: 6, answer: "", question: "", completed: "false"},
-  {id: 7, answer: "", question: "", completed: "false"},
-  {id: 8, answer: "", question: "", completed: "false"},
-  {id: 9, answer: "", question: "", completed: "false"},
-  {id: 10, answer: "", question: "", completed: "false"},
-  {id: 11, answer: "", question: "", completed: "false"},
-  {id: 12, answer: "", question: "", completed: "false"},
-  {id: 13, answer: "", question: "", completed: "false"},
-  {id: 14, answer: "", question: "", completed: "false"},
-  {id: 15, answer: "", question: "", completed: "false"},
-  {id: 16, answer: "", question: "", completed: "false"},
-  {id: 17, answer: "", question: "", completed: "false"},
-  {id: 18, answer: "", question: "", completed: "false"},
-  {id: 19, answer: "", question: "", completed: "false"},
-  {id: 20, answer: "", question: "", completed: "false"},
-  {id: 21, answer: "", question: "", completed: "false"},
-  {id: 22, answer: "", question: "", completed: "false"},
-  {id: 23, answer: "", question: "", completed: "false"},
-  {id: 24, answer: "", question: "", completed: "false"}
-];
+// var cards = [
+//   {id: 1, answer: "Blatant", question: "Brazenly obvious; flagrant; offensively noisy or loud", completed: "true"},
+//   {id: 2, answer: "Abate", question: "To reduce in amount, degree, intensity, etc", completed: "true"},
+//   {id: 3, answer: "", question: "", completed: "false"},
+//   {id: 4, answer: "", question: "", completed: "false"},
+//   {id: 5, answer: "", question: "", completed: "false"},
+//   {id: 6, answer: "", question: "", completed: "false"},
+//   {id: 7, answer: "", question: "", completed: "false"},
+//   {id: 8, answer: "", question: "", completed: "false"},
+//   {id: 9, answer: "", question: "", completed: "false"},
+//   {id: 10, answer: "", question: "", completed: "false"},
+//   {id: 11, answer: "", question: "", completed: "false"},
+//   {id: 12, answer: "", question: "", completed: "false"},
+//   {id: 13, answer: "", question: "", completed: "false"},
+//   {id: 14, answer: "", question: "", completed: "false"},
+//   {id: 15, answer: "", question: "", completed: "false"},
+//   {id: 16, answer: "", question: "", completed: "false"},
+//   {id: 17, answer: "", question: "", completed: "false"},
+//   {id: 18, answer: "", question: "", completed: "false"},
+//   {id: 19, answer: "", question: "", completed: "false"},
+//   {id: 20, answer: "", question: "", completed: "false"},
+//   {id: 21, answer: "", question: "", completed: "false"},
+//   {id: 22, answer: "", question: "", completed: "false"},
+//   {id: 23, answer: "", question: "", completed: "false"},
+//   {id: 24, answer: "", question: "", completed: "false"}
+// ];
 
 var ContentTool = React.createClass({
+	loadCardsFromServer: function() {
+    $.ajax({
+	      url: this.props.url,
+	      dataType: 'json',
+	      cache: false,
+	      success: function(cards) {
+	        this.setState({cards: cards});
+	      }.bind(this),
+	      error: function(xhr, status, err) {
+	        console.error(this.props.url, status, err.toString());
+	      }.bind(this)
+	    });
+  	},
+  	getInitialState: function() {
+		return {cards:[]};
+	},
+  	componentDidMount: function() {
+    	this.loadCardsFromServer();
+    	setInterval(this.loadCardsFromServer, this.props.pollInterval);
+  	},
 	render: function() {
 		return (
 			<div className="contentTool">
 				<Editor />
-				<BingoBoard cards={this.props.cards}/>
+				<BingoBoard cards={this.state.cards}/>
 				<Footer />
 			</div>
 		);
@@ -147,6 +167,7 @@ var Footer = React.createClass({
 });
 
 ReactDOM.render(
-	<ContentTool cards={cards} />,
+	// <ContentTool cards={cards} />,
+	<ContentTool url="/api/comments" pollInterval={2000}/>,
 	document.getElementById('content')
 );
