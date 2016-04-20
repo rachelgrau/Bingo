@@ -94,14 +94,23 @@ var Editor = React.createClass({
 	  },
 	render: function() {
 		if (this.props.isSelected=="true") {
+			/* If they've already edited, use state, otherwise use props passed in. */
+			var question = this.state.question;
+			var answer = this.state.answer;
+			if (question=="") {
+				question = this.props.card.question;
+			}
+			if (answer=="") {
+				answer = this.props.card.answer;
+			}
 			return (
 				<div className="editor">
 					<form className="bingoCardForm" onSubmit={this.handleSubmit}>
 						<div className="questionBox">
-							<input className="editorInput" type="text" placeholder="Enter question" value={this.state.question} onChange={this.handleQuestionChange}/>
+							<input className="editorInput" type="text" placeholder="Enter question" value={question} onChange={this.handleQuestionChange}/>
 						</div>
 						<div className="answerBox">
-							<input className="editorInput" type="text" placeholder="Enter answer" value={this.state.answer} onChange={this.handleAnswerChange} />
+							<input className="editorInput" type="text" placeholder="Enter answer" value={answer} onChange={this.handleAnswerChange} />
 						</div>
 						<input className="button blueButtonActive" id="editorButton" type="submit" value="Done"/>
 					</form>
