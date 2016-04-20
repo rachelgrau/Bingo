@@ -1,8 +1,9 @@
 [![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
 
-# React Tutorial
+# Bingo
 
-This is the React comment box example from [the React tutorial](http://facebook.github.io/react/docs/tutorial.html).
+ This project will eventually hold the content tool, student, and teacher views for Nearpod Bingo. 
+ Right now, you can view the content tool by running the simple server included (it's not yet connected to API) and visiting <http://localhost:3000/>.
 
 ## To use
 
