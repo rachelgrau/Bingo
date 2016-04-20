@@ -86,6 +86,7 @@
 	height: 67px;
 }
 
+/* Bingo card that has a word on it but is not currently selected */
 .bingoCardEntered {
 	background-color: white;
 	border: 1px solid #cdd3d7;
@@ -99,22 +100,50 @@
 	vertical-align: middle;
 }
 
-.bingoCardHover {
-	background-color: #eaeef1;
-	border: 1px solid #06aaff;
-	border-radius: 2px;
-}
-
-.bingoCardSelected {
+.bingoCardEntered:hover {
 	background-color: white;
 	border: 1px solid #06aaff;
 	border-radius: 2px;
 }
 
+/* Bingo card that has no word on it and is not currently selected */
 .bingoCardEmpty {
 	background-color: #eaeef1;
 	border: 1px solid #cdd3d7;
 	border-radius: 2px;
+}
+
+.bingoCardEmpty:hover {
+	background-color: #eaeef1;
+	border: 1px solid #06aaff;
+	border-radius: 2px;
+}
+
+/* Bingo card that is currently selected, whether or not it has a word on it*/
+.bingoCardSelected {
+	background-color: white;
+	border: 1px solid #06aaff;
+	border-radius: 2px;
+	color: black;
+	font-family: "Avenir LT Std";
+	font-size: 16px;
+	font-weight: 500;
+	line-height: 67px;  /* same as bingoCard height*/
+	text-align: center;
+	vertical-align: middle;
+}
+
+/* Wild bingo card */
+.bingoWildCard {
+	background-color: white;
+	border: 1px solid #cdd3d7;
+	border-radius: 2px;
+	text-align: center;
+	vertical-align: middle;
+}
+
+.bingoCardHover {
+
 }
 
 /* Buttons */

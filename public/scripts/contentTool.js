@@ -177,7 +177,7 @@ var BingoCard = React.createClass({
 		if (this.props.isWild == "true") {
 			/* Wild card */
 			return (
-				<div className="bingoCard bingoCardEntered">
+				<div className="bingoCard bingoWildCard">
 					<img src="nearpodIcon.png" className="wildCardImage"/>
 				</div>
 			);
