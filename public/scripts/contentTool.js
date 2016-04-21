@@ -28,7 +28,11 @@ var ContentTool = React.createClass({
   		var cardToUpdate = this.state.cards[this.state.selectedCard];
   		cardToUpdate["question"] = card.question;
   		cardToUpdate["answer"] = card.answer;
-  		cardToUpdate["completed"] = "true";
+  		if (!card.question && !card.answer) {
+  			cardToUpdate["completed"] = "false";
+  		} else {
+  			cardToUpdate["completed"] = "true";
+  		}
   		this.state.cards[this.state.selectedCard] = cardToUpdate;
   		this.setState({selectedCard: -1});
   	},
@@ -74,33 +78,51 @@ var ContentTool = React.createClass({
 
 var Editor = React.createClass({
 	getInitialState: function () {
-		return {question:'', answer:''};
+		return {question:'', answer:'', hasChangedQuestion: 'false', hasChangedAnswer: 'false'};
 	},
 	handleQuestionChange: function(e) {
 		this.setState({question: e.target.value});
+		this.setState({hasChangedQuestion: 'true'});
 	},
 	handleAnswerChange: function(e) {
 		this.setState({answer: e.target.value});
+		this.setState({hasChangedAnswer: 'true'});
 	},
 	handleSubmit: function(e) {
 	    e.preventDefault();
 	    var question = this.state.question.trim();
 	    var answer = this.state.answer.trim();
-	    if (!question || !answer) {
-	      return;
+
+	    if (this.state.hasChangedQuestion == 'false') {
+	    	question = this.props.card.question;
 	    }
-	    this.props.onCardSubmit({question:this.state.question, answer:this.state.answer});
-	    this.setState({question: '', answer: '', completed:'false'});
+	    if (this.state.hasChangedAnswer == 'false') {
+	    	answer = this.props.card.answer;
+	    }
+
+	    /* If question AND answer are empty, that's fine--they can press done and it will go back to being an empty card. 
+	    Otherwise, if only one is empty, don't let them press done. */
+
+	    if (!question && !answer) {
+
+	    } else if (!question) {
+	    	return;
+	    } else if (!answer) {
+	    	return; 
+	    }
+
+	    this.props.onCardSubmit({question:question, answer:answer});
+	    this.setState({question: '', answer: '', hasChangedQuestion: 'false', hasChangedAnswer: 'false'});
 	  },
 	render: function() {
 		if (this.props.isSelected=="true") {
 			/* If they've already edited, use state, otherwise use props passed in. */
 			var question = this.state.question;
 			var answer = this.state.answer;
-			if (question=="") {
+			if (this.state.hasChangedQuestion == 'false') {
 				question = this.props.card.question;
 			}
-			if (answer=="") {
+			if (this.state.hasChangedAnswer == 'false') {
 				answer = this.props.card.answer;
 			}
 			return (
@@ -119,7 +141,9 @@ var Editor = React.createClass({
 		} else {
 			return (
 				<div className="editor">
+					<div className="editorText">
 					Select any tile to edit the question and answer associated with it.
+					</div>
 				</div>
 			);
 		}

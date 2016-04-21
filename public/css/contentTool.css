@@ -29,6 +29,16 @@
 	margin: 0px 24px 25px 0px;
 }
 
+.editorText {
+	color: #5b6d79;
+	font-family: "Avenir LT Std";
+	font-size: 24px;
+	font-weight: 400;
+	line-height: 25px;
+	text-align: center;
+	margin-top: 53px;
+}
+
 .questionBox {
 	font-family: "Avenir LT Std";
 	color: #5b6d79;
