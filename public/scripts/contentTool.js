@@ -20,7 +20,6 @@ var ContentTool = React.createClass({
 	},
   	componentDidMount: function() {
     	this.loadCardsFromServer();
-    	// setInterval(this.loadCardsFromServer, this.props.pollInterval);
   	},
   	handleCardSubmit: function(card) {
   		/* Update state[cards]: edited card should contain new question/answer */
@@ -78,7 +77,7 @@ var ContentTool = React.createClass({
 
 var Editor = React.createClass({
 	getInitialState: function () {
-		return {question:'', answer:'', hasChangedQuestion: 'false', hasChangedAnswer: 'false'};
+		return {question:'', answer:'', hasChangedQuestion: 'false', hasChangedAnswer: 'false', canSubmit: 'true'};
 	},
 	handleQuestionChange: function(e) {
 		this.setState({question: e.target.value});
@@ -88,6 +87,10 @@ var Editor = React.createClass({
 		this.setState({answer: e.target.value});
 		this.setState({hasChangedAnswer: 'true'});
 	},
+	changedSelection: function() {
+    	this.setState({hasChangedAnswer: 'false'});
+		this.setState({hasChangedAnswer: 'false'});
+  	},
 	handleSubmit: function(e) {
 	    e.preventDefault();
 	    var question = this.state.question.trim();
@@ -134,7 +137,7 @@ var Editor = React.createClass({
 						<div className="answerBox">
 							<input className="editorInput" type="text" placeholder="Enter answer" value={answer} onChange={this.handleAnswerChange} />
 						</div>
-						<input className="button blueButtonActive" id="editorButton" type="submit" value="Done"/>
+						<DoneButton isActive={this.state.canSubmit} />
 					</form>
 				</div>
 			);
@@ -254,9 +257,15 @@ var AnswerBox = React.createClass({
 
 var DoneButton = React.createClass({
 	render: function() {
-		return (
-			<input className="button blueButtonInactive" id="editorButton" type="submit" value="Done"/>
-		);
+		if (this.props.isActive == "true") {
+			return (
+				<input className="button blueButtonActive" id="editorButton" type="submit" value="Done"/>
+			);
+		} else {
+			return (
+				<input className="button blueButtonInactive" id="editorButton" type="submit" value="Done"/>
+			);
+		}
 	}
 });
 
