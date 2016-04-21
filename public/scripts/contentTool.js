@@ -52,6 +52,9 @@ var ContentTool = React.createClass({
   	},
   	handleSelectCard: function(cardNumber) {
   		/* Called when the user clicks on one of the cards. */
+  		if (this.refs.myEditor) {
+  			this.refs.myEditor.changedSelection();
+  		}
   		this.setState({selectedCard: cardNumber});
   	},
 	render: function() {
@@ -66,7 +69,7 @@ var ContentTool = React.createClass({
 		} else {
 			return (
 				<div className="contentTool">
-					<Editor onCardSubmit={this.handleCardSubmit} isSelected="true" card={this.state.cards[this.state.selectedCard]}/>
+					<Editor ref="myEditor" onCardSubmit={this.handleCardSubmit} isSelected="true" card={this.state.cards[this.state.selectedCard]}/>
 					<BingoBoard cards={this.state.cards} onSelectCard={this.handleSelectCard} selectedCard={this.state.selectedCard}/>
 					<Footer />
 				</div>
@@ -88,8 +91,7 @@ var Editor = React.createClass({
 		this.setState({hasChangedAnswer: 'true'});
 	},
 	changedSelection: function() {
-    	this.setState({hasChangedAnswer: 'false'});
-		this.setState({hasChangedAnswer: 'false'});
+    	this.setState(this.getInitialState());
   	},
 	handleSubmit: function(e) {
 	    e.preventDefault();
@@ -119,7 +121,7 @@ var Editor = React.createClass({
 	  },
 	render: function() {
 		if (this.props.isSelected=="true") {
-			/* If they've already edited, use state, otherwise use props passed in. */
+			/* If they've already edited, use state, otherwise use props passed in (currently saved question/answer for the currently selected card). */
 			var question = this.state.question;
 			var answer = this.state.answer;
 			if (this.state.hasChangedQuestion == 'false') {
