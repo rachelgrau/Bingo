@@ -21,19 +21,21 @@ var ContentTool = React.createClass({
   	componentDidMount: function() {
     	this.loadCardsFromServer();
   	},
+  	/* Update state[cards]: edited card should contain new question/answer */
+  	/* Update state[selectedCard] -- no longer have a card selected */
   	handleCardSubmit: function(card) {
-  		/* Update state[cards]: edited card should contain new question/answer */
-  		/* Update state[selectedCard] -- no longer have a card selected */
   		var cardToUpdate = this.state.cards[this.state.selectedCard];
   		cardToUpdate["question"] = card.question;
   		cardToUpdate["answer"] = card.answer;
   		if (!card.question && !card.answer) {
+  			/* The card is empty */
   			cardToUpdate["completed"] = "false";
   		} else {
   			cardToUpdate["completed"] = "true";
   		}
   		this.state.cards[this.state.selectedCard] = cardToUpdate;
-  		this.setState({selectedCard: -1});
+  		/* TO DO: If at some point we want to provide a "next" button, change this to update selectedCard to be this.state.selectedCard + 1 */
+  		this.setState({selectedCard: -1}); 
   	},
   	handleSaveBoard: function(card) {
   		/* TO DO: save all cards from current state to server */
@@ -50,9 +52,10 @@ var ContentTool = React.createClass({
 	      }.bind(this)
 	    });	
   	},
+  	/* Called when the user clicks on one of the cards, changing their current selection. */
   	handleSelectCard: function(cardNumber) {
-  		/* Called when the user clicks on one of the cards. */
   		if (this.refs.myEditor) {
+  			/* Tell the editor that the selection has been changed. */
   			this.refs.myEditor.changedSelection();
   		}
   		this.setState({selectedCard: cardNumber});
@@ -79,6 +82,10 @@ var ContentTool = React.createClass({
 });
 
 var Editor = React.createClass({
+	/* The state represents what's currently in the question/answer box, not what is currently saved for this card as the question/answer. 
+	 * One exception: at the very start, before the user edits question/answer for this card, state thinks question/answer = "". We know 
+	 * this is occurring when hasChangedQuestion = hasChangedAnswer = false (at this point, use props to tell what is actually question/answer)
+	 */
 	getInitialState: function () {
 		return {question:'', answer:'', hasChangedQuestion: 'false', hasChangedAnswer: 'false', canSubmit: 'true'};
 	},
@@ -95,19 +102,11 @@ var Editor = React.createClass({
   	},
 	handleSubmit: function(e) {
 	    e.preventDefault();
-	    var question = this.state.question.trim();
-	    var answer = this.state.answer.trim();
-
-	    if (this.state.hasChangedQuestion == 'false') {
-	    	question = this.props.card.question;
-	    }
-	    if (this.state.hasChangedAnswer == 'false') {
-	    	answer = this.props.card.answer;
-	    }
+	    var question = this.getCurrentQuestion();
+	    var answer = this.getCurrentAnswer();
 
 	    /* If question AND answer are empty, that's fine--they can press done and it will go back to being an empty card. 
-	    Otherwise, if only one is empty, don't let them press done. */
-
+	    Otherwise, if only one is empty, don't let them save. */
 	    if (!question && !answer) {
 
 	    } else if (!question) {
@@ -119,6 +118,24 @@ var Editor = React.createClass({
 	    this.props.onCardSubmit({question:question, answer:answer});
 	    this.setState({question: '', answer: '', hasChangedQuestion: 'false', hasChangedAnswer: 'false'});
 	  },
+	/* Returns whatever is currently in the question input field. */
+	getCurrentQuestion: function() {
+		var question = this.state.question.trim();
+		/* If they haven't changed question, use props (saved value for this card) */
+	    if (this.state.hasChangedQuestion == 'false') {
+	    	question = this.props.card.question;
+	    }
+	    return question;
+	},
+	/* Returns whatever is currently in the answer input field. */
+	getCurrentAnswer: function() {
+		var answer = this.state.answer.trim();
+		/* If they haven't changed answer, use props (saved value for this card) */
+	    if (this.state.hasChangedAnswer == 'false') {
+	    	answer = this.props.card.answer;
+	    }
+	    return answer;
+	},
 	render: function() {
 		if (this.props.isSelected=="true") {
 			/* If they've already edited, use state, otherwise use props passed in (currently saved question/answer for the currently selected card). */
