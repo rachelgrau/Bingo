@@ -41,6 +41,7 @@ function routeRequest()
             ];
 
             $comments = json_encode($commentsDecoded, JSON_PRETTY_PRINT);
+            $comments = [{"HI": "hey"}];
             file_put_contents('comments.json', $comments);
         }
         header('Content-Type: application/json');

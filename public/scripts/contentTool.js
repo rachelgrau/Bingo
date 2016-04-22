@@ -37,7 +37,18 @@ var ContentTool = React.createClass({
   		/* TO DO: If at some point we want to provide a "next" button, change this to update selectedCard to be this.state.selectedCard + 1 */
   		this.setState({selectedCard: -1}); 
   	},
-  	handleSaveBoard: function(card) {
+  	/* Called when the user clicks on one of the cards, changing their current selection. */
+  	handleSelectCard: function(cardNumber) {
+  		if (this.refs.myEditor) {
+  			/* Tell the editor that the selection has been changed. */
+  			this.refs.myEditor.changedSelection();
+  		}
+  		this.setState({selectedCard: cardNumber});
+  	},
+  	handleCreate: function() {
+
+  	},
+  	handleSave: function() {
   		/* TO DO: save all cards from current state to server */
   		$.ajax({
 	      url: this.props.url,
@@ -50,15 +61,7 @@ var ContentTool = React.createClass({
 	      error: function(xhr, status, err) {
 	        console.error(this.props.url, status, err.toString());
 	      }.bind(this)
-	    });	
-  	},
-  	/* Called when the user clicks on one of the cards, changing their current selection. */
-  	handleSelectCard: function(cardNumber) {
-  		if (this.refs.myEditor) {
-  			/* Tell the editor that the selection has been changed. */
-  			this.refs.myEditor.changedSelection();
-  		}
-  		this.setState({selectedCard: cardNumber});
+	    });
   	},
 	render: function() {
 		if (this.state.selectedCard == -1) {	
@@ -66,7 +69,7 @@ var ContentTool = React.createClass({
 				<div className="contentTool">
 					<Editor onCardSubmit={this.handleCardSubmit} isSelected="false"/>
 					<BingoBoard cards={this.state.cards} onSelectCard={this.handleSelectCard}/>
-					<Footer />
+					<Footer onCreate={this.handleCreate} onSave={this.handleSave} />
 				</div>
 			);
 		} else {
@@ -74,7 +77,7 @@ var ContentTool = React.createClass({
 				<div className="contentTool">
 					<Editor ref="myEditor" onCardSubmit={this.handleCardSubmit} isSelected="true" card={this.state.cards[this.state.selectedCard]}/>
 					<BingoBoard cards={this.state.cards} onSelectCard={this.handleSelectCard} selectedCard={this.state.selectedCard}/>
-					<Footer />
+					<Footer onCreate={this.handleCreate} onSave={this.handleSave} />
 				</div>
 			);
 		}
@@ -102,19 +105,11 @@ var Editor = React.createClass({
   	},
 	handleSubmit: function(e) {
 	    e.preventDefault();
+	    if (!this.canPressDone()) {
+	    	return;
+	    }
 	    var question = this.getCurrentQuestion();
 	    var answer = this.getCurrentAnswer();
-
-	    /* If question AND answer are empty, that's fine--they can press done and it will go back to being an empty card. 
-	    Otherwise, if only one is empty, don't let them save. */
-	    if (!question && !answer) {
-
-	    } else if (!question) {
-	    	return;
-	    } else if (!answer) {
-	    	return; 
-	    }
-
 	    this.props.onCardSubmit({question:question, answer:answer});
 	    this.setState({question: '', answer: '', hasChangedQuestion: 'false', hasChangedAnswer: 'false'});
 	  },
@@ -127,6 +122,21 @@ var Editor = React.createClass({
 	    }
 	    return question;
 	},
+	canPressDone: function() {
+	 	/* If question AND answer are empty, that's fine--they can press done and it will go back to being an empty card. 
+	    Otherwise, if only one is empty, don't let them save. */
+	 	var question = this.getCurrentQuestion();
+	    var answer = this.getCurrentAnswer();
+	    if (!question && !answer) {
+	    	return true;
+	    } else if (!question) {
+	    	return false;
+	    } else if (!answer) {
+	    	return false;
+	    } else {
+	    	return true;
+	    }
+	 },
 	/* Returns whatever is currently in the answer input field. */
 	getCurrentAnswer: function() {
 		var answer = this.state.answer.trim();
@@ -139,14 +149,9 @@ var Editor = React.createClass({
 	render: function() {
 		if (this.props.isSelected=="true") {
 			/* If they've already edited, use state, otherwise use props passed in (currently saved question/answer for the currently selected card). */
-			var question = this.state.question;
-			var answer = this.state.answer;
-			if (this.state.hasChangedQuestion == 'false') {
-				question = this.props.card.question;
-			}
-			if (this.state.hasChangedAnswer == 'false') {
-				answer = this.props.card.answer;
-			}
+			var question = this.getCurrentQuestion();
+			var answer = this.getCurrentAnswer();
+			var isActive = this.canPressDone();
 			return (
 				<div className="editor">
 					<form className="bingoCardForm" onSubmit={this.handleSubmit}>
@@ -156,7 +161,7 @@ var Editor = React.createClass({
 						<div className="answerBox">
 							<input className="editorInput" type="text" placeholder="Enter answer" value={answer} onChange={this.handleAnswerChange} />
 						</div>
-						<DoneButton isActive={this.state.canSubmit} />
+						<DoneButton isActive={isActive} />
 					</form>
 				</div>
 			);
@@ -224,7 +229,7 @@ var BingoCard = React.createClass({
 			/* Wild card */
 			return (
 				<div className="bingoCard bingoWildCard">
-					<img src="nearpodIcon.png" className="wildCardImage"/>
+					<img src="assets/nearpodIcon.png" className="wildCardImage"/>
 				</div>
 			);
 		} else if (this.props.isSelected == "true") {
@@ -250,12 +255,20 @@ var BingoCard = React.createClass({
 });
 
 var Footer = React.createClass({
+	handleSave: function(e) {
+	    e.preventDefault();
+	    this.props.onSave();
+	},
+	handleCreate: function(e) {
+		e.preventDefault();
+	    this.props.onCreate();
+	},
 	render: function() {
 		return (
 			<div id="footer">
 				<div id="footerButtons">
-    				<input className="button footerButton greenButtonActive" id="footerSaveButton" type="submit" value="Save & Exit" />
-    				<input className="button footerButton blueButtonInactive" id="footerCreateButton" type="submit" value="Create"/>
+    				<input className="button footerButton greenButtonActive" id="footerSaveButton" type="submit" value="Save & Exit" onClick={this.handleSave}/>
+    				<input className="button footerButton blueButtonInactive" id="footerCreateButton" type="submit" value="Create" onClick={this.handleCreate}/>
     			</div>
     		</div>
 		);
@@ -276,7 +289,7 @@ var AnswerBox = React.createClass({
 
 var DoneButton = React.createClass({
 	render: function() {
-		if (this.props.isActive == "true") {
+		if (this.props.isActive) {
 			return (
 				<input className="button blueButtonActive" id="editorButton" type="submit" value="Done"/>
 			);
