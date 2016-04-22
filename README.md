@@ -7,7 +7,7 @@
 
 # Current State of Project
 
-Right now, we have a rough version of the content tool up. The data you enter is not yet stored in the local server or connected to the Nearpod API–it's just UI and interactivity. 
+Right now, we have a rough version of the content tool up. The data you enter is not yet stored in the local server or connected to the Nearpod API–it's just UI and interactivity. When you open it up in a browser, you'll see that 2 words get loaded in as samples -- "Abate" and "Blatant"-- this is to test loading in data from the local server, don't worry about it for now.
 
 ## To use
 
