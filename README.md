@@ -11,7 +11,7 @@ Right now, we have a rough version of the content tool up. The data you enter is
 
 ## To use
 
-There are several simple server implementations included. They all serve static files from `public/` and handle requests to `/api/comments` to fetch or add data. Start a server in your terminal with one of the following:
+There are several simple server implementations included. To run the project, open up a terminal window, enter the directory for this project, and then start a server with one of the following (we are using ruby):
 
 ### Node
 
@@ -49,7 +49,7 @@ cpan Mojolicious
 perl server.pl
 ```
 
-And visit <http://localhost:3000/>. Try opening multiple tabs!
+Now visit <http://localhost:3000/> and you should see the content tool with 2 cards entered, abate and blatant. 
 
 ## Changing the port
 
