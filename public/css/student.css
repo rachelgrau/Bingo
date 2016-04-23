@@ -1,0 +1,29 @@
+body {
+	min-width: 2000px;
+}
+
+.header {
+	width: 800px;
+	height: 70px;
+	background-color: #06aaff;
+
+	color: white;
+	font-family: "Avenir Next";
+	font-size: 40px;
+	font-weight: 300;
+	line-height: 82px;
+	text-align: center;
+}
+
+.leftBar {
+	float: left;
+	width: 292px;
+	height: 390px;
+	border: 2px solid black;
+}
+
+.bingoBoard {
+	float: left;
+	width: 401px;
+	border: 2px solid black;
+}

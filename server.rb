@@ -43,6 +43,29 @@ server.mount_proc '/api/contentTool' do |req, res|
   res.body = JSON.generate(contentTool)
 end
 
+server.mount_proc '/api/student' do |req, res|
+  student = JSON.parse(File.read('./student.json', encoding: 'UTF-8'))
+  if req.request_method == 'POST'
+    # Assume it's well formed
+    comment = { id: (Time.now.to_f * 1000).to_i }
+    req.query.each do |key, value|
+      comment[key] = value.force_encoding('UTF-8') unless key == 'id'
+    end
+    student << comment
+    File.write(
+      './student.json',
+      JSON.pretty_generate(student, indent: '    '),
+      encoding: 'UTF-8'
+    )
+  end
+
+  # always return json
+  res['Content-Type'] = 'application/json'
+  res['Cache-Control'] = 'no-cache'
+  res['Access-Control-Allow-Origin'] = '*'
+  res.body = JSON.generate(student)
+end
+
 trap('INT') { server.shutdown }
 
 server.start
