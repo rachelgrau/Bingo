@@ -1,6 +1,27 @@
 body {
 	min-width: 800px;
 }
+
+input[type="text"] {
+	color: #787e83;
+	font-family: "Avenir LT Std";
+	font-size: 22px;
+	font-weight: 500;
+	line-height: 29px;
+
+}
+
+textArea {
+	color: #787e83;
+	font-family: "Avenir LT Std";
+	font-size: 22px;
+	font-weight: 500;
+	line-height: 29px;
+	resize: none;
+	border: 1px solid #cdd3d7;
+	border-radius: 2px;
+}
+
 #header {
 	font-family: "Avenir LT Std";
 	font-size: 38px;

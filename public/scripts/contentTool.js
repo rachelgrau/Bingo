@@ -156,10 +156,12 @@ var Editor = React.createClass({
 				<div className="editor">
 					<form className="bingoCardForm" onSubmit={this.handleSubmit}>
 						<div className="questionBox">
-							<input className="editorInput" type="text" placeholder="Enter question" value={question} onChange={this.handleQuestionChange}/>
+							Question:
+							<textArea className="editorInput" type="text" value={question} onChange={this.handleQuestionChange}/>
 						</div>
 						<div className="answerBox">
-							<input className="editorInput" type="text" placeholder="Enter answer" value={answer} onChange={this.handleAnswerChange} />
+							Answer (On-Tile):
+							<textArea className="editorInput" type="text" value={answer} onChange={this.handleAnswerChange} />
 						</div>
 						<DoneButton isActive={isActive} />
 					</form>
@@ -174,18 +176,6 @@ var Editor = React.createClass({
 				</div>
 			);
 		}
-	}
-});
-
-var QuestionBox = React.createClass({
-	render: function() {
-		return (
-			<div className="questionBox">
-				Question:
-				<br />
-				<input className="editorInput" type="text" placeholder="Enter question" />
-			</div>
-		);
 	}
 });
 
@@ -271,18 +261,6 @@ var Footer = React.createClass({
     				<input className="button footerButton blueButtonInactive" id="footerCreateButton" type="submit" value="Create" onClick={this.handleCreate}/>
     			</div>
     		</div>
-		);
-	}
-});
-
-var AnswerBox = React.createClass({
-	render: function() {
-		return (
-			<div className="answerBox">
-				Answer:
-				<br />
-				<input className="editorInput" type="text" placeholder="Enter answer" />
-			</div>
 		);
 	}
 });
