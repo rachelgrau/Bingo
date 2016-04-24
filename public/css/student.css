@@ -1,12 +1,12 @@
 body {
 	min-width: 2000px;
+	background-color: #ededed;
 }
 
 .header {
 	width: 800px;
 	height: 70px;
 	background-color: #06aaff;
-
 	color: white;
 	font-family: "Avenir Next";
 	font-size: 40px;
