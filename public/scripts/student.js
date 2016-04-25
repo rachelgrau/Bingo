@@ -45,8 +45,14 @@ var Header = React.createClass ({
 var Question = React.createClass({
 	render: function() {
 		return (
-			<div className="testDiv">
-				Question
+			<div className="questionBox">
+				Question:
+				<div className="questionCard">
+					Brazenly obvious 
+				</div>
+				<div className="button outlineButton" id="skipButton">
+					Skip
+				</div>
 			</div>
 		);
 	}
@@ -55,8 +61,11 @@ var Question = React.createClass({
 var BingoChecker = React.createClass ({
 	render: function() {
 		return (
-			<div className="testDiv">
-				Bingo Checker
+			<div className="bingoChecker">
+    			<div className="button grayButton">
+					I have bingo!
+				</div><br/>
+				Board checks left: 3
 			</div>
 		);
 	}
@@ -64,9 +73,25 @@ var BingoChecker = React.createClass ({
 
 var BingoBoard = React.createClass ({
 	render: function() {
+		var bingoCards = []; // will become array of bingo card components
+		/* add a bingo card component for every card with a word */
+		for (var i=0; i < 25; i++) {
+			var currAnswer =  "Hi";
+			bingoCards.push(<BingoCard/>);
+		}		
 		return (
 			<div className="bingoBoard">
-				Bingo Board
+				{bingoCards}
+			</div>
+		);
+	}
+});
+
+var BingoCard = React.createClass ({
+	render: function() {
+		return (
+			<div className="bingoCard">
+				Hey
 			</div>
 		);
 	}

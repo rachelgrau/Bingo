@@ -93,12 +93,11 @@ var Editor = React.createClass({
 		return {question:'', answer:'', hasChangedQuestion: 'false', hasChangedAnswer: 'false', canSubmit: 'true'};
 	},
 	handleQuestionChange: function(e) {
-		this.setState({question: e.target.value});
-		this.setState({hasChangedQuestion: 'true'});
+		console.log(e.target.value);
+		this.setState({hasChangedQuestion: 'true', question: e.target.value});
 	},
 	handleAnswerChange: function(e) {
-		this.setState({answer: e.target.value});
-		this.setState({hasChangedAnswer: 'true'});
+		this.setState({hasChangedAnswer: 'true', answer: e.target.value});
 	},
 	changedSelection: function() {
     	this.setState(this.getInitialState());

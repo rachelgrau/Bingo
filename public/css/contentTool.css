@@ -8,10 +8,11 @@ input[type="text"] {
 	font-size: 22px;
 	font-weight: 500;
 	line-height: 29px;
-
 }
 
 textArea {
+	padding: 10px;
+	box-sizing: border-box;
 	color: #787e83;
 	font-family: "Avenir LT Std";
 	font-size: 22px;
@@ -80,10 +81,6 @@ textArea {
 	margin-top: 21px;
 }
 
-.doneButton {
-
-}
-
 .bingoBoard {
 	float: left;
 	background-color: #f8fafb;
@@ -118,6 +115,7 @@ textArea {
 	margin-bottom: 5px;
 	width: 67px;
 	height: 67px;
+	word-wrap: break-word;
 }
 
 /* Bingo card that has a word on it but is not currently selected */

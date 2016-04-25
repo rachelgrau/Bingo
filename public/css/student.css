@@ -4,26 +4,128 @@ body {
 }
 
 .header {
-	width: 800px;
-	height: 70px;
+	width: 1000px;
+	height: 97px;
+	line-height: 97px;
 	background-color: #06aaff;
 	color: white;
 	font-family: "Avenir Next";
-	font-size: 40px;
+	font-size: 41px;
 	font-weight: 300;
-	line-height: 82px;
 	text-align: center;
+	vertical-align: middle;
 }
 
 .leftBar {
 	float: left;
 	width: 292px;
-	height: 390px;
-	border: 2px solid black;
+	height: 500px;
+	margin-top: 30px;
+	margin-left: 30px;
+	margin-right: 60px;
+	margin-bottom: 30px;
 }
 
+/* Question stuff */
+
+.questionBox {
+	height: 351px;
+	width: 237px;
+	padding: 10px 46px 20px 46px;
+	background-color: white;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+	font-family: "Avenir Next";
+	font-size: 20px;
+	font-weight: 400;
+	line-height: 41px;
+}
+
+.questionCard {
+	margin: auto; /*centers it*/
+	width: 238px;
+	height: 238px;
+	background-color: rgba(6, 170, 255, 0.26);
+	border: 2px solid #06aaff;
+	border-radius: 8px;
+}
+
+#skipButton {
+	margin-top: 15px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+/* Bingo checker stuff */
+
+.bingoChecker {
+	width: 329px;
+	height: 121px;
+	padding-top: 43px;
+	margin-top: 25px;
+	background-color: white;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+	font-family: "Avenir Next";
+	font-size: 18px;
+	font-weight: 400;
+	line-height: 41px;
+	text-align: center;
+}
+
+/* Bingo board stuff */
 .bingoBoard {
 	float: left;
-	width: 401px;
-	border: 2px solid black;
+	width: 570px;
+	height: 570px;
+	background-color: rgba(6, 170, 255, 0.2);
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+	margin: 30px;
+}
+
+/* Bingo card stuff */
+.bingoCard {
+	float: left;
+	margin: 5px;
+	width: 100px;
+	height: 100px;
+	word-wrap: break-word;
+	background-color: white;
+	border: 2px solid #06aaff;
+	border-radius: 8px;
+	color: #181818;
+	font-family: "Avenir Next";
+	font-size: 15px;
+	font-weight: 200;
+	line-height: 33px;
+}
+
+/* Buttons */
+.button {
+	width: 238px;
+	height: 55px;
+	line-height: 55px;
+	border-radius: 2px;
+	border: none;
+	outline: none;
+	text-align: center;
+	font-family: "Avenir LT Std";
+	font-size: 25px;
+	font-weight: 200;
+}
+
+.outlineButton {
+	background-color: white;
+	border: 1px solid #00a8ff;
+	border-radius: 4px;
+	color: #06aaff;
+}
+
+.grayButton {
+	color: white;
+	background-color: #cdd3d7;
+	border-radius: 4px;
+	display: inline-block;
+}
+
+.blueButtonInactive {
+	background-color: #bce9ff;
 }
