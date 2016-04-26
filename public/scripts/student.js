@@ -22,11 +22,13 @@ var StudentView = React.createClass({
 		return (
 			<div className="studentView ">
 				<Header/>
-				<div className="leftBar">
-					<Question/>
-					<BingoChecker/>
+				<div className="studentContent"> 
+					<div className="leftBar">
+						<Question/>
+						<BingoChecker/>
+					</div>
+					<BingoBoard />
 				</div>
-				<BingoBoard />
 			</div>
 		);
 	}
