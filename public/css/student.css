@@ -1,10 +1,10 @@
 body {
-	min-width: 2000px;
+	/*min-width: 2000px;*/
 	background-color: #ededed;
 }
 
 .header {
-	width: 1000px;
+	width: 100%;
 	height: 97px;
 	line-height: 97px;
 	background-color: #06aaff;
@@ -15,6 +15,7 @@ body {
 	text-align: center;
 	vertical-align: middle;
 }
+
 
 .leftBar {
 	float: left;
