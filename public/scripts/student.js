@@ -47,8 +47,8 @@ var Question = React.createClass({
 		return (
 			<div className="questionBox">
 				Question:
-				<div className="questionCard">
-					Brazenly obvious 
+				<div className="questionCard" id="questionCardId">
+					Brazenly obvious; flagrant; offensively noisy or loud 
 				</div>
 				<div className="button outlineButton" id="skipButton">
 					Skip
