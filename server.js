@@ -43,7 +43,7 @@ app.get('/api/comments', function(req, res) {
     }
     res.json(JSON.parse(data));
   });
-});
+}); 
 
 app.post('/api/comments', function(req, res) {
   fs.readFile(COMMENTS_FILE, function(err, data) {
