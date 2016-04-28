@@ -3,6 +3,7 @@ body {
 	background-color: #ededed;
 }
 
+/* Contains the left bar + bingo board */
 .studentContent {
 	/* Width of left bar + bingo board + margin between left bar and bingo board */
 	width: 955px;
@@ -12,6 +13,7 @@ body {
 	margin-bottom: 30px;
 }
 
+/* Header stuff */
 .header {
 	width: 100%;
 	height: 97px;
@@ -23,6 +25,20 @@ body {
 	font-weight: 300;
 	text-align: center;
 	vertical-align: middle;
+}
+
+.howItWorks {
+	width: 115px;
+	height: 30px;
+	background-color: white;
+	border: 1px solid #00a8ff;
+	border-radius: 4px;
+	color: #06aaff;
+	font-family: "Avenir LT Std";
+	font-size: 11px;
+	font-weight: 400;
+	line-height: 30px;
+	margin-top: 33px;
 }
 
 .leftBar {
@@ -120,6 +136,10 @@ body {
 	height: 98px;
 }
 
+.wildCardImage {
+	margin-left: 25px;
+}
+
 /* Buttons */
 .button {
 	width: 238px;
@@ -141,7 +161,14 @@ body {
 	color: #06aaff;
 }
 
-.grayButton {
+.blueButtonActive {
+	color: white;
+	background-color: #06aaff;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+	display: inline-block;
+}
+
+.grayButtonInactive {
 	color: white;
 	background-color: #cdd3d7;
 	border-radius: 4px;

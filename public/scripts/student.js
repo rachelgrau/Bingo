@@ -25,9 +25,9 @@ var StudentView = React.createClass({
 				<div className="studentContent"> 
 					<div className="leftBar">
 						<Question/>
-						<BingoChecker/>
+						<BingoChecker hasBingo={true}/>
 					</div>
-					<BingoBoard />
+					<BingoBoard cards={this.state.data}/>
 				</div>
 			</div>
 		);
@@ -62,14 +62,25 @@ var Question = React.createClass({
 
 var BingoChecker = React.createClass ({
 	render: function() {
-		return (
-			<div className="bingoChecker">
-    			<div className="button grayButton">
+		if (this.props.hasBingo) {
+			return (
+				<div className="bingoChecker">
+    			<div className="button grayButtonInactive">
 					I have bingo!
 				</div><br/>
-				Board checks left: 3
+				Board checks left: <b>3</b>
 			</div>
-		);
+			);
+		} else {
+			return (
+				<div className="bingoChecker">
+    			<div className="button blueButtonActive">
+					I have bingo!
+				</div><br/>
+				Board checks left: <b>3</b>
+			</div>
+			);
+		}
 	}
 });
 
@@ -77,9 +88,13 @@ var BingoBoard = React.createClass ({
 	render: function() {
 		var bingoCards = []; // will become array of bingo card components
 		/* add a bingo card component for every card with a word */
-		for (var i=0; i < 25; i++) {
-			var currAnswer =  "Hi";
-			bingoCards.push(<BingoCard/>);
+		for (var i=0; i < this.props.cards.length; i++) {
+			var word = this.props.cards[i].word;
+			if (i==Math.floor(this.props.cards.length/2)) {
+				/* Bingo wild card */
+				bingoCards.push(<BingoCard isWild={true} word=""/>);
+			}
+			bingoCards.push(<BingoCard isWild={false} word={word}/>);
 		}		
 		return (
 			<div className="bingoBoard">
@@ -91,11 +106,19 @@ var BingoBoard = React.createClass ({
 
 var BingoCard = React.createClass ({
 	render: function() {
-		return (
-			<div className="bingoCard">
-				Hey
-			</div>
-		);
+		if (this.props.isWild) {
+			return (
+				<div className="bingoCard">
+					<img src="../assets/nearpodIcon.png" width="43" height="36" className="wildCardImage"/>
+				</div>
+			);
+		} else {
+			return (
+				<div className="bingoCard">
+					{this.props.word}
+				</div>
+			);
+		}
 	}
 });
 
