@@ -1,11 +1,25 @@
 var StudentView = React.createClass({
+	shuffleCards: function(cards) {
+		var currentIndex = cards.length, temporaryValue, randomIndex;
+  		// While there remain elements to shuffle...
+ 		 while (0 !== currentIndex) {
+    		// Pick a remaining element...
+    		randomIndex = Math.floor(Math.random() * currentIndex);
+    		currentIndex -= 1;
+    		// And swap it with the current element.
+    		temporaryValue = cards[currentIndex];
+    		cards[currentIndex] = cards[randomIndex];
+    		cards[randomIndex] = temporaryValue;
+  		}
+		return cards;
+	},
 	loadCardsFromServer: function() {
     $.ajax({
 	      url: this.props.url,
 	      dataType: 'json',
 	      cache: false,
 	      success: function(data) {
-	        this.setState({data: data});
+	        this.setState({data: this.shuffleCards(data)});
 	      }.bind(this),
 	      error: function(xhr, status, err) {
 	        console.error(this.props.url, status, err.toString());
