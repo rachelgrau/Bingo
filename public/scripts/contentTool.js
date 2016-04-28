@@ -29,9 +29,9 @@ var ContentTool = React.createClass({
   		cardToUpdate["answer"] = card.answer;
   		if (!card.question && !card.answer) {
   			/* The card is empty */
-  			cardToUpdate["completed"] = "false";
+  			cardToUpdate["completed"] = false;
   		} else {
-  			cardToUpdate["completed"] = "true";
+  			cardToUpdate["completed"] = true;
   		}
   		this.state.cards[this.state.selectedCard] = cardToUpdate;
   		/* TO DO: If at some point we want to provide a "next" button, change this to update selectedCard to be this.state.selectedCard + 1 */
@@ -67,7 +67,7 @@ var ContentTool = React.createClass({
 		if (this.state.selectedCard == -1) {	
 			return (
 				<div className="contentTool">
-					<Editor onCardSubmit={this.handleCardSubmit} isSelected="false"/>
+					<Editor onCardSubmit={this.handleCardSubmit} isSelected={false}/>
 					<BingoBoard cards={this.state.cards} onSelectCard={this.handleSelectCard}/>
 					<Footer onCreate={this.handleCreate} onSave={this.handleSave} />
 				</div>
@@ -75,7 +75,7 @@ var ContentTool = React.createClass({
 		} else {
 			return (
 				<div className="contentTool">
-					<Editor ref="myEditor" onCardSubmit={this.handleCardSubmit} isSelected="true" card={this.state.cards[this.state.selectedCard]}/>
+					<Editor ref="myEditor" onCardSubmit={this.handleCardSubmit} isSelected={true} card={this.state.cards[this.state.selectedCard]}/>
 					<BingoBoard cards={this.state.cards} onSelectCard={this.handleSelectCard} selectedCard={this.state.selectedCard}/>
 					<Footer onCreate={this.handleCreate} onSave={this.handleSave} />
 				</div>
@@ -90,14 +90,14 @@ var Editor = React.createClass({
 	 * this is occurring when hasChangedQuestion = hasChangedAnswer = false (at this point, use props to tell what is actually question/answer)
 	 */
 	getInitialState: function () {
-		return {question:'', answer:'', hasChangedQuestion: 'false', hasChangedAnswer: 'false', canSubmit: 'true'};
+		return {question:'', answer:'', hasChangedQuestion: false, hasChangedAnswer: false, canSubmit: true};
 	},
 	handleQuestionChange: function(e) {
 		console.log(e.target.value);
-		this.setState({hasChangedQuestion: 'true', question: e.target.value});
+		this.setState({hasChangedQuestion: true, question: e.target.value});
 	},
 	handleAnswerChange: function(e) {
-		this.setState({hasChangedAnswer: 'true', answer: e.target.value});
+		this.setState({hasChangedAnswer: true, answer: e.target.value});
 	},
 	changedSelection: function() {
     	this.setState(this.getInitialState());
@@ -110,13 +110,13 @@ var Editor = React.createClass({
 	    var question = this.getCurrentQuestion();
 	    var answer = this.getCurrentAnswer();
 	    this.props.onCardSubmit({question:question, answer:answer});
-	    this.setState({question: '', answer: '', hasChangedQuestion: 'false', hasChangedAnswer: 'false'});
+	    this.setState({question: '', answer: '', hasChangedQuestion: false, hasChangedAnswer: false});
 	  },
 	/* Returns whatever is currently in the question input field. */
 	getCurrentQuestion: function() {
 		var question = this.state.question.trim();
 		/* If they haven't changed question, use props (saved value for this card) */
-	    if (this.state.hasChangedQuestion == 'false') {
+	    if (!this.state.hasChangedQuestion) {
 	    	question = this.props.card.question;
 	    }
 	    return question;
@@ -140,13 +140,13 @@ var Editor = React.createClass({
 	getCurrentAnswer: function() {
 		var answer = this.state.answer.trim();
 		/* If they haven't changed answer, use props (saved value for this card) */
-	    if (this.state.hasChangedAnswer == 'false') {
+	    if (!this.state.hasChangedAnswer) {
 	    	answer = this.props.card.answer;
 	    }
 	    return answer;
 	},
 	render: function() {
-		if (this.props.isSelected=="true") {
+		if (this.props.isSelected) {
 			/* If they've already edited, use state, otherwise use props passed in (currently saved question/answer for the currently selected card). */
 			var question = this.getCurrentQuestion();
 			var answer = this.getCurrentAnswer();
@@ -191,14 +191,14 @@ var BingoBoard = React.createClass({
 			var isCompleted = this.props.cards[i].completed;
 			if (i==Math.floor(this.props.cards.length/2)) {
 				/* Bingo wild card */
-				bingoCards.push(<BingoCard answer="WILD" completed="true" isWild="true"/>);
+				bingoCards.push(<BingoCard answer="WILD" completed={true} isWild={true}/>);
 			}
 			if (this.props.selectedCard == i) {
-				bingoCards.push(<BingoCard isSelected="true" index={i} answer={currAnswer} completed="true" isWild="false" onCardClick={this.handleCardClicked}/>);
-			} else if (isCompleted=="true") {	
-				bingoCards.push(<BingoCard isSelected="false" index={i} answer={currAnswer} completed="true" isWild="false" onCardClick={this.handleCardClicked}/>);
+				bingoCards.push(<BingoCard isSelected={true} index={i} answer={currAnswer} completed={true} isWild={false} onCardClick={this.handleCardClicked}/>);
+			} else if (isCompleted) {	
+				bingoCards.push(<BingoCard isSelected={false} index={i} answer={currAnswer} completed={true} isWild={false} onCardClick={this.handleCardClicked}/>);
 			} else {
-				bingoCards.push(<BingoCard  isSelected="false" index={i} answer="" completed="false" isWild="false" onCardClick={this.handleCardClicked}/>);
+				bingoCards.push(<BingoCard  isSelected={false} index={i} answer="" completed={false} isWild={false} onCardClick={this.handleCardClicked}/>);
 			}
 		}		
 		return (
@@ -214,20 +214,20 @@ var BingoCard = React.createClass({
 		this.props.onCardClick(this.props.index);
 	},
 	render: function() {
-		if (this.props.isWild == "true") {
+		if (this.props.isWild) {
 			/* Wild card */
 			return (
 				<div className="bingoCard bingoWildCard">
 					<img src="../assets/nearpodIcon.png" className="wildCardImage"/>
 				</div>
 			);
-		} else if (this.props.isSelected == "true") {
+		} else if (this.props.isSelected) {
 			return (
 				<div className="bingoCard bingoCardSelected" onClick={this.handleClick}>
 					{this.props.answer}
 				</div>
 			);
-		} else if (this.props.completed == "false") {
+		} else if (!this.props.completed) {
 			return (
 				<div className="bingoCard bingoCardEmpty" onClick={this.handleClick}>
 					{this.props.answer}
