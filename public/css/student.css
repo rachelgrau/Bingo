@@ -136,8 +136,27 @@ body {
 	height: 98px;
 }
 
+.bingoChipCard {
+	background-image: url("../assets/bingoChip.png");
+	background-repeat: no-repeat;
+	background-position: 50% 50%;
+}
+
 .wildCardImage {
 	margin-left: 25px;
+}
+
+.bingoChip {
+	width: 70px;
+	height: 70px;
+	margin-left: 14px; /* (Bingo card width - image width) / 2*/
+}
+
+.chipText {
+	position: absolute; 
+    /*top: 200px;*/ 
+    /*left: 0; */
+    /*width: 100%; */
 }
 
 /* Buttons */
