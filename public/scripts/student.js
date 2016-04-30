@@ -20,7 +20,8 @@ var StudentView = React.createClass({
 	      dataType: 'json',
 	      cache: false,
 	      success: function(data) {
-	        this.setState({data: data});
+	      	var cards = this.shuffleCards(data["cards"]);
+	      	this.setState({question: data["question"], cards: cards});
 	      }.bind(this),
 	      error: function(xhr, status, err) {
 	        console.error(this.props.url, status, err.toString());
@@ -28,22 +29,29 @@ var StudentView = React.createClass({
 	    });
   	},
   	getInitialState: function() {
-		return {data:[]};
+		return {cards:[], question:""};
+	},
+	/* Called when they place a chip on a card */
+	handleClickedCard: function(cardIndex) {
+		var cards = this.state.cards;
+		cards[cardIndex]["hasChip"] = true;
+		this.setState({cards: cards});
+
+		// this.state.data["cards"][cardIndex] = card;
 	},
   	componentDidMount: function() {
     	this.loadCardsFromServer();
   	},
   	render: function() {
-  		var cards = this.shuffleCards(this.state.data["cards"]);
 		return (
 			<div className="studentView ">
 				<Header/>
 				<div className="studentContent"> 
 					<div className="leftBar">
-						<Question question={this.state.data["question"]}/>
+						<Question question={this.state.question}/>
 						<BingoChecker hasBingo={true}/>
 					</div>
-					<BingoBoard cards={cards}/>
+					<BingoBoard cards={this.state.cards} handleClickedCard={this.handleClickedCard}/>
 				</div>
 			</div>
 		);
@@ -101,6 +109,9 @@ var BingoChecker = React.createClass ({
 });
 
 var BingoBoard = React.createClass ({
+	handleClickedCard: function(cardIndex) {
+		this.props.handleClickedCard(cardIndex);
+	},
 	render: function() {
 		var bingoCards = []; // will become array of bingo card components
 		/* add a bingo card component for every card with a word */
@@ -111,7 +122,7 @@ var BingoBoard = React.createClass ({
 				/* Bingo wild card */
 				bingoCards.push(<BingoCard isWild={true} word=""/>);
 			}	
-			bingoCards.push(<BingoCard isWild={false} word={word} hasChip={card["hasChip"]}/>);
+			bingoCards.push(<BingoCard index={i} isWild={false} word={word} hasChip={card["hasChip"]} handleClick={this.handleClickedCard}/>);
 		}		
 		return (
 			<div className="bingoBoard">
@@ -123,7 +134,7 @@ var BingoBoard = React.createClass ({
 
 var BingoCard = React.createClass ({
 	handleClick: function() {
-		console.log("HERE");
+		this.props.handleClick(this.props.index);
 	},
 	render: function() {
 		if (this.props.isWild) {
@@ -139,7 +150,6 @@ var BingoCard = React.createClass ({
 				<div className={chipClassName} onClick={this.handleClick}>
 					{this.props.word}
 				</div>
-
 			); 
 		}
 	}
