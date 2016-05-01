@@ -14,6 +14,88 @@ var StudentView = React.createClass({
   		}
 		return cards;
 	},
+	/* Returns true if the student currently has bingo (based on where 
+	   their chips are placed, and not whether the chips were placed 
+	   correctly), and false if bingo is not possible with current chip 
+	   layout */
+	bingoButtonShouldActivate: function() {
+		var numPerRow = Math.sqrt(this.state.cards.length + 1);
+		var wildCardRow = Math.floor(numPerRow/2);
+		/* Check horizontal */
+		for (var row=0; row<numPerRow; row++) {
+			/* Account for row with wild card (has one less real card) */
+			var numCardsInRow = numPerRow;
+			if (row == wildCardRow) {
+				numCardsInRow--; 
+			}
+			var currRowHasBingo = true;
+			for (var col=0; col<numCardsInRow; col++) {
+				var currIndex = row * numPerRow + col;
+				if (row > wildCardRow) {
+					currIndex--;
+				}
+				/* Skipped wild card */
+				var currentCard = this.state.cards[currIndex];
+				if (!currentCard["hasChip"]) {
+					currRowHasBingo = false;
+					break;
+				}
+			}
+			if (currRowHasBingo) return true;
+		}
+
+		/* Check vertical */
+		var wildCardIndex = Math.floor(this.state.cards.length/2);
+		for (var col=0; col<numPerRow; col++) {
+			var currColHasBingo = true; 
+			for (var row=0; row<numPerRow; row++) {
+				/* Check col i */
+				currIndex = col + (row*numPerRow);
+				if (currIndex == wildCardIndex) {
+					continue;
+				} else if (currIndex > wildCardIndex) {
+					currIndex--;
+				}
+				var currentCard = this.state.cards[currIndex];
+				if (!currentCard["hasChip"]) {
+					currColHasBingo = false;
+					break;
+				}
+			}
+			if (currColHasBingo) return true;
+		}
+
+		/* Check diagonal from top left to bottom right corners */
+		var downDiagonalHasBingo = true;
+		for (var i=0; i<numPerRow; i++) {
+			var currIndex = i + (i * numPerRow);
+			if (currIndex > wildCardIndex) currIndex--;
+			if (currIndex == wildCardIndex) continue;
+			var currentCard = this.state.cards[currIndex];
+			if (!currentCard["hasChip"]) {
+				downDiagonalHasBingo = false;
+				break;
+			}
+		}
+		if (downDiagonalHasBingo) return true;
+
+		/* Check diagonal from top right to bottom left corners */
+		var upDiagonalHasBingo = true;
+		for (var i=(numPerRow-1); i>=0; i--) {
+			var currRow = (numPerRow-1) - i;
+			var currIndex = (currRow * numPerRow) + i;
+			if (currIndex > wildCardIndex) currIndex--;
+			if (currIndex == wildCardIndex) continue;
+			var currentCard = this.state.cards[currIndex];
+			if (!currentCard["hasChip"]) {
+				upDiagonalHasBingo = false;
+				break;
+			}
+		}
+		if (upDiagonalHasBingo) return true;
+
+		return false;
+	},
 	loadCardsFromServer: function() {
     $.ajax({
 	      url: this.props.url,
@@ -36,20 +118,21 @@ var StudentView = React.createClass({
 		var cards = this.state.cards;
 		cards[cardIndex]["hasChip"] = true;
 		this.setState({cards: cards});
-
+		this.bingoButtonShouldActivate();
 		// this.state.data["cards"][cardIndex] = card;
 	},
   	componentDidMount: function() {
     	this.loadCardsFromServer();
   	},
   	render: function() {
+  		var hasBingo = this.bingoButtonShouldActivate();
 		return (
 			<div className="studentView ">
 				<Header/>
 				<div className="studentContent"> 
 					<div className="leftBar">
 						<Question question={this.state.question}/>
-						<BingoChecker hasBingo={true}/>
+						<BingoChecker hasBingo={hasBingo}/>
 					</div>
 					<BingoBoard cards={this.state.cards} handleClickedCard={this.handleClickedCard}/>
 				</div>
@@ -89,7 +172,7 @@ var BingoChecker = React.createClass ({
 		if (this.props.hasBingo) {
 			return (
 				<div className="bingoChecker">
-    			<div className="button grayButtonInactive">
+    			<div className="button blueButtonActive">
 					I have bingo!
 				</div><br/>
 				Board checks left: <b>3</b>
@@ -98,7 +181,7 @@ var BingoChecker = React.createClass ({
 		} else {
 			return (
 				<div className="bingoChecker">
-    			<div className="button blueButtonActive">
+    			<div className="button grayButtonInactive">
 					I have bingo!
 				</div><br/>
 				Board checks left: <b>3</b>
