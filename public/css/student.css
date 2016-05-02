@@ -180,11 +180,17 @@ body {
 	color: #06aaff;
 }
 
-.blueButtonActive {
+.blueButtonShadow {
 	color: white;
 	background-color: #06aaff;
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 	display: inline-block;
+}
+
+.blueButton {
+	color: white;
+	background-color: #06aaff;
+	border-radius: 4px;
 }
 
 .grayButtonInactive {
@@ -196,4 +202,139 @@ body {
 
 .blueButtonInactive {
 	background-color: #bce9ff;
+}
+
+/* Modal */
+.modalBg {
+	position: absolute;
+	left: 0;
+	top: 0;
+	background-color: rgba(86, 86, 86, .65);
+	width: 100%;
+	height: 100%;
+}
+
+.modal {
+	position: absolute;
+	width: 525px;
+	height: 321px;
+	background-image: linear-gradient(180deg, white 0%, #f8fafb 100%);
+	border: 1px solid #ebeff2;
+	border-radius: 10px;
+	box-shadow: 2px 2px 4px rgba(168, 168, 168, 0.5);
+	/* Center on screen */
+	position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-top: -176px;
+    margin-left: -262px;
+    padding-top: 31px;
+    /* Font */
+    text-align: center;
+    color: #454545;
+	font-family: "Avenir Next";
+	font-size: 22px;
+	font-weight: 500;
+	line-height: 30px;
+}
+
+/* Container that contains question & answer in modal */
+#boxContainer {
+	height: 150px; /* Same as question & answer*/
+	width: 346px; /* (2*width of question/answer) + margin between question & answer */
+	/* Center it in modal box */
+	position: relative;
+	left: 50%;
+	margin-left: -173px; /* 1/2 width */
+	margin-top: 20px; /* Between boxes & header */
+}
+
+.questionSmall {
+	/* Look */
+	width: 140px;
+	height: 140px;
+	background-color: rgba(6, 170, 255, 0.3);
+	border: 1px solid #06aaff;
+	border-radius: 5px;
+	text-align: left;
+	/* Position */
+	float: left;
+	padding: 5px;
+	/* Font */
+	word-wrap: break-word;
+	color: black;
+	font-family: "Avenir LT Std";
+	font-size: 16px;
+	font-weight: 400;
+	line-height: 20px;
+	/* Vertically centers */
+  	display: flex;
+  	justify-content: center;
+  	flex-direction: column;
+  	height: 150px;
+}
+
+.answerSmall {
+	/* Look */
+	background-color: white;
+	width: 150px;
+	height: 150px;
+	border: 1px solid #06aaff;
+	border-radius: 5px;
+	/* Position */
+	float: right;
+	/* Vertically centers */
+  	display: flex;
+  	justify-content: center;
+  	flex-direction: column;
+  	height: 150px;
+}
+
+.modalFooter {
+	background-color: white;
+	background-color: white;
+	border: 1px solid #ebeff2;	
+	width: 525px; /* Same as modal */
+	height: 100px;
+	border-bottom-left-radius: 5px;
+	border-bottom-right-radius: 5px;
+	/* position */
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	margin-left: -263px;
+	margin-top: 75px;
+}
+
+.modalButton {
+	width: 206px;
+	height: 42px;
+	/* Font */
+	font-family: "Avenir Next";
+	font-size: 16px;
+	font-weight: 400;
+	line-height: 21px;
+	/* Vertically centers */
+  	display: flex;
+  	justify-content: center;
+  	flex-direction: column;
+  	height: 42px;
+}
+
+#buttonContainer {
+	height: 100px; /* Same as modal button*/
+	width: 430px; /* (2*width of question/answer) + margin between question & answer */
+	/* Center it in modal box */
+	position: relative;
+	left: 50%;
+	margin-left: -215px; /* 1/2 width */
+	margin-top: 25px; /* Between boxes & header */
+}
+
+#leftModalButton {
+	float: left;
+}
+
+#rightModalButton {
+	float: right;
 }

@@ -111,21 +111,42 @@ var StudentView = React.createClass({
 	    });
   	},
   	getInitialState: function() {
-		return {cards:[], question:""};
+		return {cards:[], question:"", isModalOpen: false, selectedCardIndex: -1};
 	},
 	/* Called when they place a chip on a card */
 	handleClickedCard: function(cardIndex) {
-		var cards = this.state.cards;
-		cards[cardIndex]["hasChip"] = true;
-		this.setState({cards: cards});
-		this.bingoButtonShouldActivate();
-		// this.state.data["cards"][cardIndex] = card;
+		this.state.selectedCardIndex = cardIndex;
+		this.openModal();
 	},
   	componentDidMount: function() {
     	this.loadCardsFromServer();
   	},
+  	/* The app uses one shared modal, so we open & close it as needed and 
+  	   just change its inner content */
+  	openModal: function() {
+        this.setState({isModalOpen: true});
+    },
+    /* Called when the user clicks "yes" to close the modal; places a bingo chip */
+    closeModalAccept: function() {
+    	/* Place the chip */
+    	var cards = this.state.cards;
+		cards[this.state.selectedCardIndex]["hasChip"] = true;
+		this.bingoButtonShouldActivate();
+        this.setState({cards: cards, isModalOpen: false, selectedCardIndex: -1});
+    },
+    /* Called when the user clicks "no" to close the modal */
+    closeModalCancel: function() {
+    	this.setState({isModalOpen: false, selectedCardIndex: -1});
+    },
   	render: function() {
   		var hasBingo = this.bingoButtonShouldActivate();
+
+  		/* If the user just selected a card, figure out what the word was so we
+  		   can display it in modal */
+  		var selectedCardWord = "";
+  		if (this.state.selectedCardIndex != -1) {
+  			selectedCardWord = this.state.cards[this.state.selectedCardIndex].word;
+  		}
 		return (
 			<div className="studentView ">
 				<Header/>
@@ -136,6 +157,7 @@ var StudentView = React.createClass({
 					</div>
 					<BingoBoard cards={this.state.cards} handleClickedCard={this.handleClickedCard}/>
 				</div>
+				<Modal modalType="confirmChipPlacement" isOpen={this.state.isModalOpen} question= {this.state.question} answer={selectedCardWord} onAccept={this.closeModalAccept} onCancel={this.closeModalCancel}/>
 			</div>
 		);
 	}
@@ -145,7 +167,7 @@ var Header = React.createClass ({
 	render: function() {
 		return (
 			<div className="header">
-				Bingo Header
+				Bingo
 			</div>
 		);
 	}
@@ -153,17 +175,25 @@ var Header = React.createClass ({
 
 var Question = React.createClass({
 	render: function() {
-		return (
-			<div className="questionBox">
-				Question:
-				<div className="questionCard" id="questionCardId">
-					{this.props.question}
+		if (this.props.question) {
+			return (
+				<div className="questionBox">
+					Question:
+					<div className="questionCard" id="questionCardId">
+						{this.props.question}
+						</div>
+					<div className="button outlineButton" id="skipButton">
+						Skip
 					</div>
-				<div className="button outlineButton" id="skipButton">
-					Skip
 				</div>
-			</div>
-		);
+			);
+		} else {
+			return (
+				<div className="questionBox">
+					Waiting for next question...
+				</div>
+			);
+		}
 	}
 });
 
@@ -172,7 +202,7 @@ var BingoChecker = React.createClass ({
 		if (this.props.hasBingo) {
 			return (
 				<div className="bingoChecker">
-    			<div className="button blueButtonActive">
+    			<div className="button blueButtonShadow">
 					I have bingo!
 				</div><br/>
 				Board checks left: <b>3</b>
@@ -236,6 +266,46 @@ var BingoCard = React.createClass ({
 			); 
 		}
 	}
+});
+
+/* Modal types 
+ * -------------
+ * confirmChipPlacement: "Are you sure you want to place this chip" + yes/no buttons 
+ */
+var Modal = React.createClass({
+    render: function() {
+        if(this.props.isOpen){
+        	if (this.props.modalType == "confirmChipPlacement") {
+        		return (
+	                <div className="modalBg">
+	                  <div className="modal">
+	              			Are you sure you want to place this chip?<br/>
+	              			<div id="boxContainer">
+	              				<div className="questionSmall"> {this.props.question}</div>
+	              				<div className="answerSmall"> {this.props.answer}</div>
+	              			</div>
+	              			<div className="modalFooter">
+	              				<div id="buttonContainer">
+									<div className="modalButton blueButton" id="leftModalButton" onClick={this.props.onCancel}>No, go back.</div>
+									<div className="modalButton outlineButton" id="rightModalButton" onClick={this.props.onAccept}>Yes, make selection.</div>
+								</div>
+							</div>
+	              		</div>
+	                </div>
+            	);
+        	} else {
+        		return (
+        			<div className="">
+                	</div>
+        		);
+        	}
+        } else {
+        	return (
+        		<div className="">
+                </div>
+        	);
+        }
+    }
 });
 
 ReactDOM.render(
