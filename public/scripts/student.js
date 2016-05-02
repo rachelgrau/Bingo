@@ -111,7 +111,7 @@ var StudentView = React.createClass({
 	    });
   	},
   	getInitialState: function() {
-		return {cards:[], question:"", isModalOpen: false, selectedCardIndex: -1};
+		return {cards:[], question:"", isModalOpen: false, selectedCardIndex: -1, readyForNextQuestion: false};
 	},
 	/* Called when they place a chip on a card */
 	handleClickedCard: function(cardIndex) {
@@ -132,7 +132,7 @@ var StudentView = React.createClass({
     	var cards = this.state.cards;
 		cards[this.state.selectedCardIndex]["hasChip"] = true;
 		this.bingoButtonShouldActivate();
-        this.setState({cards: cards, isModalOpen: false, selectedCardIndex: -1});
+        this.setState({cards: cards, isModalOpen: false, selectedCardIndex: -1, readyForNextQuestion: true});
     },
     /* Called when the user clicks "no" to close the modal */
     closeModalCancel: function() {
@@ -147,15 +147,18 @@ var StudentView = React.createClass({
   		if (this.state.selectedCardIndex != -1) {
   			selectedCardWord = this.state.cards[this.state.selectedCardIndex].word;
   		}
+  		/* If the student is currently waiting for the next question, then don't respond
+  		   to any clicks on cards */
+  		var canSelectCard = !this.state.readyForNextQuestion;
 		return (
 			<div className="studentView ">
 				<Header/>
 				<div className="studentContent"> 
 					<div className="leftBar">
-						<Question question={this.state.question}/>
+						<Question question={this.state.question} readyForNextQuestion={this.state.readyForNextQuestion}/>
 						<BingoChecker hasBingo={hasBingo}/>
 					</div>
-					<BingoBoard cards={this.state.cards} handleClickedCard={this.handleClickedCard}/>
+					<BingoBoard cards={this.state.cards} handleClickedCard={this.handleClickedCard} clicksEnabled={canSelectCard}/>
 				</div>
 				<Modal modalType="confirmChipPlacement" isOpen={this.state.isModalOpen} question= {this.state.question} answer={selectedCardWord} onAccept={this.closeModalAccept} onCancel={this.closeModalCancel}/>
 			</div>
@@ -173,9 +176,15 @@ var Header = React.createClass ({
 	}
 });
 
+/*
+ * Props
+ * -----
+ * question (string): the question to display, or "" if none
+ * readyForNextQuestion (bool): if true, then we won't display a question, just a "waiting for next question" text
+ */
 var Question = React.createClass({
 	render: function() {
-		if (this.props.question) {
+		if (this.props.question && !this.props.readyForNextQuestion) {
 			return (
 				<div className="questionBox">
 					Question:
@@ -197,6 +206,11 @@ var Question = React.createClass({
 	}
 });
 
+/*
+ * Props
+ * -----
+ * hasBingo (boolean): if true, then the "I have bingo" button will activate
+ */
 var BingoChecker = React.createClass ({
 	render: function() {
 		if (this.props.hasBingo) {
@@ -221,9 +235,19 @@ var BingoChecker = React.createClass ({
 	}
 });
 
+/*
+ * Props
+ * -----
+ * clicksEnabled (boolean): if true, then we will respond to parent with click events; if false, we do nothing on clikcs
+ * cards (array): array of cards to display on the board
+ * handleClickedCard (function): callback that gets called when a BingoCard is selected
+ */
 var BingoBoard = React.createClass ({
 	handleClickedCard: function(cardIndex) {
-		this.props.handleClickedCard(cardIndex);
+		/* Clicks are disabled when there is no question */
+		if (this.props.clicksEnabled) {	
+			this.props.handleClickedCard(cardIndex);
+		}
 	},
 	render: function() {
 		var bingoCards = []; // will become array of bingo card components
@@ -245,6 +269,14 @@ var BingoBoard = React.createClass ({
 	}
 });
 
+/*
+ * Props
+ * -----
+ * hasChip (boolean): if true, then places a chip on this card
+ * word (string): the word to display on this card
+ * index (int): this card's index on the board (from top left to bottom right, excluding wild card)
+ * handleClick (function): callback that gets called when this card is selected
+ */
 var BingoCard = React.createClass ({
 	handleClick: function() {
 		/* If card already has a chip, do nothing */
@@ -274,6 +306,15 @@ var BingoCard = React.createClass ({
 /* Modal types 
  * -------------
  * confirmChipPlacement: "Are you sure you want to place this chip" + yes/no buttons 
+ *
+ * Props
+ * -----
+ * isOpen (boolean): if true, then displays the modal; otherwise doesn't
+ * modalType (string): the type of modal (see above)
+ * question (string): if the modal is type "confirmChipPlacement", then this prop is the question the student is trying to answer
+ * answer (string): if the modal is type "confirmChipPlacement", then this prop is the card the student just selected
+ * onCancel (function): if the modal is type "confirmChipPlacement", then this is the callback for when student clicks "cancel" button 
+ * onAccept (function): if the modal is type "confirmChipPlacement", then this is the callback for when student clicks "yes" button 
  */
 var Modal = React.createClass({
     render: function() {
