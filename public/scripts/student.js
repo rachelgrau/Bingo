@@ -247,7 +247,10 @@ var BingoBoard = React.createClass ({
 
 var BingoCard = React.createClass ({
 	handleClick: function() {
-		this.props.handleClick(this.props.index);
+		/* If card already has a chip, do nothing */
+		if (!this.props.hasChip) {
+			this.props.handleClick(this.props.index);
+		}		
 	},
 	render: function() {
 		if (this.props.isWild) {
