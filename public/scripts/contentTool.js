@@ -46,7 +46,6 @@ var ContentTool = React.createClass({
   		this.setState({selectedCard: cardNumber});
   	},
   	handleCreate: function() {
-
   	},
   	handleSave: function() {
   		/* TO DO: save all cards from current state to server */
