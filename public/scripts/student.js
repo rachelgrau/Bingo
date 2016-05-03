@@ -1,3 +1,13 @@
+/* State
+ * -------
+ * cards (array): an array of this students bingo cards, in the order that they appear on his/her board.
+ * question (string): the current question, or "" if none.
+ * modalType (string): the type of modal to display, or "" if none. Should be set to something before chanign isModalOpen to true.
+ * isModalOpen (boolean): whether or not a modal is currently being displayed.
+ * selectedCardIndex (int): when a student clicks on a card, this holds the index in |cards| of the card they selected. Default value is -1 (no selection)
+ * readyForNextQuestion (boolean): false until the student answers the current question, then becomes true. When a new question arrives, turns to false again unitl they answer.
+ * numBingoChecksLeft (int): the number of chances this student has left to check if they have bingo. Starts at 3. 
+ */
 var StudentView = React.createClass({
 	shuffleCards: function(cards) {
 		if (!cards) return [];
