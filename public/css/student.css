@@ -204,7 +204,7 @@ body {
 	background-color: #bce9ff;
 }
 
-/* Modal */
+/* MODAL STUFF */
 .modalBg {
 	position: absolute;
 	left: 0;
@@ -216,7 +216,7 @@ body {
 
 .modal {
 	position: absolute;
-	width: 525px;
+	width: 445px;
 	height: 321px;
 	background-image: linear-gradient(180deg, white 0%, #f8fafb 100%);
 	border: 1px solid #ebeff2;
@@ -229,6 +229,8 @@ body {
     margin-top: -176px;
     margin-left: -262px;
     padding-top: 31px;
+    padding-left: 40px;
+    padding-right: 40px;
     /* Font */
     text-align: center;
     color: #454545;
@@ -319,6 +321,26 @@ body {
   	justify-content: center;
   	flex-direction: column;
   	height: 42px;
+}
+
+/* Are you sure you want to check bingo? */
+.modalSubheader {
+	font-family: "Avenir Next";
+	font-size: 16px;
+	line-height: 26px;
+	font-weight: 400;
+}
+
+.modalHeader {
+	font-family: "Avenir Next";
+	font-size: 20px;
+	line-height: 30px;
+	font-weight: 400;
+}
+
+#modalConfirmation {
+	margin-top: 35px;
+	margin-bottom: 20px;
 }
 
 #buttonContainer {

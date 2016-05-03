@@ -9,117 +9,140 @@
         {
             "id": 2,
             "index": 2,
-            "word": "Docile"
+            "word": "Docile",
+            "hasChip": true
         },
         {
             "id": 3,
             "index": 3,
-            "word": "Hybrid"
+            "word": "Hybrid",
+            "hasChip": true
         },
         {
             "id": 4,
             "index": 4,
-            "word": "Nomadic"
+            "word": "Nomadic",
+            "hasChip": true
         },
         {
             "id": 5,
             "index": 5,
-            "word": "Persist"
+            "word": "Persist",
+            "hasChip": true
         },
         {
             "id": 6,
             "index": 6,
-            "word": "Resume"
+            "word": "Resume",
+            "hasChip": true
         },
         {
             "id": 7,
             "index": 7,
-            "word": "Wrath"
+            "word": "Wrath",
+            "hasChip": true
         },
         {
             "id": 8,
             "index": 8,
-            "word": "Affliction"
+            "word": "Affliction",
+            "hasChip": true
         },
         {
             "id": 9,
             "index": 9,
-            "word": "Endure"
+            "word": "Endure",
+            "hasChip": true
         },
         {
             "id": 10,
             "index": 10,
-            "word": "Dependent"
+            "word": "Dependent",
+            "hasChip": true
         },
         {
             "id": 11,
             "index": 11,
-            "word": "Stodgy"
+            "word": "Stodgy",
+            "hasChip": true
         },
         {
             "id": 12,
             "index": 12,
-            "word": "Notorious"
+            "word": "Notorious",
+            "hasChip": true
         },
         {
             "id": 13,
             "index": 13,
-            "word": "Irate"
+            "word": "Irate",
+            "hasChip": true
         },
         {
             "id": 14,
             "index": 14,
-            "word": "Grim"
+            "word": "Grim",
+            "hasChip": true
         },
         {
             "id": 15,
             "index": 15,
-            "word": "Legacy"
+            "word": "Legacy",
+            "hasChip": true
         },
         {
             "id": 16,
             "index": 16,
-            "word": "Vindictive"
+            "word": "Vindictive",
+            "hasChip": true
         },
         {
             "id": 17,
             "index": 17,
-            "word": "Flaw"
+            "word": "Flaw",
+            "hasChip": true
         },
         {
             "id": 18,
             "index": 18,
-            "word": "Trivial"
+            "word": "Trivial",
+            "hasChip": true
         },
         {
             "id": 19,
             "index": 19,
-            "word": "Consult"
+            "word": "Consult",
+            "hasChip": true
         },
         {
             "id": 20,
             "index": 20,
-            "word": "Nimble"
+            "word": "Nimble",
+            "hasChip": true
         },
         {
             "id": 21,
             "index": 21,
-            "word": "Homage"
+            "word": "Homage",
+            "hasChip": true
         },
         {
             "id": 22,
             "index": 22,
-            "word": "Sham"
+            "word": "Sham",
+            "hasChip": true
         },
         {
             "id": 23,
             "index": 23,
-            "word": "Capricious"
+            "word": "Capricious",
+            "hasChip": true
         },
         {
             "id": 24,
             "index": 24,
-            "word": "Perjury"
+            "word": "Perjury",
+            "hasChip": true
         }
     ]
 }

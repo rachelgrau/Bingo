@@ -111,32 +111,75 @@ var StudentView = React.createClass({
 	    });
   	},
   	getInitialState: function() {
-		return {cards:[], question:"", isModalOpen: false, selectedCardIndex: -1, readyForNextQuestion: false};
+		return {
+			cards:[], 
+			question:"", 
+			modalType:"", 
+			isModalOpen: false, 
+			selectedCardIndex: -1, 
+			readyForNextQuestion: false,
+			numBingoChecksLeft: 3
+		};
 	},
 	/* Called when they place a chip on a card */
 	handleClickedCard: function(cardIndex) {
 		this.state.selectedCardIndex = cardIndex;
-		this.openModal();
+		this.openModal("confirmChipPlacement");
 	},
   	componentDidMount: function() {
     	this.loadCardsFromServer();
   	},
-  	/* The app uses one shared modal, so we open & close it as needed and 
-  	   just change its inner content */
-  	openModal: function() {
-        this.setState({isModalOpen: true});
+  	/* The app uses one shared modal, so we open & close it as needed and just change its inner content.
+  	 * modalType (string): the type of modal you want to open
+  	 */
+  	openModal: function(modalType) {
+        this.setState({modalType: modalType, isModalOpen: true});
     },
-    /* Called when the user clicks "yes" to close the modal; places a bingo chip */
+    /* Called when the user clicks "yes" to close the modal. Check what the curent modal type is and act accordingly.
+     * "confirmChipPlacement": place a chip on the card they selected
+     * "checkBingo": check if they have bingo
+     */
     closeModalAccept: function() {
-    	/* Place the chip */
-    	var cards = this.state.cards;
-		cards[this.state.selectedCardIndex]["hasChip"] = true;
-		this.bingoButtonShouldActivate();
-        this.setState({cards: cards, isModalOpen: false, selectedCardIndex: -1, readyForNextQuestion: true});
+    	switch(this.state.modalType) {
+    		case "confirmChipPlacement":
+        		/* Place the chip */
+    			var cards = this.state.cards;
+				cards[this.state.selectedCardIndex]["hasChip"] = true;
+				this.bingoButtonShouldActivate();
+        		this.setState({cards: cards, isModalOpen: false, modalType:"", selectedCardIndex: -1, readyForNextQuestion: true});
+       			break;
+    		case "checkBingo":
+    			/* Check if they have bingo */
+        		break;
+    		default:
+    			/* Close modal */
+    			this.setState({isModalOpen: false, modalType:"", selectedCardIndex: -1});
+        		break;
+		}
     },
-    /* Called when the user clicks "no" to close the modal */
+    /* Called when the user clicks "yes" to close the modal. Check what the curent modal type is and act accordingly.
+     * "confirmChipPlacement": close modal
+     * "checkBingo": close modal
+     */
     closeModalCancel: function() {
-    	this.setState({isModalOpen: false, selectedCardIndex: -1});
+    	switch(this.state.modalType) {
+    		case "confirmChipPlacement":
+        		/* Close modal */
+    			this.setState({isModalOpen: false, modalType:"", selectedCardIndex: -1});
+       			break;
+    		case "checkBingo":
+    			/* Close modal */
+    			this.setState({isModalOpen: false, modalType:"", selectedCardIndex: -1});
+        		break;
+    		default:
+    			/* Close modal */
+    			this.setState({isModalOpen: false, modalType:"", selectedCardIndex: -1});
+        		break;
+		}
+    },
+    /* Called when the student clicks the "I have bingo" button*/
+    handleBingoClicked: function() {
+    	this.openModal("checkBingo");
     },
   	render: function() {
   		var hasBingo = this.bingoButtonShouldActivate();
@@ -156,11 +199,11 @@ var StudentView = React.createClass({
 				<div className="studentContent"> 
 					<div className="leftBar">
 						<Question question={this.state.question} readyForNextQuestion={this.state.readyForNextQuestion}/>
-						<BingoChecker hasBingo={hasBingo}/>
+						<BingoChecker hasBingo={hasBingo} onBingoClicked={this.handleBingoClicked} numBingoChecksLeft={this.state.numBingoChecksLeft}/>
 					</div>
 					<BingoBoard cards={this.state.cards} handleClickedCard={this.handleClickedCard} clicksEnabled={canSelectCard}/>
 				</div>
-				<Modal modalType="confirmChipPlacement" isOpen={this.state.isModalOpen} question= {this.state.question} answer={selectedCardWord} onAccept={this.closeModalAccept} onCancel={this.closeModalCancel}/>
+				<Modal modalType={this.state.modalType} isOpen={this.state.isModalOpen} question= {this.state.question} answer={selectedCardWord} onAccept={this.closeModalAccept} onCancel={this.closeModalCancel} numBingoChecksLeft={this.state.numBingoChecksLeft}/>
 			</div>
 		);
 	}
@@ -210,16 +253,17 @@ var Question = React.createClass({
  * Props
  * -----
  * hasBingo (boolean): if true, then the "I have bingo" button will activate
+ * onBingoClicked (function): this function gets called when the student clicks "I have bingo!"
  */
 var BingoChecker = React.createClass ({
 	render: function() {
 		if (this.props.hasBingo) {
 			return (
 				<div className="bingoChecker">
-    			<div className="button blueButtonShadow">
+    			<div className="button blueButtonShadow" onClick={this.props.onBingoClicked}>
 					I have bingo!
 				</div><br/>
-				Board checks left: <b>3</b>
+				Board checks left: <b>{this.props.numBingoChecksLeft}</b>
 			</div>
 			);
 		} else {
@@ -305,16 +349,18 @@ var BingoCard = React.createClass ({
 
 /* Modal types 
  * -------------
- * confirmChipPlacement: "Are you sure you want to place this chip" + yes/no buttons 
- *
+ * "confirmChipPlacement": "Are you sure you want to place this chip" + yes/no buttons 
+ * "checkBingo": "Are you sure you sure you want to check your board for bingo?" + yes/no button
+ * 
  * Props
  * -----
  * isOpen (boolean): if true, then displays the modal; otherwise doesn't
  * modalType (string): the type of modal (see above)
  * question (string): if the modal is type "confirmChipPlacement", then this prop is the question the student is trying to answer
  * answer (string): if the modal is type "confirmChipPlacement", then this prop is the card the student just selected
- * onCancel (function): if the modal is type "confirmChipPlacement", then this is the callback for when student clicks "cancel" button 
- * onAccept (function): if the modal is type "confirmChipPlacement", then this is the callback for when student clicks "yes" button 
+ * numBingoChecksLeft (int): the the number of bingo checks they have left 
+ * onCancel (function): the callback for when student clicks "cancel" button (regardless of modal type)
+ * onAccept (function): the callback for when student clicks "yes" button (regardless of modal type)
  */
 var Modal = React.createClass({
     render: function() {
@@ -337,6 +383,25 @@ var Modal = React.createClass({
 	              		</div>
 	                </div>
             	);
+        	} else if (this.props.modalType == "checkBingo"){
+        		return (
+        			<div className="modalBg">
+        				<div className="modal">
+        					<div className="modalSubheader" id="modalConfirmation">
+        						Are you sure you want to check <b>bingo?</b> <br/>
+        					</div>
+        					<div className="modalHeader">
+        						You can only check your board <b>{this.props.numBingoChecksLeft}</b> more times this game.
+        					</div>
+        					<div className="modalFooter">
+	              				<div id="buttonContainer">
+									<div className="modalButton blueButton" id="leftModalButton" onClick={this.props.onCancel}>No, go back.</div>
+									<div className="modalButton outlineButton" id="rightModalButton" onClick={this.props.onAccept}>Yes, I want to check.</div>
+								</div>
+							</div>
+        				</div>
+        			</div>
+        		);
         	} else {
         		return (
         			<div className="">
