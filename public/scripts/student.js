@@ -8,11 +8,13 @@
  * readyForNextQuestion (boolean): false until the student answers the current question, then becomes true. When a new question arrives, turns to false again unitl they answer.
  * numBingoChecksLeft (int): the number of chances this student has left to check if they have bingo. Starts at 3. 
  * hasBingo (boolean): false until the student gets bingo correctly!
+ * incorrectCardIndex (int): if the student checks for bingo and has an incorrect answer, this is the index of that incorrect card on their board. At all other times it's -1.
  */
 var StudentView = React.createClass({
 	/* Dummy function that will be eventually done on teacher side. 
-	   Tells you if you have bingo or not. */
+	   Sets the incorrectCardIndex and returns whether or not the student successfully got bingo */
 	hasBingo: function(cards) {
+		this.setState({incorrectCardIndex: 12});
 		return false;
 	},
 	shuffleCards: function(cards) {
@@ -135,7 +137,8 @@ var StudentView = React.createClass({
 			selectedCardIndex: -1, 
 			readyForNextQuestion: false,
 			numBingoChecksLeft: 3,
-			hasBingo: false
+			hasBingo: false, 
+			incorrectCardIndex: -1
 		};
 	},
 	/* Called when they place a chip on a card */
@@ -243,7 +246,7 @@ var StudentView = React.createClass({
 						<Question question={this.state.question} readyForNextQuestion={this.state.readyForNextQuestion} onSkip={this.handleSkipQuestion}/>
 						<BingoChecker hasBingo={hasBingo} onBingoClicked={this.handleBingoClicked} numBingoChecksLeft={this.state.numBingoChecksLeft} gotBingo={this.state.hasBingo}/>
 					</div>
-					<BingoBoard cards={this.state.cards} handleClickedCard={this.handleClickedCard} clicksEnabled={canSelectCard}/>
+					<BingoBoard cards={this.state.cards} handleClickedCard={this.handleClickedCard} clicksEnabled={canSelectCard} incorrectCardIndex={this.state.incorrectCardIndex}/>
 				</div>
 				<Modal modalType={this.state.modalType} isOpen={this.state.isModalOpen} question= {this.state.question} answer={selectedCardWord} onAccept={this.closeModalAccept} onCancel={this.closeModalCancel} numBingoChecksLeft={this.state.numBingoChecksLeft}/>
 			</div>
@@ -340,6 +343,7 @@ var BingoChecker = React.createClass ({
  * clicksEnabled (boolean): if true, then we will respond to parent with click events; if false, we do nothing on clikcs
  * cards (array): array of cards to display on the board
  * handleClickedCard (function): callback that gets called when a BingoCard is selected
+ * incorrectCardIndex (int): if there is an "incorrect card" to display (after the student checks for bingo), then this holds the index of that card. Otherwise it's -1.
  */
 var BingoBoard = React.createClass ({
 	handleClickedCard: function(cardIndex) {
@@ -355,10 +359,15 @@ var BingoBoard = React.createClass ({
 			var card = this.props.cards[i];
 			var word = card.word;
 			if (i==Math.floor(this.props.cards.length/2)) {
-				/* Bingo wild card */
-				bingoCards.push(<BingoCard isWild={true} word=""/>);
-			}	
-			bingoCards.push(<BingoCard index={i} isWild={false} word={word} hasChip={card["hasChip"]} handleClick={this.handleClickedCard}/>);
+				/* Add Bingo wild card */
+				bingoCards.push(<BingoCard isWild={true} isIncorrect={false} word=""/>);
+			}
+			/* Add card for whatever's at index i regardless of whether we needed to add wild card */
+			var isIncorrect = false;
+			if (i==this.props.incorrectCardIndex) {
+				isIncorrect = true;
+			} 
+			bingoCards.push(<BingoCard index={i} isWild={false} isIncorrect={isIncorrect} word={word} hasChip={card["hasChip"]} handleClick={this.handleClickedCard}/>);
 		}		
 		return (
 			<div className="bingoBoard">
@@ -372,6 +381,7 @@ var BingoBoard = React.createClass ({
  * Props
  * -----
  * hasChip (boolean): if true, then places a chip on this card
+ * isIncorrect (boolean): true if the current card is being displayed as an "incorrect" card after a student has checked for bingo
  * word (string): the word to display on this card
  * index (int): this card's index on the board (from top left to bottom right, excluding wild card)
  * handleClick (function): callback that gets called when this card is selected
@@ -386,8 +396,14 @@ var BingoCard = React.createClass ({
 	render: function() {
 		if (this.props.isWild) {
 			return (
-				<div className="bingoCard">
+				<div className="bingoCard" onClick={this.handleClick}>
 					<div className="verticallyCenteredText"><img src="../assets/nearpodIcon.png" width="43" height="36" className="wildCardImage"/></div>
+				</div>
+			);
+		} else if (this.props.isIncorrect) {
+			return (
+				<div className="bingoCard bingoCardIncorrect" onClick={this.handleClick}>
+					<div className="verticallyCenteredText"> {this.props.word} </div>
 				</div>
 			);
 		} else  {
@@ -500,9 +516,6 @@ var Modal = React.createClass({
         			<div className="modalBg">
         				<div className="incorrectModal">
         				Uh oh!
-        				</div>
-        				<div className="incorrectCard">
-        					
         				</div>
         			</div>
         		);

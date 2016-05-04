@@ -253,10 +253,10 @@ var BingoBoard = React.createClass({
  * Props
  * -----
  * isSelected (boolean): true if the card should appear as selected, false otehrwise
- * index (int): the index of this card on the board (excluding wild card) from top left to bottom right 
- * answer (string): the answer to display on the card
  * completed (boolean): true if the current card has been completed (i.e. has an answer), false if it's empty
  * isWild (boolean): true if this is the wild card, false otherwise
+ * index (int): the index of this card on the board (excluding wild card) from top left to bottom right 
+ * answer (string): the answer to display on the card
  * onCardClick (function): callback that should get called when this card is selected...pass it the index of this card
  */
 var BingoCard = React.createClass({
