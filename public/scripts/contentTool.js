@@ -1,5 +1,8 @@
 /*
- * State for the content tool: the cards themselves, and the # of the card that is currently selected (or -1) if none
+ * State 
+ * ------
+ * cards (array): the cards themselves
+ * selectedCard (int): the index of the card that is currently selected (or -1) if none
  */
 var ContentTool = React.createClass({
 	loadCardsFromServer: function() {
@@ -16,7 +19,10 @@ var ContentTool = React.createClass({
 	    });
   	},
   	getInitialState: function() {
-		return {cards:[], selectedCard:-1};
+		return {
+			cards:[], 
+			selectedCard:-1
+		};
 	},
   	componentDidMount: function() {
     	this.loadCardsFromServer();
@@ -46,9 +52,12 @@ var ContentTool = React.createClass({
   		}
   		this.setState({selectedCard: cardNumber});
   	},
+  	/* Called when the user clicks "create" */
   	handleCreate: function() {
   	},
+  	/* Called when the user clicks "save and exit" – saves current state of all cards */
   	handleSave: function() {
+<<<<<<< HEAD
   		/* TO DO: save all cards (this.state.cards) from current state to server */
   		console.log(this.state.cards);
   		$.ajax({
@@ -65,6 +74,22 @@ var ContentTool = React.createClass({
 	      }.bind(this)
 	    });
 		console.log("handle save");
+=======
+  		console.log("Save");
+  		/* TO DO: save all cards from current state to server */
+  		// $.ajax({
+	   //    url: this.props.url,
+	   //    dataType: 'json',
+	   //    type: 'POST',
+	   //    data: card,
+	   //    success: function(cards) {
+	   //      this.setState({cards: cards});
+	   //    }.bind(this),
+	   //    error: function(xhr, status, err) {
+	   //      console.error(this.props.url, status, err.toString());
+	   //    }.bind(this)
+	   //  });
+>>>>>>> c618561f18df3de38d9f431d32c82a13905a55cb
   	},
 	render: function() {
 		if (this.state.selectedCard == -1) {	
@@ -87,16 +112,41 @@ var ContentTool = React.createClass({
 	}
 });
 
+/*
+ * Props
+ * -----
+ * onCardSubmit (function): callback that will get called when the user presses "Done" 
+ * isSelected (boolean): true if a card is currently selected to be edited, and false if no card is selected
+ * card (dictionary): the card that is currently being edited. It holds the question & answer as they are currently saved on the board (NOT how they appear in the editor necessarily)
+ * 
+ * State
+ * -----
+ * question (string): the current question to display in the box (NOT what's currently saved as question); one exception=to start out, it's "" even if props gave us a question
+ * answer (string): the current answer to display in the box (NOT what's currently saved as answer); one exception=to start out, it's "" even if props gave us an answer
+ * hasChangedQuestion (boolean): false until the user edits the question in any way. If this is false, then we know to display the props value for the question and not the state value
+ * hasChangedAnswer (boolean): false until the user edits the answer in any way. If this is false, then we know to display the props value for the answer and not the state value
+ * canSubmit (boolean): whether or not the "Done" button should be activated 
+ * 
+ */
 var Editor = React.createClass({
 	/* The state represents what's currently in the question/answer box, not what is currently saved for this card as the question/answer. 
 	 * One exception: at the very start, before the user edits question/answer for this card, state thinks question/answer = "". We know 
 	 * this is occurring when hasChangedQuestion = hasChangedAnswer = false (at this point, use props to tell what is actually question/answer)
 	 */
 	getInitialState: function () {
-		return {question:'', answer:'', hasChangedQuestion: false, hasChangedAnswer: false, canSubmit: true};
+		return {
+			question:'', 
+			answer:'', 
+			hasChangedQuestion: false, 
+			hasChangedAnswer: false, 
+			canSubmit: true
+		};
 	},
 	handleQuestionChange: function(e) {
-		this.setState({hasChangedQuestion: true, question: e.target.value});
+		this.setState({
+			hasChangedQuestion: true, 
+			question: e.target.value
+		});
 	},
 	handleAnswerChange: function(e) {
 		this.setState({hasChangedAnswer: true, answer: e.target.value});
@@ -180,6 +230,14 @@ var Editor = React.createClass({
 	}
 });
 
+/*
+ * Props
+ * -----
+ * cards (array): array of all the cards to display
+ * onSelectCard (function): function that should get called when the user clicks on a card. Pass it the index of the card that was selected
+ * selectedCard (int): if a card is currently selected, the index of that card (excluding wild card)...otherwise -1
+ * 
+ */
 var BingoBoard = React.createClass({
 	handleCardClicked: function(cardNumber) {
 		/* Tell content tool component that card with |cardNumber| was selected */
@@ -211,6 +269,16 @@ var BingoBoard = React.createClass({
 	}
 });
 
+/*
+ * Props
+ * -----
+ * isSelected (boolean): true if the card should appear as selected, false otehrwise
+ * index (int): the index of this card on the board (excluding wild card) from top left to bottom right 
+ * answer (string): the answer to display on the card
+ * completed (boolean): true if the current card has been completed (i.e. has an answer), false if it's empty
+ * isWild (boolean): true if this is the wild card, false otherwise
+ * onCardClick (function): callback that should get called when this card is selected...pass it the index of this card
+ */
 var BingoCard = React.createClass({
 	handleClick: function(e) {
 		this.props.onCardClick(this.props.index);
@@ -245,6 +313,12 @@ var BingoCard = React.createClass({
 	}
 });
 
+/*
+ * Props
+ * -----
+ * onSave (function): callback that should get called when the user clicks save
+ * onCreate (function): callback that should get called when the user clicks create
+ */
 var Footer = React.createClass({
 	handleSave: function(e) {
 	    e.preventDefault();
@@ -266,6 +340,11 @@ var Footer = React.createClass({
 	}
 });
 
+/*
+ * Props
+ * -----
+ * isActive (boolean): true when the done button should be clickable; false otherwise
+ */
 var DoneButton = React.createClass({
 	render: function() {
 		if (this.props.isActive) {
