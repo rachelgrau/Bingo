@@ -7,8 +7,14 @@
  * selectedCardIndex (int): when a student clicks on a card, this holds the index in |cards| of the card they selected. Default value is -1 (no selection)
  * readyForNextQuestion (boolean): false until the student answers the current question, then becomes true. When a new question arrives, turns to false again unitl they answer.
  * numBingoChecksLeft (int): the number of chances this student has left to check if they have bingo. Starts at 3. 
+ * hasBingo (boolean): false until the student gets bingo correctly!
  */
 var StudentView = React.createClass({
+	/* Dummy function that will be eventually done on teacher side. 
+	   Tells you if you have bingo or not. */
+	hasBingo: function(cards) {
+		return true;
+	},
 	shuffleCards: function(cards) {
 		if (!cards) return [];
 		var currentIndex = cards.length, temporaryValue, randomIndex;
@@ -128,7 +134,8 @@ var StudentView = React.createClass({
 			isModalOpen: false, 
 			selectedCardIndex: -1, 
 			readyForNextQuestion: false,
-			numBingoChecksLeft: 3
+			numBingoChecksLeft: 3,
+			hasBingo: false
 		};
 	},
 	/* Called when they place a chip on a card */
@@ -161,7 +168,13 @@ var StudentView = React.createClass({
        			break;
     		case "checkBingo":
     			/* Check if they have bingo */
-    			this.setState({isModalOpen: false, modalType:"", selectedCardIndex: -1, readyForNextQuestion: true});
+    			if (this.hasBingo()) {
+    				var numBoardChecksLeft = this.state.numBingoChecksLeft - 1;
+    				this.setState({hasBingo: true, numBingoChecksLeft: numBoardChecksLeft, isModalOpen: false, modalType:"", selectedCardIndex: -1, readyForNextQuestion: true});
+    				this.openModal("youGotBingo");
+    			} else {
+
+    			}
         		break;
         	case "skip":
         		/* Ready for next question */
@@ -177,6 +190,7 @@ var StudentView = React.createClass({
      * "confirmChipPlacement": close modal
      * "checkBingo": close modal
      * "skip": close modal 
+     * "youGotBingo": close modal
      */
     closeModalCancel: function() {
     	switch(this.state.modalType) {
@@ -189,6 +203,9 @@ var StudentView = React.createClass({
     			this.setState({isModalOpen: false, modalType:"", selectedCardIndex: -1});
         		break;
         	case "skip":
+        		this.setState({isModalOpen: false, modalType:"", selectedCardIndex: -1});
+        		break;
+        	case "youGotBingo":
         		this.setState({isModalOpen: false, modalType:"", selectedCardIndex: -1});
         		break;
     		default:
@@ -223,7 +240,7 @@ var StudentView = React.createClass({
 				<div className="studentContent"> 
 					<div className="leftBar">
 						<Question question={this.state.question} readyForNextQuestion={this.state.readyForNextQuestion} onSkip={this.handleSkipQuestion}/>
-						<BingoChecker hasBingo={hasBingo} onBingoClicked={this.handleBingoClicked} numBingoChecksLeft={this.state.numBingoChecksLeft}/>
+						<BingoChecker hasBingo={hasBingo} onBingoClicked={this.handleBingoClicked} numBingoChecksLeft={this.state.numBingoChecksLeft} gotBingo={this.state.hasBingo}/>
 					</div>
 					<BingoBoard cards={this.state.cards} handleClickedCard={this.handleClickedCard} clicksEnabled={canSelectCard}/>
 				</div>
@@ -279,28 +296,38 @@ var Question = React.createClass({
 /*
  * Props
  * -----
- * hasBingo (boolean): if true, then the "I have bingo" button will activate
+ * hasBingo (boolean): if true, then the "I have bingo" button will activate (should happen when the board currently looks like the student has bingo, regardless of whether their answers were correct)
  * onBingoClicked (function): this function gets called when the student clicks "I have bingo!"
+ * gotBingo (boolean): if true, the student already got bingo correctly and all buttons in this section are disabled
  */
 var BingoChecker = React.createClass ({
 	render: function() {
-		if (this.props.hasBingo) {
+		if (this.props.gotBingo) {
 			return (
 				<div className="bingoChecker">
-    			<div className="button blueButtonShadow" onClick={this.props.onBingoClicked}>
-					I have bingo!
-				</div><br/>
-				Board checks left: <b>{this.props.numBingoChecksLeft}</b>
-			</div>
+    				<div className="button grayButtonInactive" onClick={this.props.onBingoClicked}>
+						I have bingo!
+					</div><br/>
+					<div className="textDisabled">Board checks left: <b>{this.props.numBingoChecksLeft}</b></div>
+				</div>
+			);
+		} else if (this.props.hasBingo) {
+			return (
+				<div className="bingoChecker">
+	    			<div className="button blueButtonShadow" onClick={this.props.onBingoClicked}>
+						I have bingo!
+					</div><br/>
+					Board checks left: <b>{this.props.numBingoChecksLeft}</b>
+				</div>
 			);
 		} else {
 			return (
 				<div className="bingoChecker">
-    			<div className="button grayButtonInactive">
-					I have bingo!
-				</div><br/>
-				Board checks left: <b>3</b>
-			</div>
+    				<div className="button grayButtonInactive">
+						I have bingo!
+					</div><br/>
+					Board checks left: <b>3</b>
+				</div>
 			);
 		}
 	}
@@ -379,6 +406,7 @@ var BingoCard = React.createClass ({
  * "confirmChipPlacement": "Are you sure you want to place this chip" + question and selected answer + yes/no buttons 
  * "checkBingo": "Are you sure you sure you want to check your board for bingo?" + yes/no button
  * "skip": "Are you sure you want to skip" + question + yes/no buttons 
+ * "youGotBingo": "You just got bingo" + list of people who got bingo + keep playing button
  *
  * Props
  * -----
@@ -403,7 +431,7 @@ var Modal = React.createClass({
 	              				<div className="answerSmall"><div className="verticallyCenteredText">{this.props.answer}</div></div>
 	              			</div>
 	              			<div className="modalFooter">
-	              				<div id="buttonContainer">
+	              				<div id="twoButtonContainer">
 									<div className="modalButton blueButton" id="leftModalButton" onClick={this.props.onCancel}>No, go back.</div>
 									<div className="modalButton outlineButton" id="rightModalButton" onClick={this.props.onAccept}>Yes, make selection.</div>
 								</div>
@@ -420,7 +448,7 @@ var Modal = React.createClass({
 	              				<div className="questionSmall"><div className="verticallyCenteredText">{this.props.question}</div></div>
 	              			</div>
 	              			<div className="modalFooter">
-	              				<div id="buttonContainer">
+	              				<div id="twoButtonContainer">
 									<div className="modalButton blueButton" id="leftModalButton" onClick={this.props.onCancel}>No, go back.</div>
 									<div className="modalButton outlineButton" id="rightModalButton" onClick={this.props.onAccept}>Yes, skip.</div>
 								</div>
@@ -439,9 +467,27 @@ var Modal = React.createClass({
         						You can only check your board <b>{this.props.numBingoChecksLeft}</b> more times this game.
         					</div>
         					<div className="modalFooter">
-	              				<div id="buttonContainer">
+	              				<div id="twoButtonContainer">
 									<div className="modalButton blueButton" id="leftModalButton" onClick={this.props.onCancel}>No, go back.</div>
 									<div className="modalButton outlineButton" id="rightModalButton" onClick={this.props.onAccept}>Yes, I want to check.</div>
+								</div>
+							</div>
+        				</div>
+        			</div>
+        		);
+        	} else if (this.props.modalType == "youGotBingo") {
+        		return (
+        			<div className="modalBg">
+        				<div className="modal">
+        					<div className="modalSubheader" id="modalConfirmation">
+        						You just got bingo! <br/>
+        					</div>
+        					<div className="modalHeader">
+        						YAY
+        					</div>
+        					<div className="modalFooter">
+        						<div id="singleButtonContainer">
+									<div className="modalButton blueButton" id="rightModalButton" onClick={this.props.onCancel}>Keep playing!</div>
 								</div>
 							</div>
         				</div>

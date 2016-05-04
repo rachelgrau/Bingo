@@ -116,6 +116,10 @@ body {
 	text-align: center;
 }
 
+.textDisabled {
+	color: #CDD3D7;
+}
+
 /* Bingo board stuff */
 .bingoBoard {
 	float: left;
@@ -365,13 +369,25 @@ body {
 	margin-bottom: 20px;
 }
 
-#buttonContainer {
+/* Wrap around two buttons in footer of modal to center them */
+#twoButtonContainer {
 	height: 100px; /* Same as modal button*/
 	width: 430px; /* (2*width of question/answer) + margin between question & answer */
 	/* Center it in modal box */
 	position: relative;
 	left: 50%;
 	margin-left: -215px; /* 1/2 width */
+	margin-top: 25px; /* Between boxes & header */
+}
+
+/* Wrap around two buttons in footer of modal to center them */
+#singleButtonContainer {
+	height: 100px; /* Same as modal button*/
+	width: 206px; /* Same as modal button */
+	/* Center it in modal box */
+	position: relative;
+	left: 50%;
+	margin-left: -103px; /* 1/2 width */
 	margin-top: 25px; /* Between boxes & header */
 }
 
