@@ -116,6 +116,9 @@ textArea {
 	width: 67px;
 	height: 67px;
 	word-wrap: break-word;
+	text-align: center;
+	/* vertically center text */
+	display: table;
 }
 
 /* Bingo card that has a word on it but is not currently selected */
@@ -127,9 +130,13 @@ textArea {
 	font-family: "Avenir LT Std";
 	font-size: 16px;
 	font-weight: 500;
-	line-height: 67px;  /* same as bingoCard height*/
-	text-align: center;
+}
+
+/* Use this class to vertically center text if container has display: table*/
+.centeredText {
+	display: table-cell;
 	vertical-align: middle;
+	text-align: center;
 }
 
 .bingoCardEntered:hover {
@@ -160,9 +167,6 @@ textArea {
 	font-family: "Avenir LT Std";
 	font-size: 16px;
 	font-weight: 500;
-	line-height: 67px;  /* same as bingoCard height*/
-	text-align: center;
-	vertical-align: middle;
 }
 
 /* Wild bingo card */
@@ -170,12 +174,6 @@ textArea {
 	background-color: white;
 	border: 1px solid #cdd3d7;
 	border-radius: 2px;
-	text-align: center;
-	vertical-align: middle;
-}
-
-.bingoCardHover {
-
 }
 
 /* Buttons */

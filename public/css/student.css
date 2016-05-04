@@ -70,6 +70,7 @@ body {
 	border: 2px solid #06aaff;
 	border-radius: 8px;
 	padding: 7px;
+	display: table;
 }
 
 #questionCardId {
@@ -91,7 +92,7 @@ body {
 	font-weight: 400;
 	line-height: 43px;
 	text-align: center;
-/* Vertically centers */
+/* Vertically centers in chrome */
 	display: flex;
   	justify-content: center;
  	flex-direction: column;
@@ -140,13 +141,15 @@ body {
 	font-family: "Avenir Next";
 	font-size: 15px;
 	font-weight: 200;
-	line-height: 33px;
+	line-height: 20px;
 	text-align: center;
-	/* Vertically centers */
+	/* Vertically centers in Chrome */
 	display: flex;
 	justify-content: center;
 	flex-direction: column;
 	height: 98px;
+	/* Vertically centers in Safari */
+	display: table;
 }
 
 .bingoChipCard {
@@ -155,21 +158,10 @@ body {
 	background-position: 50% 50%;
 }
 
-.wildCardImage {
-	margin-left: 25px;
-}
-
 .bingoChip {
 	width: 70px;
 	height: 70px;
 	margin-left: 14px; /* (Bingo card width - image width) / 2*/
-}
-
-.chipText {
-	position: absolute; 
-    /*top: 200px;*/ 
-    /*left: 0; */
-    /*width: 100%; */
 }
 
 /* Buttons */
@@ -292,27 +284,30 @@ body {
 	font-size: 16px;
 	font-weight: 400;
 	line-height: 20px;
-	/* Vertically centers */
+	/* Vertically centers in Chrome */
   	display: flex;
   	justify-content: center;
   	flex-direction: column;
-  	height: 150px;
+  	/* Vertically centers in Safari */
+  	display: table;
 }
 
 .answerSmall {
 	/* Look */
 	background-color: white;
-	width: 150px;
-	height: 150px;
+	width: 140px;
+	height: 140px;
 	border: 1px solid #06aaff;
 	border-radius: 5px;
 	/* Position */
 	float: right;
+	padding: 5px;
 	/* Vertically centers */
   	display: flex;
   	justify-content: center;
   	flex-direction: column;
-  	height: 150px;
+  	 /* Vertically centers in Safari */
+  	display: table;
 }
 
 .modalFooter {
@@ -338,12 +333,11 @@ body {
 	font-family: "Avenir Next";
 	font-size: 16px;
 	font-weight: 400;
-	line-height: 21px;
+	line-height: 42px;
 	/* Vertically centers */
   	display: flex;
   	justify-content: center;
   	flex-direction: column;
-  	height: 42px;
 }
 
 /* Are you sure you want to check bingo? */
@@ -382,4 +376,12 @@ body {
 
 #rightModalButton {
 	float: right;
+}
+
+/* RANDOM */
+
+/* Use this class to vertically center text if container has display: table*/
+.verticallyCenteredText {
+	display: table-cell;
+	vertical-align: middle;
 }

@@ -257,8 +257,8 @@ var Question = React.createClass({
 				<div className="questionBox">
 					Question:
 					<div className="questionCard" id="questionCardId">
-						{this.props.question}
-						</div>
+						<div className="verticallyCenteredText">{this.props.question}</div>
+					</div>
 					<div className="button outlineButton" id="skipButton" onClick={this.props.onSkip}>
 						Skip
 					</div>
@@ -267,7 +267,7 @@ var Question = React.createClass({
 		} else {
 			return (
 				<div className="questionBox">
-					<div id="noQuestion">
+					<div className="verticallyCenteredText" id="noQuestion">
 						Waiting for next question...
 					</div>
 				</div>
@@ -359,7 +359,7 @@ var BingoCard = React.createClass ({
 		if (this.props.isWild) {
 			return (
 				<div className="bingoCard">
-					<img src="../assets/nearpodIcon.png" width="43" height="36" className="wildCardImage"/>
+					<div className="verticallyCenteredText"><img src="../assets/nearpodIcon.png" width="43" height="36" className="wildCardImage"/></div>
 				</div>
 			);
 		} else  {
@@ -367,7 +367,7 @@ var BingoCard = React.createClass ({
 			if (this.props.hasChip) chipClassName += " bingoChipCard";
 			return (
 				<div className={chipClassName} onClick={this.handleClick}>
-					{this.props.word}
+					<div className="verticallyCenteredText"> {this.props.word} </div>
 				</div>
 			); 
 		}
@@ -399,8 +399,8 @@ var Modal = React.createClass({
 	                  <div className="modal">
 	              			Are you sure you want to place this chip?<br/>
 	              			<div id="questionAnswerContainer">
-	              				<div className="questionSmall"> {this.props.question}</div>
-	              				<div className="answerSmall"> {this.props.answer}</div>
+	              				<div className="questionSmall"><div className="verticallyCenteredText">{this.props.question}</div></div>
+	              				<div className="answerSmall"><div className="verticallyCenteredText">{this.props.answer}</div></div>
 	              			</div>
 	              			<div className="modalFooter">
 	              				<div id="buttonContainer">

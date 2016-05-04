@@ -222,7 +222,7 @@ var BingoCard = React.createClass({
 		} else if (this.props.isSelected) {
 			return (
 				<div className="bingoCard bingoCardSelected" onClick={this.handleClick}>
-					{this.props.answer}
+					<div className="centeredText">{this.props.answer}</div>
 				</div>
 			);
 		} else if (!this.props.completed) {
@@ -234,7 +234,7 @@ var BingoCard = React.createClass({
 		} else {
 			return (
 				<div className="bingoCard bingoCardEntered" onClick={this.handleClick}>
-					{this.props.answer}
+					<div className="centeredText">{this.props.answer}</div>
 				</div>
 			);
 		}
