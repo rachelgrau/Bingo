@@ -49,7 +49,7 @@ var ContentTool = React.createClass({
 
   	},
   	handleSave: function() {
-  		/* TO DO: save all cards from current state to server */
+  		/* TO DO: save all cards (this.state.cards) from current state to server */
   		$.ajax({
 	      url: this.props.url,
 	      dataType: 'json',
