@@ -148,6 +148,7 @@ var StudentView = React.createClass({
     /* Called when the user clicks "yes" to close the modal. Check what the curent modal type is and act accordingly.
      * "confirmChipPlacement": place a chip on the card they selected
      * "checkBingo": check if they have bingo
+     * "skip": don't place any chips, just become ready for next question
      */
     closeModalAccept: function() {
     	switch(this.state.modalType) {
@@ -160,6 +161,11 @@ var StudentView = React.createClass({
        			break;
     		case "checkBingo":
     			/* Check if they have bingo */
+    			this.setState({isModalOpen: false, modalType:"", selectedCardIndex: -1, readyForNextQuestion: true});
+        		break;
+        	case "skip":
+        		/* Ready for next question */
+        		this.setState({isModalOpen: false, modalType:"", selectedCardIndex: -1, readyForNextQuestion: true});
         		break;
     		default:
     			/* Close modal */
@@ -170,6 +176,7 @@ var StudentView = React.createClass({
     /* Called when the user clicks "yes" to close the modal. Check what the curent modal type is and act accordingly.
      * "confirmChipPlacement": close modal
      * "checkBingo": close modal
+     * "skip": close modal 
      */
     closeModalCancel: function() {
     	switch(this.state.modalType) {
@@ -181,6 +188,9 @@ var StudentView = React.createClass({
     			/* Close modal */
     			this.setState({isModalOpen: false, modalType:"", selectedCardIndex: -1});
         		break;
+        	case "skip":
+        		this.setState({isModalOpen: false, modalType:"", selectedCardIndex: -1});
+        		break;
     		default:
     			/* Close modal */
     			this.setState({isModalOpen: false, modalType:"", selectedCardIndex: -1});
@@ -190,6 +200,10 @@ var StudentView = React.createClass({
     /* Called when the student clicks the "I have bingo" button*/
     handleBingoClicked: function() {
     	this.openModal("checkBingo");
+    },
+    /* Called when the student clicks "Skip" */
+    handleSkipQuestion: function() {
+    	this.openModal("skip");
     },
   	render: function() {
   		var hasBingo = this.bingoButtonShouldActivate();
@@ -208,7 +222,7 @@ var StudentView = React.createClass({
 				<Header/>
 				<div className="studentContent"> 
 					<div className="leftBar">
-						<Question question={this.state.question} readyForNextQuestion={this.state.readyForNextQuestion}/>
+						<Question question={this.state.question} readyForNextQuestion={this.state.readyForNextQuestion} onSkip={this.handleSkipQuestion}/>
 						<BingoChecker hasBingo={hasBingo} onBingoClicked={this.handleBingoClicked} numBingoChecksLeft={this.state.numBingoChecksLeft}/>
 					</div>
 					<BingoBoard cards={this.state.cards} handleClickedCard={this.handleClickedCard} clicksEnabled={canSelectCard}/>
@@ -234,6 +248,7 @@ var Header = React.createClass ({
  * -----
  * question (string): the question to display, or "" if none
  * readyForNextQuestion (bool): if true, then we won't display a question, just a "waiting for next question" text
+ * onSkip (function): function that gets called when student clicks "skip"
  */
 var Question = React.createClass({
 	render: function() {
@@ -244,7 +259,7 @@ var Question = React.createClass({
 					<div className="questionCard" id="questionCardId">
 						{this.props.question}
 						</div>
-					<div className="button outlineButton" id="skipButton">
+					<div className="button outlineButton" id="skipButton" onClick={this.props.onSkip}>
 						Skip
 					</div>
 				</div>
@@ -252,7 +267,9 @@ var Question = React.createClass({
 		} else {
 			return (
 				<div className="questionBox">
-					Waiting for next question...
+					<div id="noQuestion">
+						Waiting for next question...
+					</div>
 				</div>
 			);
 		}
@@ -359,9 +376,10 @@ var BingoCard = React.createClass ({
 
 /* Modal types 
  * -------------
- * "confirmChipPlacement": "Are you sure you want to place this chip" + yes/no buttons 
+ * "confirmChipPlacement": "Are you sure you want to place this chip" + question and selected answer + yes/no buttons 
  * "checkBingo": "Are you sure you sure you want to check your board for bingo?" + yes/no button
- * 
+ * "skip": "Are you sure you want to skip" + question + yes/no buttons 
+ *
  * Props
  * -----
  * isOpen (boolean): if true, then displays the modal; otherwise doesn't
@@ -380,7 +398,7 @@ var Modal = React.createClass({
 	                <div className="modalBg">
 	                  <div className="modal">
 	              			Are you sure you want to place this chip?<br/>
-	              			<div id="boxContainer">
+	              			<div id="questionAnswerContainer">
 	              				<div className="questionSmall"> {this.props.question}</div>
 	              				<div className="answerSmall"> {this.props.answer}</div>
 	              			</div>
@@ -388,6 +406,23 @@ var Modal = React.createClass({
 	              				<div id="buttonContainer">
 									<div className="modalButton blueButton" id="leftModalButton" onClick={this.props.onCancel}>No, go back.</div>
 									<div className="modalButton outlineButton" id="rightModalButton" onClick={this.props.onAccept}>Yes, make selection.</div>
+								</div>
+							</div>
+	              		</div>
+	                </div>
+            	);
+        	} else if (this.props.modalType == "skip") {
+        		return (
+	                <div className="modalBg">
+	                  <div className="modal">
+	              			Are you sure you want to skip?<br/>
+	              			<div id="questionOnlyContainer">
+	              				<div className="questionSmall"> {this.props.question}</div>
+	              			</div>
+	              			<div className="modalFooter">
+	              				<div id="buttonContainer">
+									<div className="modalButton blueButton" id="leftModalButton" onClick={this.props.onCancel}>No, go back.</div>
+									<div className="modalButton outlineButton" id="rightModalButton" onClick={this.props.onAccept}>Yes, skip.</div>
 								</div>
 							</div>
 	              		</div>
