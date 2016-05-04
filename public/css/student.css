@@ -210,8 +210,13 @@ body {
 }
 
 /* MODAL STUFF */
+.wrapper {
+	min-height:100%; 
+	position:relative;
+}
+
 .modalBg {
-	position: absolute;
+	position: fixed;
 	left: 0;
 	top: 0;
 	background-color: rgba(86, 86, 86, .65);

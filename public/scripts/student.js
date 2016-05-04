@@ -417,7 +417,7 @@ var Modal = React.createClass({
 	                  <div className="modal">
 	              			Are you sure you want to skip?<br/>
 	              			<div id="questionOnlyContainer">
-	              				<div className="questionSmall"> {this.props.question}</div>
+	              				<div className="questionSmall"><div className="verticallyCenteredText">{this.props.question}</div></div>
 	              			</div>
 	              			<div className="modalFooter">
 	              				<div id="buttonContainer">
