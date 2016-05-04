@@ -40,15 +40,28 @@ def content_tool_handler():
         cards = json.loads(file.read())
 
     if request.method == 'POST':
-        newCard = request.form.to_dict()
-        newCard['id'] = int(time.time() * 1000)
-        cards.append(newCard)
+        cards = request.body
 
         with open('contentTool.json', 'w') as file:
             file.write(json.dumps(cards, indent=4, separators=(',', ': ')))
 
     return Response(json.dumps(cards), mimetype='application/json', headers={'Cache-Control': 'no-cache', 'Access-Control-Allow-Origin': '*'})
 
+@app.route('/api/student', methods=['GET', 'POST'])
+def student_handler():
+
+    with open('student.json', 'r') as file:
+        cards = json.loads(file.read())
+
+    if request.method == 'POST':
+        newCard = request.form.to_dict()
+        newCard['id'] = int(time.time() * 1000)
+        cards.append(newCard)
+
+        with open('student.json', 'w') as file:
+            file.write(json.dumps(cards, indent=4, separators=(',', ': ')))
+
+    return Response(json.dumps(cards), mimetype='application/json', headers={'Cache-Control': 'no-cache', 'Access-Control-Allow-Origin': '*'})
 
 
 
