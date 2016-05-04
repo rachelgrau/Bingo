@@ -57,7 +57,6 @@ var ContentTool = React.createClass({
   	},
   	/* Called when the user clicks "save and exit" – saves current state of all cards */
   	handleSave: function() {
-<<<<<<< HEAD
   		/* TO DO: save all cards (this.state.cards) from current state to server */
   		console.log(this.state.cards);
   		$.ajax({
@@ -74,22 +73,6 @@ var ContentTool = React.createClass({
 	      }.bind(this)
 	    });
 		console.log("handle save");
-=======
-  		console.log("Save");
-  		/* TO DO: save all cards from current state to server */
-  		// $.ajax({
-	   //    url: this.props.url,
-	   //    dataType: 'json',
-	   //    type: 'POST',
-	   //    data: card,
-	   //    success: function(cards) {
-	   //      this.setState({cards: cards});
-	   //    }.bind(this),
-	   //    error: function(xhr, status, err) {
-	   //      console.error(this.props.url, status, err.toString());
-	   //    }.bind(this)
-	   //  });
->>>>>>> c618561f18df3de38d9f431d32c82a13905a55cb
   	},
 	render: function() {
 		if (this.state.selectedCard == -1) {	
