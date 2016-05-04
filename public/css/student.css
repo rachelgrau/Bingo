@@ -399,6 +399,49 @@ body {
 	float: right;
 }
 
+/* Incorrect modal stuff */
+.incorrectModal {
+	position: absolute;
+	width: 95px;
+	height: 105px;
+	border: 2px solid #06aaff;
+	border: 1px solid #b8c0c6;
+	background-color: #eee;
+	box-shadow: 0 3px 5px #cdd3d7;
+	/* Position */
+	position: absolute;
+    margin-top: 10px;
+    margin-left: 10px;
+    padding: 5px;
+    /* Font */
+    text-align: center;
+    color: #454545;
+	font-family: "Avenir Next";
+	font-size: 22px;
+	font-weight: 500;
+	line-height: 30px;
+}
+.incorrectCard {
+	position: absolute;
+	width: 95px;
+	height: 95px;
+	border: 2px solid #06aaff;
+	border-radius: 8px;
+	background-color: white;
+	/* Position */
+	position: absolute;
+    margin-top: 140px;
+    margin-left: 10px;
+    padding: 5px;
+    /* Font */
+    text-align: center;
+    color: #454545;
+	font-family: "Avenir Next";
+	font-size: 22px;
+	font-weight: 500;
+	line-height: 30px;
+}
+
 /* RANDOM */
 
 /* Use this class to vertically center text if container has display: table*/

@@ -13,7 +13,7 @@ var StudentView = React.createClass({
 	/* Dummy function that will be eventually done on teacher side. 
 	   Tells you if you have bingo or not. */
 	hasBingo: function(cards) {
-		return true;
+		return false;
 	},
 	shuffleCards: function(cards) {
 		if (!cards) return [];
@@ -167,13 +167,14 @@ var StudentView = React.createClass({
         		this.setState({cards: cards, isModalOpen: false, modalType:"", selectedCardIndex: -1, readyForNextQuestion: true});
        			break;
     		case "checkBingo":
+    			var numBoardChecksLeft = this.state.numBingoChecksLeft - 1;
     			/* Check if they have bingo */
     			if (this.hasBingo()) {
-    				var numBoardChecksLeft = this.state.numBingoChecksLeft - 1;
     				this.setState({hasBingo: true, numBingoChecksLeft: numBoardChecksLeft, isModalOpen: false, modalType:"", selectedCardIndex: -1, readyForNextQuestion: true});
     				this.openModal("youGotBingo");
     			} else {
-
+    				this.setState({hasBingo: true, numBingoChecksLeft: numBoardChecksLeft, isModalOpen: false, modalType:"", selectedCardIndex: -1, readyForNextQuestion: true});
+    				this.openModal("incorrect");
     			}
         		break;
         	case "skip":
@@ -407,6 +408,7 @@ var BingoCard = React.createClass ({
  * "checkBingo": "Are you sure you sure you want to check your board for bingo?" + yes/no button
  * "skip": "Are you sure you want to skip" + question + yes/no buttons 
  * "youGotBingo": "You just got bingo" + list of people who got bingo + keep playing button
+ * "incorrect": When they check 
  *
  * Props
  * -----
@@ -432,8 +434,8 @@ var Modal = React.createClass({
 	              			</div>
 	              			<div className="modalFooter">
 	              				<div id="twoButtonContainer">
-									<div className="modalButton blueButton" id="leftModalButton" onClick={this.props.onCancel}>No, go back.</div>
-									<div className="modalButton outlineButton" id="rightModalButton" onClick={this.props.onAccept}>Yes, make selection.</div>
+									<div className="modalButton outlineButton" id="leftModalButton" onClick={this.props.onCancel}>No, go back.</div>
+									<div className="modalButton blueButton" id="rightModalButton" onClick={this.props.onAccept}>Yes, make selection.</div>
 								</div>
 							</div>
 	              		</div>
@@ -449,8 +451,8 @@ var Modal = React.createClass({
 	              			</div>
 	              			<div className="modalFooter">
 	              				<div id="twoButtonContainer">
-									<div className="modalButton blueButton" id="leftModalButton" onClick={this.props.onCancel}>No, go back.</div>
-									<div className="modalButton outlineButton" id="rightModalButton" onClick={this.props.onAccept}>Yes, skip.</div>
+									<div className="modalButton outlineButton" id="leftModalButton" onClick={this.props.onCancel}>No, go back.</div>
+									<div className="modalButton blueButton" id="rightModalButton" onClick={this.props.onAccept}>Yes, skip.</div>
 								</div>
 							</div>
 	              		</div>
@@ -468,8 +470,8 @@ var Modal = React.createClass({
         					</div>
         					<div className="modalFooter">
 	              				<div id="twoButtonContainer">
-									<div className="modalButton blueButton" id="leftModalButton" onClick={this.props.onCancel}>No, go back.</div>
-									<div className="modalButton outlineButton" id="rightModalButton" onClick={this.props.onAccept}>Yes, I want to check.</div>
+									<div className="modalButton outlineButton" id="leftModalButton" onClick={this.props.onCancel}>No, go back.</div>
+									<div className="modalButton blueButton" id="rightModalButton" onClick={this.props.onAccept}>Yes, I want to check.</div>
 								</div>
 							</div>
         				</div>
@@ -490,6 +492,17 @@ var Modal = React.createClass({
 									<div className="modalButton blueButton" id="rightModalButton" onClick={this.props.onCancel}>Keep playing!</div>
 								</div>
 							</div>
+        				</div>
+        			</div>
+        		);
+        	} else if (this.props.modalType == "incorrect") {
+        		return (
+        			<div className="modalBg">
+        				<div className="incorrectModal">
+        				Uh oh!
+        				</div>
+        				<div className="incorrectCard">
+        					
         				</div>
         			</div>
         		);
