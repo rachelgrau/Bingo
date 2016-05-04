@@ -48,16 +48,16 @@ var ContentTool = React.createClass({
   	},
   	handleCreate: function() {
   	},
-  	handleSave: function(cards) {
+  	handleSave: function() {
   		/* TO DO: save all cards (this.state.cards) from current state to server */
-  		console.log(cards);
+  		console.log(this.state.cards);
   		$.ajax({
 	      url: this.props.url,
 	      dataType: 'json',
 	      type: 'POST',
-	      data: cards,
+	      data: this.state.cards,
 	      success: function(cards) {
-	        this.setState({cards: cards});
+	        this.setState({cards: this.state.cards});
 	        // console.log(cards);
 	      }.bind(this),
 	      error: function(xhr, status, err) {
