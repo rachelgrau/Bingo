@@ -92,7 +92,6 @@ var Editor = React.createClass({
 		return {question:'', answer:'', hasChangedQuestion: false, hasChangedAnswer: false, canSubmit: true};
 	},
 	handleQuestionChange: function(e) {
-		console.log(e.target.value);
 		this.setState({hasChangedQuestion: true, question: e.target.value});
 	},
 	handleAnswerChange: function(e) {
@@ -113,7 +112,7 @@ var Editor = React.createClass({
 	  },
 	/* Returns whatever is currently in the question input field. */
 	getCurrentQuestion: function() {
-		var question = this.state.question.trim();
+		var question = this.state.question;
 		/* If they haven't changed question, use props (saved value for this card) */
 	    if (!this.state.hasChangedQuestion) {
 	    	question = this.props.card.question;
@@ -137,7 +136,7 @@ var Editor = React.createClass({
 	 },
 	/* Returns whatever is currently in the answer input field. */
 	getCurrentAnswer: function() {
-		var answer = this.state.answer.trim();
+		var answer = this.state.answer;
 		/* If they haven't changed answer, use props (saved value for this card) */
 	    if (!this.state.hasChangedAnswer) {
 	    	answer = this.props.card.answer;
