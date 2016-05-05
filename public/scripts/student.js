@@ -7,6 +7,7 @@
  * selectedCardIndex (int): when a student clicks on a card, this holds the index in |cards| of the card they selected. Default value is -1 (no selection)
  * readyForNextQuestion (boolean): false until the student answers the current question, then becomes true. When a new question arrives, turns to false again unitl they answer.
  * numBingoChecksLeft (int): the number of chances this student has left to check if they have bingo. Starts at 3. 
+ * approvedBingo (boolean): true when the teacher notices that the student correctly has bingo 
  * hasBingo (boolean): false until the student gets bingo correctly!
  * incorrectCardIndex (int): if the student has an incorrect answer, this is the index of one incorrect card on their board. At all other times it's -1.
  * correctCardIndex (int): if the student has an incorrect answer, this is the index of the correct answer to that question on their board. At all other times it's -1.
@@ -21,6 +22,7 @@ var StudentView = React.createClass({
 			selectedCardIndex: -1, 
 			readyForNextQuestion: false,
 			numBingoChecksLeft: 3,
+			approvedBingo: false,
 			hasBingo: false, 
 			incorrectCardIndex: -1,
 			correctCardIndex: -1
@@ -32,14 +34,44 @@ var StudentView = React.createClass({
 	      dataType: 'json',
 	      cache: false,
 	      success: function(data) {
-	      	// var cards = this.shuffleCards(data["cards"]);
-	      	var cards = data["cards"];
+	      	/* If we dont' have any cards, do initial board setup 
+	      	 * Otherwise ignore cards 
+	      	 */
+	      	var cards = this.state.cards;
+	      	if (cards.length == 0) {
+    			cards = this.shuffleCards(data["cards"]);
+    		}
+    		/* Find incorrect index and correct index from ids */
+    		var incorrectId= data["incorrectCardId"];
+    		var correctId = data["correctCardId"];
+    		var incorrectIndex = -1;
+    		var correctIndex = -1;
+    		if (incorrectId != -1) {
+    			for (var i=0; i<cards.length; i++) {
+    				if (cards[i].id == incorrectId) {
+    					incorrectIndex = i;
+    				}
+    				if (cards[i].id == correctId) {
+    					correctIndex = i;
+    				}
+    			}
+    		}
+
+    		/* See if it's time for next question */
+    		var readyForNext = this.state.readyForNextQuestion;
+    		var nextQuestion = data["nextQuestion"];
+    		if (nextQuestion != this.state.question) {
+    			readyForNext = false;
+    		}
+
+    		/* Update state! */
 	      	this.setState({
 	      		question: data["nextQuestion"], 
-	      		incorrectCardIndex: data["incorrectCardIndex"],
-	      		correctCardIndex: data["correctCardIndex"],
-	      		hasBingo: data["approvedBingo"],
-	      		cards: cards
+	      		incorrectCardIndex: incorrectIndex,
+	      		correctCardIndex: correctIndex,
+	      		approvedBingo: data["approvedBingo"],
+	      		cards: cards,
+	      		readyForNextQuestion: readyForNext
 	      	});
 	      }.bind(this),
 	      error: function(xhr, status, err) {
@@ -156,6 +188,7 @@ var StudentView = React.createClass({
 	},
   	componentDidMount: function() {
     	this.loadCardsFromServer();
+    	setInterval(this.loadCardsFromServer, this.props.pollInterval);
   	},
   	/* The app uses one shared modal, so we open & close it as needed and just change its inner content.
   	 * modalType (string): the type of modal you want to open
@@ -181,11 +214,11 @@ var StudentView = React.createClass({
     		case "checkBingo":
     			var numBoardChecksLeft = this.state.numBingoChecksLeft - 1;
     			/* Check if they have bingo */
-    			if (this.hasBingo()) {
+    			if (this.state.approvedBingo) {
     				this.setState({hasBingo: true, numBingoChecksLeft: numBoardChecksLeft, isModalOpen: false, modalType:"", selectedCardIndex: -1, readyForNextQuestion: true});
     				this.openModal("youGotBingo");
     			} else {
-    				this.setState({hasBingo: true, numBingoChecksLeft: numBoardChecksLeft, isModalOpen: false, modalType:"", selectedCardIndex: -1, readyForNextQuestion: true});
+    				this.setState({hasBingo: false, numBingoChecksLeft: numBoardChecksLeft, isModalOpen: false, modalType:"", selectedCardIndex: -1, readyForNextQuestion: true});
     				this.openModal("incorrect");
     			}
         		break;

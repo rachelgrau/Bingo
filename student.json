@@ -1,86 +1,73 @@
 {
     "nextQuestion": "Brazenly obvious; flagrant; offensively noisy or loud",
     "approvedBingo": false,
-    "incorrectCardIndex": 1,
-    "correctCardIndex": 23,
+    "incorrectCardId": -1,
+    "correctCardId": -1,
     "cards": [
         {
             "id": 1,
             "index": 1,
-            "word": "Blatant",
-            "hasChip": true
+            "word": "Blatant"
         },
         {
             "id": 2,
             "index": 2,
-            "word": "Docile",
-            "hasChip": true
+            "word": "Docile"
         },
         {
             "id": 3,
             "index": 3,
-            "word": "Hybrid",
-            "hasChip": true
+            "word": "Hybrid"
         },
         {
             "id": 4,
             "index": 4,
-            "word": "Nomadic",
-            "hasChip": true
+            "word": "Nomadic"
         },
         {
             "id": 5,
             "index": 5,
-            "word": "Persist",
-            "hasChip": true
+            "word": "Persist"
         },
         {
             "id": 6,
             "index": 6,
-            "word": "Resume",
-            "hasChip": true
+            "word": "Resume"
         },
         {
             "id": 7,
             "index": 7,
-            "word": "Wrath",
-            "hasChip": true
+            "word": "Wrath"
         },
         {
             "id": 8,
             "index": 8,
-            "word": "Affliction",
-            "hasChip": true
+            "word": "Affliction"
         },
         {
             "id": 9,
             "index": 9,
-            "word": "Endure",
-            "hasChip": true
+            "word": "Endure"
         },
         {
             "id": 10,
             "index": 10,
-            "word": "Dependent",
-            "hasChip": true
+            "word": "Dependent"
         },
         {
             "id": 11,
             "index": 11,
-            "word": "Stodgy",
-            "hasChip": true
+            "word": "Stodgy"
         },
         {
             "id": 12,
             "index": 12,
-            "word": "Notorious",
-            "hasChip": true
+            "word": "Notorious"
         },
         {
             "id": 13,
             "index": 13,
-            "word": "Irate",
-            "hasChip": true
+            "word": "Irate"
         },
         {
             "id": 14,
