@@ -1,5 +1,8 @@
 {
-    "question": "Brazenly obvious; flagrant; offensively noisy or loud",
+    "nextQuestion": "Brazenly obvious; flagrant; offensively noisy or loud",
+    "approvedBingo": false,
+    "incorrectCardIndex": 1,
+    "correctCardIndex": 23,
     "cards": [
         {
             "id": 1,

@@ -8,13 +8,48 @@
  * readyForNextQuestion (boolean): false until the student answers the current question, then becomes true. When a new question arrives, turns to false again unitl they answer.
  * numBingoChecksLeft (int): the number of chances this student has left to check if they have bingo. Starts at 3. 
  * hasBingo (boolean): false until the student gets bingo correctly!
- * incorrectCardIndex (int): if the student checks for bingo and has an incorrect answer, this is the index of that incorrect card on their board. At all other times it's -1.
+ * incorrectCardIndex (int): if the student has an incorrect answer, this is the index of one incorrect card on their board. At all other times it's -1.
+ * correctCardIndex (int): if the student has an incorrect answer, this is the index of the correct answer to that question on their board. At all other times it's -1.
  */
 var StudentView = React.createClass({
+	getInitialState: function() {
+		return {
+			cards:[], 
+			question:"", 
+			modalType:"", 
+			isModalOpen: false, 
+			selectedCardIndex: -1, 
+			readyForNextQuestion: false,
+			numBingoChecksLeft: 3,
+			hasBingo: false, 
+			incorrectCardIndex: -1,
+			correctCardIndex: -1
+		};
+	},
+	loadCardsFromServer: function() {
+    $.ajax({
+	      url: this.props.url,
+	      dataType: 'json',
+	      cache: false,
+	      success: function(data) {
+	      	// var cards = this.shuffleCards(data["cards"]);
+	      	var cards = data["cards"];
+	      	this.setState({
+	      		question: data["nextQuestion"], 
+	      		incorrectCardIndex: data["incorrectCardIndex"],
+	      		correctCardIndex: data["correctCardIndex"],
+	      		hasBingo: data["approvedBingo"],
+	      		cards: cards
+	      	});
+	      }.bind(this),
+	      error: function(xhr, status, err) {
+	        console.error(this.props.url, status, err.toString());
+	      }.bind(this)
+	    });
+  	},
 	/* Dummy function that will be eventually done on teacher side. 
 	   Sets the incorrectCardIndex and returns whether or not the student successfully got bingo */
 	hasBingo: function(cards) {
-		this.setState({incorrectCardIndex: 12});
 		return false;
 	},
 	shuffleCards: function(cards) {
@@ -114,33 +149,6 @@ var StudentView = React.createClass({
 
 		return false;
 	},
-	loadCardsFromServer: function() {
-    $.ajax({
-	      url: this.props.url,
-	      dataType: 'json',
-	      cache: false,
-	      success: function(data) {
-	      	var cards = this.shuffleCards(data["cards"]);
-	      	this.setState({question: data["question"], cards: cards});
-	      }.bind(this),
-	      error: function(xhr, status, err) {
-	        console.error(this.props.url, status, err.toString());
-	      }.bind(this)
-	    });
-  	},
-  	getInitialState: function() {
-		return {
-			cards:[], 
-			question:"", 
-			modalType:"", 
-			isModalOpen: false, 
-			selectedCardIndex: -1, 
-			readyForNextQuestion: false,
-			numBingoChecksLeft: 3,
-			hasBingo: false, 
-			incorrectCardIndex: -1
-		};
-	},
 	/* Called when they place a chip on a card */
 	handleClickedCard: function(cardIndex) {
 		this.state.selectedCardIndex = cardIndex;
@@ -186,8 +194,10 @@ var StudentView = React.createClass({
         		this.setState({isModalOpen: false, modalType:"", selectedCardIndex: -1, readyForNextQuestion: true});
         		break;
         	case "incorrect":
-        		/* TO DO: place chip on correct spot and remove chip from incorrect spot */
-        		this.setState({isModalOpen: false, modalType:"", selectedCardIndex: -1, incorrectCardIndex: -1});
+        		var cards = this.state.cards;
+        		cards[this.state.incorrectCardIndex].hasChip = false;
+        		cards[this.state.correctCardIndex].hasChip = true;
+        		this.setState({isModalOpen: false, cards: cards, modalType:"", selectedCardIndex: -1, incorrectCardIndex: -1});
         		break;
     		default:
     			/* Close modal */
@@ -243,6 +253,21 @@ var StudentView = React.createClass({
   		/* If the student is currently waiting for the next question, then don't respond
   		   to any clicks on cards */
   		var canSelectCard = !this.state.readyForNextQuestion;
+
+  		/* Only display a card as incorrect if they decided that they wanted to check bingo (i.e., we are currently displaying the incorrect modal)
+  		 * Otherwise keep it hidden for now (by setting incorrect index to -1). */
+  		var incorrectCardIndex = this.state.incorrectCardIndex;
+  		var correctCardIndex = this.state.correctCardIndex;
+  		if (this.state.modalType != "incorrect") {
+  			incorrectCardIndex = -1;
+  			correctCardIndex = -1;
+  		}
+  		var incorrectAnswer = "";
+  		var correctAnswer = "";
+  		if ((incorrectCardIndex != -1) && (correctCardIndex != -1)) {
+  			incorrectAnswer = this.state.cards[incorrectCardIndex].word;
+  			correctAnswer = this.state.cards[correctCardIndex].word;
+  		}
 		return (
 			<div className="studentView ">
 				<Header/>
@@ -251,9 +276,9 @@ var StudentView = React.createClass({
 						<Question question={this.state.question} readyForNextQuestion={this.state.readyForNextQuestion} onSkip={this.handleSkipQuestion}/>
 						<BingoChecker hasBingo={hasBingo} onBingoClicked={this.handleBingoClicked} numBingoChecksLeft={this.state.numBingoChecksLeft} gotBingo={this.state.hasBingo}/>
 					</div>
-					<BingoBoard cards={this.state.cards} handleClickedCard={this.handleClickedCard} clicksEnabled={canSelectCard} incorrectCardIndex={this.state.incorrectCardIndex}/>
+					<BingoBoard cards={this.state.cards} handleClickedCard={this.handleClickedCard} clicksEnabled={canSelectCard} incorrectCardIndex={incorrectCardIndex}/>
 				</div>
-				<Modal modalType={this.state.modalType} isOpen={this.state.isModalOpen} question= {this.state.question} answer={selectedCardWord} onAccept={this.closeModalAccept} onCancel={this.closeModalCancel} numBingoChecksLeft={this.state.numBingoChecksLeft} incorrectAnswer="Trivial" correctAnswer="Resume"/>
+				<Modal modalType={this.state.modalType} isOpen={this.state.isModalOpen} question={this.state.question} answer={selectedCardWord} onAccept={this.closeModalAccept} onCancel={this.closeModalCancel} numBingoChecksLeft={this.state.numBingoChecksLeft} incorrectAnswer={incorrectAnswer} correctAnswer={correctAnswer}/>
 			</div>
 		);
 	}
