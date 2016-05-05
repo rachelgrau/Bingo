@@ -159,6 +159,7 @@ var StudentView = React.createClass({
      * "confirmChipPlacement": place a chip on the card they selected
      * "checkBingo": check if they have bingo
      * "skip": don't place any chips, just become ready for next question
+     * "incorrect": place a chip on the correct answer, and set incorrectCardIndex to -1
      */
     closeModalAccept: function() {
     	switch(this.state.modalType) {
@@ -183,6 +184,10 @@ var StudentView = React.createClass({
         	case "skip":
         		/* Ready for next question */
         		this.setState({isModalOpen: false, modalType:"", selectedCardIndex: -1, readyForNextQuestion: true});
+        		break;
+        	case "incorrect":
+        		/* TO DO: place chip on correct spot and remove chip from incorrect spot */
+        		this.setState({isModalOpen: false, modalType:"", selectedCardIndex: -1, incorrectCardIndex: -1});
         		break;
     		default:
     			/* Close modal */
@@ -248,7 +253,7 @@ var StudentView = React.createClass({
 					</div>
 					<BingoBoard cards={this.state.cards} handleClickedCard={this.handleClickedCard} clicksEnabled={canSelectCard} incorrectCardIndex={this.state.incorrectCardIndex}/>
 				</div>
-				<Modal modalType={this.state.modalType} isOpen={this.state.isModalOpen} question= {this.state.question} answer={selectedCardWord} onAccept={this.closeModalAccept} onCancel={this.closeModalCancel} numBingoChecksLeft={this.state.numBingoChecksLeft}/>
+				<Modal modalType={this.state.modalType} isOpen={this.state.isModalOpen} question= {this.state.question} answer={selectedCardWord} onAccept={this.closeModalAccept} onCancel={this.closeModalCancel} numBingoChecksLeft={this.state.numBingoChecksLeft} incorrectAnswer="Trivial" correctAnswer="Resume"/>
 			</div>
 		);
 	}
@@ -430,9 +435,13 @@ var BingoCard = React.createClass ({
  * -----
  * isOpen (boolean): if true, then displays the modal; otherwise doesn't
  * modalType (string): the type of modal (see above)
- * question (string): if the modal is type "confirmChipPlacement", then this prop is the question the student is trying to answer
+ * question (string): 
+ * 		- if modal type = "confirmChipPlacement" --> the question the student is trying to answer
+ * 		- if modal type = "incorrectAnswer" --> the question they got incorrect
  * answer (string): if the modal is type "confirmChipPlacement", then this prop is the card the student just selected
  * numBingoChecksLeft (int): the the number of bingo checks they have left 
+ * incorrectAnswer (string): if modal type = "incorrectAnswer" this is the answer that they selected incorrectly
+ * correctAnswer (string): if modal type = "incorrectAnswer" this is the correct answer  
  * onCancel (function): the callback for when student clicks "cancel" button (regardless of modal type)
  * onAccept (function): the callback for when student clicks "yes" button (regardless of modal type)
  */
@@ -515,7 +524,11 @@ var Modal = React.createClass({
         		return (
         			<div className="modalBg">
         				<div className="incorrectModal">
-        				Uh oh!
+							<span className="incorrectHeader">Uh oh!</span><br/><br/>
+		        			<span className="incorrectHeader">Question:</span> {this.props.question} <br/><br/>
+		        			<span className="incorrectHeader">You said:</span> {this.props.incorrectAnswer}<br/><br/>
+		        			<span className="incorrectHeader">Correct answer:</span> {this.props.correctAnswer}<br/><br/>
+        					<div className="button transparentOutlineButton" id="placeCorrectChip" onClick={this.props.onAccept}> Place chip on <b>{this.props.correctAnswer}</b></div>
         				</div>
         			</div>
         		);

@@ -164,6 +164,8 @@ body {
 }
 
 .bingoCardIncorrect {
+	border: 2px solid #FF0000;
+	border-radius: 0px;
 	z-index: 999;
 }
 
@@ -192,6 +194,20 @@ body {
 	border: 1px solid #00a8ff;
 	border-radius: 4px;
 	color: #06aaff;
+}
+
+.transparentOutlineButton {
+	/* Button */
+	width: 180px;
+	height: 37px;
+	border: 1px solid #b8c0c6;
+	border-radius: 4px;
+	/* Font */
+	color: #06aaff;
+	font-family: "Avenir LT Std";
+	font-size: 13px;
+	font-weight: 400;
+	line-height: 37px;
 }
 
 .blueButtonShadow {
@@ -407,8 +423,8 @@ body {
 /* Incorrect modal stuff */
 .incorrectModal {
 	position: absolute;
-	width: 95px;
-	height: 105px;
+	width: 182px;
+	/*height: 188px;*/
 	border: 2px solid #06aaff;
 	border: 1px solid #b8c0c6;
 	background-color: #eee;
@@ -417,14 +433,14 @@ body {
 	position: absolute;
     margin-top: 10px;
     margin-left: 10px;
-    padding: 5px;
+	padding: 17px;
     /* Font */
-    text-align: center;
+    text-align: left;
     color: #454545;
 	font-family: "Avenir Next";
-	font-size: 22px;
-	font-weight: 500;
-	line-height: 30px;
+	font-size: 13px;
+	font-weight: 200;
+	line-height: 15px;
 }
 .incorrectCard {
 	position: absolute;
@@ -445,6 +461,10 @@ body {
 	font-size: 22px;
 	font-weight: 500;
 	line-height: 30px;
+}
+
+.incorrectHeader {
+	font-weight: 400;
 }
 
 /* RANDOM */
