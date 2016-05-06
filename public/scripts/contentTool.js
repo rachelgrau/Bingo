@@ -42,6 +42,7 @@ var ContentTool = React.createClass({
   		this.state.cards[this.state.selectedCard] = cardToUpdate;
   		/* TO DO: If at some point we want to provide a "next" button, change this to update selectedCard to be this.state.selectedCard + 1 */
   		this.setState({selectedCard: -1}); 
+	 
   	},
   	/* Called when the user clicks on one of the cards, changing their current selection. */
   	handleSelectCard: function(cardNumber) {
@@ -56,20 +57,20 @@ var ContentTool = React.createClass({
   	},
   	/* Called when the user clicks "save and exit" – saves current state of all cards */
   	handleSave: function() {
-  		console.log("Save");
-  		/* TO DO: save all cards from current state to server */
-  		// $.ajax({
-	   //    url: this.props.url,
-	   //    dataType: 'json',
-	   //    type: 'POST',
-	   //    data: card,
-	   //    success: function(cards) {
-	   //      this.setState({cards: cards});
-	   //    }.bind(this),
-	   //    error: function(xhr, status, err) {
-	   //      console.error(this.props.url, status, err.toString());
-	   //    }.bind(this)
-	   //  });
+  		/* TO DO: save all cards (this.state.cards) from current state to server */
+  		$.ajax({
+	      url: this.props.url,
+	      dataType: 'json',
+	      type: 'POST',
+	      data: JSON.stringify(this.state.cards),
+	      success: function(cards) {
+	      	console.log("success");
+	      }.bind(this),
+	      error: function(xhr, status, err) {
+	        console.error(this.props.url, status, err.toString());
+	      }.bind(this)
+	    });
+		console.log("handle save");
   	},
 	render: function() {
 		if (this.state.selectedCard == -1) {	
@@ -85,7 +86,7 @@ var ContentTool = React.createClass({
 				<div className="contentTool">
 					<Editor ref="myEditor" onCardSubmit={this.handleCardSubmit} isSelected={true} card={this.state.cards[this.state.selectedCard]}/>
 					<BingoBoard cards={this.state.cards} onSelectCard={this.handleSelectCard} selectedCard={this.state.selectedCard}/>
-					<Footer onCreate={this.handleCreate} onSave={this.handleSave} />
+					<Footer onCreate={this.handleCreate} onSave={this.handleSave}/>
 				</div>
 			);
 		}
