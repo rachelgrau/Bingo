@@ -57,13 +57,29 @@ def student_handler():
     with open('student.json', 'r') as file:
         cards = json.loads(file.read())
 
-    if request.method == 'POST':
-        newCard = request.form.to_dict()
-        newCard['id'] = int(time.time() * 1000)
-        cards.append(newCard)
+    # if request.method == 'POST':
+    #     newCard = request.form.to_dict()
+    #     newCard['id'] = int(time.time() * 1000)
+    #     cards.append(newCard)
 
-        with open('student.json', 'w') as file:
-            file.write(json.dumps(cards, indent=4, separators=(',', ': ')))
+    #     with open('student.json', 'w') as file:
+    #         file.write(json.dumps(cards, indent=4, separators=(',', ': ')))
+
+    return Response(json.dumps(cards), mimetype='application/json', headers={'Cache-Control': 'no-cache', 'Access-Control-Allow-Origin': '*'})
+
+@app.route('/api/teacher', methods=['GET', 'POST'])
+def teacher_handler():
+
+    with open('teacher.json', 'r') as file:
+        cards = json.loads(file.read())
+
+    # if request.method == 'POST':
+    #     newCard = request.form.to_dict()
+    #     newCard['id'] = int(time.time() * 1000)
+    #     cards.append(newCard)
+
+    #     with open('student.json', 'w') as file:
+    #         file.write(json.dumps(cards, indent=4, separators=(',', ': ')))
 
     return Response(json.dumps(cards), mimetype='application/json', headers={'Cache-Control': 'no-cache', 'Access-Control-Allow-Origin': '*'})
 

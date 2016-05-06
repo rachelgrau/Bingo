@@ -57,7 +57,6 @@ var ContentTool = React.createClass({
   	},
   	/* Called when the user clicks "save and exit" – saves current state of all cards */
   	handleSave: function() {
-  		/* TO DO: save all cards (this.state.cards) from current state to server */
   		$.ajax({
 	      url: this.props.url,
 	      dataType: 'json',
