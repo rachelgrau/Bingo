@@ -2,16 +2,16 @@
     {
         "id": 1,
         "index": 1,
-        "answer": "Blatant",
-        "question": "Brazenly obvious; flagrant; offensively noisy or loud",
-        "completed": true
+        "answer": "",
+        "question": "",
+        "completed": false
     },
     {
         "id": 2,
         "index": 2,
-        "answer": "Abate",
-        "question": "To reduce in amount, degree, intensity, etc",
-        "completed": true
+        "answer": "",
+        "question": "",
+        "completed": false
     },
     {
         "id": 3,

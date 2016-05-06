@@ -1,128 +1,128 @@
 {
-    "nextQuestion": "Brazenly obvious; flagrant; offensively noisy or loud",
-    "approvedBingo": false,
+    "nextQuestion": "Anotherrr question",
+    "approvedBingo": true,
     "incorrectCardId": -1,
     "correctCardId": -1,
     "cards": [
         {
             "id": 1,
             "index": 1,
-            "word": "Blatant"
+            "answer": "Blatant"
         },
         {
             "id": 2,
             "index": 2,
-            "word": "Docile"
+            "answer": "Docile"
         },
         {
             "id": 3,
             "index": 3,
-            "word": "Hybrid"
+            "answer": "Hybrid"
         },
         {
             "id": 4,
             "index": 4,
-            "word": "Nomadic"
+            "answer": "Nomadic"
         },
         {
             "id": 5,
             "index": 5,
-            "word": "Persist"
+            "answer": "Persist"
         },
         {
             "id": 6,
             "index": 6,
-            "word": "Resume"
+            "answer": "Resume"
         },
         {
             "id": 7,
             "index": 7,
-            "word": "Wrath"
+            "answer": "Wrath"
         },
         {
             "id": 8,
             "index": 8,
-            "word": "Affliction"
+            "answer": "Affliction"
         },
         {
             "id": 9,
             "index": 9,
-            "word": "Endure"
+            "answer": "Endure"
         },
         {
             "id": 10,
             "index": 10,
-            "word": "Dependent"
+            "answer": "Dependent"
         },
         {
             "id": 11,
             "index": 11,
-            "word": "Stodgy"
+            "answer": "Stodgy"
         },
         {
             "id": 12,
             "index": 12,
-            "word": "Notorious"
+            "answer": "Notorious"
         },
         {
             "id": 13,
             "index": 13,
-            "word": "Irate"
+            "answer": "Irate"
         },
         {
             "id": 14,
             "index": 14,
-            "word": "Grim"
+            "answer": "Grim"
         },
         {
             "id": 15,
             "index": 15,
-            "word": "Legacy"
+            "answer": "Legacy"
         },
         {
             "id": 16,
             "index": 16,
-            "word": "Vindictive"
+            "answer": "Vindictive"
         },
         {
             "id": 17,
             "index": 17,
-            "word": "Flaw"
+            "answer": "Flaw"
         },
         {
             "id": 18,
             "index": 18,
-            "word": "Trivial"
+            "answer": "Trivial"
         },
         {
             "id": 19,
             "index": 19,
-            "word": "Consult"
+            "answer": "Consult"
         },
         {
             "id": 20,
             "index": 20,
-            "word": "Nimble"
+            "answer": "Nimble"
         },
         {
             "id": 21,
             "index": 21,
-            "word": "Homage"
+            "answer": "Homage"
         },
         {
             "id": 22,
             "index": 22,
-            "word": "Sham"
+            "answer": "Sham"
         },
         {
             "id": 23,
             "index": 23,
-            "word": "Capricious"
+            "answer": "Capricious"
         },
         {
             "id": 24,
             "index": 24,
-            "word": "Perjury"
+            "answer": "Perjury"
         }
     ]
 }

@@ -281,7 +281,7 @@ var StudentView = React.createClass({
   		   can display it in modal */
   		var selectedCardWord = "";
   		if (this.state.selectedCardIndex != -1) {
-  			selectedCardWord = this.state.cards[this.state.selectedCardIndex].word;
+  			selectedCardWord = this.state.cards[this.state.selectedCardIndex].answer;
   		}
   		/* If the student is currently waiting for the next question, then don't respond
   		   to any clicks on cards */
@@ -298,8 +298,8 @@ var StudentView = React.createClass({
   		var incorrectAnswer = "";
   		var correctAnswer = "";
   		if ((incorrectCardIndex != -1) && (correctCardIndex != -1)) {
-  			incorrectAnswer = this.state.cards[incorrectCardIndex].word;
-  			correctAnswer = this.state.cards[correctCardIndex].word;
+  			incorrectAnswer = this.state.cards[incorrectCardIndex].answer;
+  			correctAnswer = this.state.cards[correctCardIndex].answer;
   		}
 		return (
 			<div className="studentView ">
@@ -420,7 +420,7 @@ var BingoBoard = React.createClass ({
 		/* add a bingo card component for every card with a word */
 		for (var i=0; i < this.props.cards.length; i++) {
 			var card = this.props.cards[i];
-			var word = card.word;
+			var word = card.answer;
 			if (i==Math.floor(this.props.cards.length/2)) {
 				/* Add Bingo wild card */
 				bingoCards.push(<BingoCard isWild={true} isIncorrect={false} word=""/>);
