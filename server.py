@@ -35,15 +35,19 @@ def comments_handler():
 
 @app.route('/api/contentTool', methods=['GET', 'POST'])
 def content_tool_handler():
-
     with open('contentTool.json', 'r') as file:
         cards = json.loads(file.read())
 
-    if request.method == 'POST':
-        cards = request.body
+    newCards = None
 
+    if request.method == 'POST':
+        cardDict = request.form.to_dict()
+        cards = cardDict.keys()[0]
+        print("printing cards")
+        print cards
         with open('contentTool.json', 'w') as file:
-            file.write(json.dumps(cards, indent=4, separators=(',', ': ')))
+            file.write(cards)
+            # file.write(json.dumps(cards, indent=4, separators=(',', ': ')))
 
     return Response(json.dumps(cards), mimetype='application/json', headers={'Cache-Control': 'no-cache', 'Access-Control-Allow-Origin': '*'})
 

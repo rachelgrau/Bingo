@@ -58,15 +58,13 @@ var ContentTool = React.createClass({
   	/* Called when the user clicks "save and exit" – saves current state of all cards */
   	handleSave: function() {
   		/* TO DO: save all cards (this.state.cards) from current state to server */
-  		console.log(this.state.cards);
   		$.ajax({
 	      url: this.props.url,
 	      dataType: 'json',
 	      type: 'POST',
-	      data: this.state.cards,
+	      data: JSON.stringify(this.state.cards),
 	      success: function(cards) {
-	        this.setState({cards: this.state.cards});
-	        // console.log(cards);
+	      	console.log("success");
 	      }.bind(this),
 	      error: function(xhr, status, err) {
 	        console.error(this.props.url, status, err.toString());
@@ -88,7 +86,7 @@ var ContentTool = React.createClass({
 				<div className="contentTool">
 					<Editor ref="myEditor" onCardSubmit={this.handleCardSubmit} isSelected={true} card={this.state.cards[this.state.selectedCard]}/>
 					<BingoBoard cards={this.state.cards} onSelectCard={this.handleSelectCard} selectedCard={this.state.selectedCard}/>
-					<Footer onCreate={this.handleCreate} onSave={this.handleSave} cards={this.state.cards}/>
+					<Footer onCreate={this.handleCreate} onSave={this.handleSave}/>
 				</div>
 			);
 		}
