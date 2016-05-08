@@ -51,19 +51,40 @@ server.mount_proc '/api/student' do |req, res|
     req.query.each do |key, value|
       comment[key] = value.force_encoding('UTF-8') unless key == 'id'
     end
-    student << comment
+    teacher << comment
     File.write(
       './student.json',
       JSON.pretty_generate(student, indent: '    '),
       encoding: 'UTF-8'
     )
   end
-
   # always return json
   res['Content-Type'] = 'application/json'
   res['Cache-Control'] = 'no-cache'
   res['Access-Control-Allow-Origin'] = '*'
   res.body = JSON.generate(student)
+end
+
+server.mount_proc '/api/teacher' do |req, res|
+  teacher = JSON.parse(File.read('./teacher.json', encoding: 'UTF-8'))
+  if req.request_method == 'POST'
+    # Assume it's well formed
+    comment = { id: (Time.now.to_f * 1000).to_i }
+    req.query.each do |key, value|
+      comment[key] = value.force_encoding('UTF-8') unless key == 'id'
+    end
+    teacher << comment
+    File.write(
+      './teacher.json',
+      JSON.pretty_generate(teacher, indent: '    '),
+      encoding: 'UTF-8'
+    )
+  end
+  # always return json
+  res['Content-Type'] = 'application/json'
+  res['Cache-Control'] = 'no-cache'
+  res['Access-Control-Allow-Origin'] = '*'
+  res.body = JSON.generate(teacher)
 end
 
 trap('INT') { server.shutdown }
