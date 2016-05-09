@@ -150,9 +150,9 @@
         { 
             "deviceID": 0,
             "name": "Ricky",
-            "question": "A particular occupation, business, or profession",
-            "answer": "Nomadic",
-            "didPass": true,
+            "question": "Heavy, dull, or uninteresting; tediously commonplace",
+            "answer": "Stodgy",
+            "didPass": false,
             "cards": [
                 {
                     "id": 1,
@@ -302,8 +302,8 @@
         }, { 
             "deviceID": 1,
             "name": "Alex",
-            "question": "Widely and unfavorably known",
-            "answer": "",
+            "question": "A feature that mars the perfection of something; defect; fault",
+            "answer": "Flaw",
             "didPass": false,
             "cards": [
                 {
@@ -454,8 +454,8 @@
         }, { 
             "deviceID": 2,
             "name": "Daniel",
-            "question": "Widely and unfavorably known",
-            "answer": "Blatant",
+            "question": "Heavy, dull, or uninteresting; tediously commonplace",
+            "answer": "Stodgy",
             "didPass": false,
             "cards": [
                 {

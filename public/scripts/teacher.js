@@ -1,5 +1,6 @@
 /* State
  * -------
+ * gameOver (boolean): true when the teacher has ended the game, false otherwise
  * cards (array): an array of all the questions/answers. Gets shuffled at beginning, then doesn't change
  * indexOfCurrQuestion (int): the index of the current question in the cards array 
  * responsesForStudents (array): array of all the repsonses to sent to students
@@ -46,6 +47,7 @@
 var TeacherView = React.createClass({
 	getInitialState: function() {
 		return {
+			gameOver: false,
 			cards:[], 
 			indexOfCurrQuestion: 0,
 			currentQuestionAnswers: [],
@@ -269,6 +271,73 @@ var TeacherView = React.createClass({
   		}
   		return stats;
   	},
+  	handleEndGame: function() {
+  		this.putCurrentAnswersInPast();
+  		this.setState({"gameOver": true});
+  	},
+  	/* Returns the div for the results table */
+  	getResultsTable: function () {
+  		/* Put all answers in table header header */
+  		var answerHeaders = [];
+  		for (var i=0; i <= this.state.indexOfCurrQuestion; i++) {
+  			var answer = this.state.cards[i].answer;
+  			answerHeaders.push(
+  				<th>
+  					{answer}
+  				</th>
+  			);
+  		}
+
+  		/* Create table */
+  		var table = [];
+  		for (var i=0; i < this.state.allQuestions.length; i++) {
+  			var currStudentInfo = this.state.allQuestions[i];
+  			/* This student's overall score */
+  			var percentage = Math.floor((currStudentInfo.stats.numCorrect / (this.state.indexOfCurrQuestion + 1)) * 100);
+  			/* Build up table cells for this students answer to every question */
+  			var studentAnswers = [];
+  			for (var j=0; j<currStudentInfo.answers.length; j++) {
+  				var answer = currStudentInfo.answers[j].answer;
+  				if (answer == "") answer = "–";
+				if (currStudentInfo.answers[j].wasCorrect) {
+					studentAnswers.push(
+						<td className="correctAnswer">
+							{answer}
+						</td>
+					);
+				} else {
+					studentAnswers.push(
+						<td className="incorrectAnswer">
+							{answer}
+						</td>
+					);
+				}
+				
+  			}
+
+  			table.push(
+  				<tr>
+  					<th>{currStudentInfo.name}</th>
+  					<th>{percentage}%</th>
+  					{studentAnswers}
+  				</tr>
+  			);
+  		}
+  		
+
+  		return (
+			<table>
+				<tbody>
+				  <tr className="tableHeader">
+				    <th>Student</th>
+				    <th>Student total</th>
+				    {answerHeaders}
+				  </tr>
+				  {table}
+			  </tbody>
+			</table>
+		); 
+  	},
   	render: function() {
   		/* Get the current question + answer */
   		var currentQuestion = "";
@@ -281,12 +350,19 @@ var TeacherView = React.createClass({
   		if (this.state.indexOfCurrQuestion == this.state.cards.length - 1) {
   			canPressNext = false;
   		}
-		return (
-			<div className="teacherContent">
-				<CurrentQuestion question={currentQuestion} answer={currentAnswer} canPressNext={canPressNext} indexOfCurrentQuestion={this.state.indexOfCurrQuestion} numTotalQuestions={this.state.cards.length} studentAnswers={this.state.currentQuestionAnswers} currentStats={this.state.currentQuestionStats} handleNextQuestion={this.handleNextQuestion}/>
-				<PastQuestions pastQuestions={this.state.allQuestions}/>
-			</div>
-		);
+
+  		/* Display game normally */
+  		if (!this.state.gameOver) {
+  			return (
+  				<div className="teacherContent">
+					<CurrentQuestion question={currentQuestion} answer={currentAnswer} canPressNext={canPressNext} indexOfCurrentQuestion={this.state.indexOfCurrQuestion} numTotalQuestions={this.state.cards.length} studentAnswers={this.state.currentQuestionAnswers} currentStats={this.state.currentQuestionStats} handleNextQuestion={this.handleNextQuestion}/>
+					<PastQuestions pastQuestions={this.state.allQuestions} onEndGame={this.handleEndGame}/>
+				</div>
+  			);
+  		/* If game is over, display results */
+  		} else {
+  			return this.getResultsTable();
+  		}
 	}
 });
 
@@ -446,8 +522,9 @@ var CurrentQuestionAnswers = React.createClass({
  * Props
  * -----
  * pastQuestions (array): array of dictionaries that contain each student's record for this game. See Teacher
- * component's "allQuestions" array.
- }*/
+ * 						  component's "allQuestions" array.
+ * onEndGame (function): callback that gets called when the teacher presses "End game"
+ */
 var PastQuestions = React.createClass({
 	render: function() {
 		return (
@@ -455,7 +532,7 @@ var PastQuestions = React.createClass({
 				<h1> All questions sorted by: student </h1>
 				<hr color="#06AAFF"/>
 				<AllAnswers pastQuestions={this.props.pastQuestions}/>
-				<div className="outlineButton">
+				<div className="outlineButton" onClick={this.props.onEndGame}>
 					End game
 				</div>
 			</div>
