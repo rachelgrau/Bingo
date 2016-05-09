@@ -150,7 +150,9 @@
         { 
             "deviceID": 0,
             "name": "Ricky",
+            "question": "",
             "answer": "Consult",
+            "didPass": false,
             "cards": [
                 {
                     "id": 1,
@@ -300,7 +302,9 @@
         }, { 
             "deviceID": 1,
             "name": "Alex",
-            "answer": "Wrath",
+            "question": "Quick and light in movement; moving with ease; agile; active; rapid",
+            "answer": "Nimble",
+            "didPass": false,
             "cards": [
                 {
                     "id": 1,
@@ -450,7 +454,9 @@
         }, { 
             "deviceID": 2,
             "name": "Daniel",
+            "question": "To seek advice or information from; ask guidance from",
             "answer": "Blatant",
+            "didPass": false,
             "cards": [
                 {
                     "id": 1,

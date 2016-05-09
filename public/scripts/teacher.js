@@ -18,6 +18,30 @@
  * 		- "numIncorrect" (int): # of students that have gotten this question incorrect
  * 		- "numUnanswered" (int): # of students that have not yet answered this question incorrect
  *		- "totalStudents" (int): total # of students
+ * allQuestions (array): array of dictionaries that look like:
+ * 		 {
+ 			"name": "Ricky",
+			"answers": [
+				{ 
+					"question": "Brazenly obvious; flagrant; offensively noisy or loud",
+					"answer": "Blatant",
+					"wasCorrect": true
+				}, {
+					"question": "Subject to, led by, or indicative of a sudden, odd notion or unpredictable change; erratic"
+        			"answer": "Capricious",
+					"wasCorrect": true	
+				}
+				{
+					"question": "Easily managed or handled; tractable"
+        			"answer": "Pass",
+					"wasCorrect": false	
+				}
+			],
+			"stats": {
+				"numCorrect": 2,
+				"numIncorrect": 1
+			}
+ 		}
  */
 var TeacherView = React.createClass({
 	getInitialState: function() {
@@ -26,7 +50,8 @@ var TeacherView = React.createClass({
 			indexOfCurrQuestion: 0,
 			currentQuestionAnswers: [],
 			currentQuestionStats: [],
-			responsesForStudents: []
+			responsesForStudents: [],
+			allQuestions: []
 		};
 	},
 	shuffleCards: function(cards) {
@@ -50,11 +75,13 @@ var TeacherView = React.createClass({
 	      dataType: 'json',
 	      cache: false,
 	      success: function(data) {	      
-    		/* Update state! */
+    		/* If we don't have any cards yet, store them */
     		if (this.state.cards.length == 0) {
     			var cards = this.shuffleCards(data["cards"]); 
     			this.state.cards = cards;   		
     		}
+    		/* Read in the student responses for current question */
+    		this.addNewStudents(data["studentResponses"]);
 	    	var currentQuestionAnswers = this.getCurrentAnswers(data["studentResponses"]);
 	    	var currentQuestionStats = this.getCurrentStats(data["studentResponses"]);
 	    	this.setState({
@@ -71,10 +98,54 @@ var TeacherView = React.createClass({
     	this.loadCardsFromServer();
     	setInterval(this.loadCardsFromServer, this.props.pollInterval);
   	},
+  	/* Goes through all of the student responses for the current question and 
+  	   moves them to the repository of "past" questions (e.g. this.state.allQuestions) 
+       If the student hasn't answered the question, mark it as incorrect.
+
+        * 		- "name" (string): student's name
+ 		* 		- "answer" (string): the student's answer, or "" if no answer yet
+ 		*		- "isCorrect" (boolean): whether the student's answer was correct, or false if still hasn't answered
+ 		*
+  	*/
+  	putCurrentAnswersInPast: function() {
+  		/* The question we are currently moving on from */
+  		var questionToSave = this.state.cards[this.state.indexOfCurrQuestion].question;
+  		/* Loop over all the students' answers to the question we are about to leave */
+  		for (var i=0; i < this.state.currentQuestionAnswers.length; i++) {
+  			var currStudentName = this.state.currentQuestionAnswers[i].name;
+  			var currAnswer = this.state.currentQuestionAnswers[i].answer;
+  			var wasCorrect = this.state.currentQuestionAnswers[i].isCorrect;
+  			if (currAnswer == "") wasCorrect = false; /* If current still unanswered, mark as incorrect */ 
+  			/* Find that student in our array for past questions */
+  			for (var j=0; j < this.state.allQuestions.length; j++) {
+  				var currEntry = this.state.allQuestions[j];
+  				if (currEntry.name == currStudentName) {
+  					/* Add to their list of answers */
+  					var answerDict = {
+  						"question": questionToSave,
+						"answer": currAnswer,
+						"wasCorrect": wasCorrect
+  					}
+  					/* Update their stats */
+  					var stats = currEntry.stats;
+  					if (wasCorrect) {
+  						stats["numCorrect"]++;
+  					} else {
+  						stats["numIncorrect"]++;
+  					}
+
+  					currEntry.answers.push(answerDict);
+  					currEntry.stats = stats;
+  					this.state.allQuestions[j] = currEntry;
+  				}
+  			}
+  		}
+  		console.log(this.state.allQuestions);
+  	},
   	/* Called when the teacher clicks "next question"
   	   increments the index of the current question */
   	handleNextQuestion: function() {
-  		/* TO DO: save all student responses here into past questions */
+  		this.putCurrentAnswersInPast();
   		var indexOfNextQuestion = this.state.indexOfCurrQuestion + 1;
   		/* Clear current question answers and stats */
   		var currentAnswers = [];
@@ -97,6 +168,31 @@ var TeacherView = React.createClass({
 	      	currentQuestionStats: stats
 	     });
   	},
+  	/* Looks at the current student responses and sees if there are any students that are currently 
+	   not in this.state.allQuestions record. If so, adds an entry for those new students to this.state.allQuestions. */
+	addNewStudents: function(studentResponses) {
+		for (var i=0; i < studentResponses.length; i++) {
+			var name = studentResponses[i].name;
+			var studentIsNew = true;
+			for (var j=0; j < this.state.allQuestions.length; j++) {
+				var currentEntry = this.state.allQuestions[j];
+				if (currentEntry.name == name) {
+					studentIsNew = false;
+					break;
+				}
+			}
+			if (studentIsNew) {
+				var newStudent = {};
+				newStudent["name"] = name;
+				newStudent["answers"] = [];
+				newStudent["stats"] = {
+					"numCorrect": 0,
+					"numIncorrect": 0
+				};
+				this.state.allQuestions.push(newStudent);
+			}
+		}
+	},
   	/*
   	 * Given the student responses from the API, this method returns an array of the student answers
   	 * with 1 dictionary per student, where each dictionary contains "name" "answer" and "isCorrect"
@@ -105,10 +201,15 @@ var TeacherView = React.createClass({
   	getCurrentAnswers: function (studentResponses) {
   		var answers = [];
   		for (var i=0; i < studentResponses.length; i++) {
-  			// var curStudentAnswer = this.state.studentAnswers[i];
+  			var questionStudentIsAnswering = studentResponses[i].question;
+  			var currentQuestion = this.state.cards[this.state.indexOfCurrQuestion].question;
+  			var answer = studentResponses[i].answer;
+  			if (questionStudentIsAnswering != currentQuestion) {
+  				answer = "";
+  			}
   			var curStudentAnswer = {};
   			curStudentAnswer["name"] = studentResponses[i].name;
-  			curStudentAnswer["answer"] =  studentResponses[i].answer;
+  			curStudentAnswer["answer"] =  answer;
   			curStudentAnswer["isCorrect"] = (studentResponses[i].answer == this.state.cards[this.state.indexOfCurrQuestion].answer);
   			answers.push(curStudentAnswer);
   		}
@@ -127,7 +228,12 @@ var TeacherView = React.createClass({
   			"totalStudents": studentResponses.length
   		};
   		for (var i=0; i < studentResponses.length; i++) {
-  			var answer =  studentResponses[i].answer;
+  			var questionStudentIsAnswering = studentResponses[i].question;
+  			var currentQuestion = this.state.cards[this.state.indexOfCurrQuestion].question;
+  			var answer = studentResponses[i].answer;
+  			if (questionStudentIsAnswering != currentQuestion) {
+  				answer = "";
+  			}
   			if (answer == "") {
   				stats.numUnanswered++;
   			} else {
@@ -156,7 +262,7 @@ var TeacherView = React.createClass({
 		return (
 			<div className="teacherContent">
 				<CurrentQuestion question={currentQuestion} answer={currentAnswer} canPressNext={canPressNext} indexOfCurrentQuestion={this.state.indexOfCurrQuestion} numTotalQuestions={this.state.cards.length} studentAnswers={this.state.currentQuestionAnswers} currentStats={this.state.currentQuestionStats} handleNextQuestion={this.handleNextQuestion}/>
-				<PastQuestions />
+				<PastQuestions pastQuestions={this.state.allQuestions}/>
 			</div>
 		);
 	}
@@ -314,13 +420,19 @@ var CurrentQuestionAnswers = React.createClass({
 	}
 });
 
+/*
+ * Props
+ * -----
+ * pastQuestions (array): array of dictionaries that contain each student's record for this game. See Teacher
+ * component's "allQuestions" array.
+ }*/
 var PastQuestions = React.createClass({
 	render: function() {
 		return (
 			<div className="pastQuestions">
 				<h1> All questions sorted by: student </h1>
 				<hr color="#06AAFF"/>
-				<AllAnswers studentAnswers={this.props.studentAnswers}/>
+				<AllAnswers pastQuestions={this.props.pastQuestions}/>
 				<div className="outlineButton">
 					End game
 				</div>
@@ -329,28 +441,35 @@ var PastQuestions = React.createClass({
 	}
 });
 
+/*
+ * Props
+ * -----
+ * pastQuestions (array): array of dictionaries that contain each student's record for this game. See Teacher
+ * component's "allQuestions" array.
+ }*/
 var AllAnswers = React.createClass({
 	render: function() {
 		var table = [];
-		table.push(<tr>
-				    <td className="studentNamePast">Ricky</td>
-				    <td className="fractionScore correctAnswer">1/1</td> 
-				    <td className="percentageScore correctAnswer">100%</td> 
-				  </tr>);
-		table.push(<tr>
-				    <td className="studentNamePast">Alex</td>
-				    <td className="fractionScore unanswered">0/0</td> 
-				  	<td className="percentageScore unanswered">–</td> 
-				  </tr>);
-		table.push(<tr>
-				    <td className="studentNamePast">Daniel</td>
-				    <td className="fractionScore incorrectAnswer">0/1</td> 
-				  	<td className="percentageScore incorrectAnswer">0%</td> 				  
-				  </tr>);
+		/* Loop over and add table entry for each student answer */
+		for (var i=0; i < this.props.pastQuestions.length; i++) {
+			var cur = this.props.pastQuestions[i];	
+			var curStats = cur.stats;
+			var totalQuestionsAnswered = curStats["numCorrect"] + curStats["numIncorrect"];
+			var percentage = 0;
+			if (totalQuestionsAnswered > 0) {
+				percentage = Math.floor((curStats["numCorrect"] / totalQuestionsAnswered) * 100);
+			}
+			table.push(
+				<tr>
+				    <td className="studentNamePast">{cur.name}</td>
+				    <td className="fractionScore unanswered">{curStats["numCorrect"]}/{totalQuestionsAnswered}</td> 
+				  	<td className="percentageScore unanswered">{percentage}%</td> 
+				 </tr>
+			);
+		}
 		return (
 			<table className="simpleTable">
 				<tbody>
-				  
 				  {table}
 			  </tbody>
 			</table>
