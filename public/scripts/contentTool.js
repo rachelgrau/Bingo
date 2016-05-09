@@ -5,8 +5,63 @@
  * selectedCard (int): the index of the card that is currently selected (or -1) if none
  */
 var ContentTool = React.createClass({
+
+	getUrlVars: function() {
+	    var vars = {};
+	    var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+	        vars[key] = value;
+	    });
+	    return vars;
+	},
+
+
+	setHeaders: function(){
+		//TODO FIGURE OUT WHAT APP ID SHOULD BE
+		return {"x-api-key":"7dabac64681a7c12c1cb97183c44de93", "JWT": getUrlVars()["jwt"]};
+	},
+
+	showError: function(json){
+		alert("error: " + json.error_code + "\nmessage: " + json.message + "\n\nfull: " + JSON.stringify(json) );
+	},
+
+	showSuccess: function(json){
+		alert("code: " + json.error_code + "\nmessage: " + json.message + "\n\nfull: " + JSON.stringify(json) );
+	},
+
+	get: function(path, params, successCallback){
+		$.ajax({
+			  url: "https://api-dev.nearpod.com/v1/ct/" + path,
+			  method: "GET",
+			  async: false,
+			  data: params,
+			  headers: setHeaders(),
+			  success: function(data, textStatus, jqXHR){
+				  successCallback(jqXHR.responseJSON);
+			  },
+			  error: function(jqXHR, textStatus, errorThrown){
+				  showError(jqXHR.responseJSON);
+			  }
+		});	
+	},
+
+	post: function(path, params, successCallback){
+		$.ajax({
+			  url: "https://api-dev.nearpod.com/v1/ct/" + path,
+			  method: "POST",
+			  async: false,
+			  data: JSON.stringify(params),
+			  headers: setHeaders(),
+			  success: function(data, textStatus, jqXHR){
+				  successCallback(jqXHR.responseJSON);
+			  },
+			  error: function(jqXHR, textStatus, errorThrown){
+				  showError(jqXHR.responseJSON);
+			  }
+		});	
+	},
+
 	loadCardsFromServer: function() {
-    $.ajax({
+    	$.ajax({
 	      url: this.props.url,
 	      dataType: 'json',
 	      cache: false,
@@ -17,6 +72,7 @@ var ContentTool = React.createClass({
 	        console.error(this.props.url, status, err.toString());
 	      }.bind(this)
 	    });
+		// post(this.props.url, null, showSuccess);
   	},
   	getInitialState: function() {
 		return {
@@ -57,19 +113,20 @@ var ContentTool = React.createClass({
   	},
   	/* Called when the user clicks "save and exit" – saves current state of all cards */
   	handleSave: function() {
-  		$.ajax({
-	      url: this.props.url,
-	      dataType: 'json',
-	      type: 'POST',
-	      data: JSON.stringify(this.state.cards),
-	      success: function(cards) {
-	      	console.log("success");
-	      }.bind(this),
-	      error: function(xhr, status, err) {
-	        console.error(this.props.url, status, err.toString());
-	      }.bind(this)
-	    });
+  		// $.ajax({
+	   //    url: this.props.url,
+	   //    dataType: 'json',
+	   //    type: 'POST',
+	   //    data: JSON.stringify(this.state.cards),
+	   //    success: function(cards) {
+	   //    	console.log("success");
+	   //    }.bind(this),
+	   //    error: function(xhr, status, err) {
+	   //      console.error(this.props.url, status, err.toString());
+	   //    }.bind(this)
+	   //  });
 		console.log("handle save");
+		post(this.props.url, this.state.cards, showSuccess);
   	},
 	render: function() {
 		if (this.state.selectedCard == -1) {	
