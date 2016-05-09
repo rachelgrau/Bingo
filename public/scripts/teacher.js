@@ -3,13 +3,12 @@
  * gameOver (boolean): true when the teacher has ended the game, false otherwise
  * cards (array): an array of all the questions/answers. Gets shuffled at beginning, then doesn't change
  * indexOfCurrQuestion (int): the index of the current question in the cards array 
- * responsesForStudents (array): array of all the repsonses to sent to students
- * 		- array of dictionaries mapping device ids to individualized responses
+ * responsesForStudents (dictionary): dictionary mapping student deviceIDs to their individualized responses
  * 		- each response has:
  * 				- nextQuestion (string): the current question
  * 				- approvedBingo (boolean): whether the student has bingo
- * 				- incorrectCardId (int): 
- * 				- correctCardId (int): 
+ * 				- incorrectCardIds (array): array of any incorrect cards the student has
+ * 				- correctCardIds (array): array of correct card ids (maps to incorrectCardIds)
  * currentQuestionAnswers (array): abbreviated version of student responses. An array of the students' answers to the current question. Each dictionary in the array contains:
  * 		- "name" (string): student's name
  * 		- "answer" (string): the student's answer, or "" if no answer yet
@@ -58,7 +57,7 @@ var TeacherView = React.createClass({
 			indexOfCurrQuestion: 0,
 			currentQuestionAnswers: [],
 			currentQuestionStats: [],
-			responsesForStudents: [],
+			responsesForStudents: {},
 			allQuestionsByQuestion: [],
 			allQuestionsByStudent: [],
 		};
@@ -155,12 +154,15 @@ var TeacherView = React.createClass({
   		}
   		this.state.allQuestionsByQuestion.push(thisQuestion);
   	},
-  	/* Called when the teacher clicks "next question"
-  	   increments the index of the current question */
+  	/* Called when the teacher clicks "next question."
+     * Increments the index of the current question, moves the answers to the
+     * current question to past questions, clears the current question array, 
+     * and updates the responses for students (changes their current question).
+  	 * */
   	handleNextQuestion: function() {
   		this.putCurrentAnswersInPast();
   		var indexOfNextQuestion = this.state.indexOfCurrQuestion + 1;
-  		/* Clear current question answers and stats */
+  		/* Clear current question answers */
   		var currentAnswers = [];
   		for (var i=0; i < this.state.currentQuestionAnswers.length; i++) {
   			var curStudentAnswer = {};
@@ -169,20 +171,35 @@ var TeacherView = React.createClass({
   			curStudentAnswer["isCorrect"] = false;
   			currentAnswers.push(curStudentAnswer);
   		}
+      /* Clear stats */
   		var stats = {
   			"numCorrect": 0,
   			"numIncorrect": 0,
   			"numUnanswered": this.state.currentQuestionAnswers.length,
   			"totalStudents": this.state.currentQuestionAnswers.length
   		};
+      /* Update responses for students by moving onto next question, if there is another question */ 
+      var responsesForStudents = this.state.responsesForStudents;
+      if (indexOfNextQuestion < this.state.cards.length) {
+        var nextQuestion = this.state.cards[indexOfNextQuestion].question;
+        for (var key in responsesForStudents) {
+          var currResponse = responsesForStudents[key];
+          currResponse["nextQuestion"] = nextQuestion;
+          responsesForStudents[key] = currResponse;
+        }
+      }
   		this.setState({
 	      	indexOfCurrQuestion: indexOfNextQuestion,
 	      	currentQuestionAnswers: currentAnswers,
-	      	currentQuestionStats: stats
+	      	currentQuestionStats: stats,
+          responsesForStudents: responsesForStudents
 	     });
+      console.log(this.state.responsesForStudents);
   	},
-  	/* Looks at the current student responses and sees if there are any students that are currently 
-	   not in this.state.allQuestionsByStudent record. If so, adds an entry for those new students to this.state.allQuestionsByStudent. */
+  	/* Looks at the current student responses and sees if there are any students 
+     * that are currently not in this.state.allQuestionsByStudent record. If so, 
+     * adds an entry for those new students to this.state.allQuestionsByStudent and
+     * this.state.responsesForStudents */
 	addNewStudents: function(studentResponses) {
 		for (var i=0; i < studentResponses.length; i++) {
 			var name = studentResponses[i].name;
@@ -195,6 +212,7 @@ var TeacherView = React.createClass({
 				}
 			}
 			if (studentIsNew) {
+        /* 1. Create entry in allQuestionsByStudent */
 				var newStudent = {};
 				newStudent["name"] = name;
 				newStudent["answers"] = [];
@@ -203,6 +221,16 @@ var TeacherView = React.createClass({
 					"numIncorrect": 0
 				};
 				this.state.allQuestionsByStudent.push(newStudent);
+        /* 2. Create entry in allQuestionsByStudent */
+        var newStudentResponse = {};
+        var deviceID = studentResponses[i].deviceID;
+        var currentQuestion = this.state.cards[this.state.indexOfCurrQuestion].question;
+        newStudentResponse["nextQuestion"] = currentQuestion;
+        newStudentResponse["approvedBingo"] = false;
+        newStudentResponse["incorrectCardIds"] = [];
+        newStudentResponse["correctCardIds"] = [];
+        newStudentResponse["gameOver"] = this.state.gameOver;
+        this.state.responsesForStudents[deviceID] = newStudentResponse;
 			}
 		}
 	},
@@ -219,10 +247,23 @@ var TeacherView = React.createClass({
 		}
 		return true;
 	},
+  /* Given the answer on a card, returns that card's ID */
+  getCardIdFromAnswer: function(answer) {
+    for (var i=0; i<this.state.cards.length; i++) {
+      var card = this.state.cards[i];
+      if (card.answer == answer) {
+        return card.id;
+      }
+    }
+    return -1;
+  },
   	/*
   	 * Given the student responses from the API, this method returns an array of the student answers
   	 * with 1 dictionary per student, where each dictionary contains "name" "answer" and "isCorrect"
   	 * (What this.state.currentQuestionAnswers should be)
+     * 
+     * Along the way, it also updates this.state.responsesForStudent based on their current
+     * responses. 
   	 */
   	getCurrentAnswers: function (studentResponses) {
   		var answers = [];
@@ -245,7 +286,31 @@ var TeacherView = React.createClass({
   			} else {
   				/* We received this student's answer for this question */
   				curStudentAnswer["answer"] =  studentResponses[i].answer;
-  				curStudentAnswer["isCorrect"] = (studentResponses[i].answer == this.state.cards[this.state.indexOfCurrQuestion].answer);
+          if (studentResponses[i].answer == this.state.cards[this.state.indexOfCurrQuestion].answer) {
+            curStudentAnswer["isCorrect"] = true;
+          } else {
+            curStudentAnswer["isCorrect"] = false;
+            /* If they've answered, update incorrectCardId in responses for student */
+            if (answer.length > 0) {
+              var deviceId = studentResponses[i].deviceID;
+              var incorrectId = this.getCardIdFromAnswer(answer);
+              var correctCardId = this.state.cards[this.state.indexOfCurrQuestion].id;
+              var response = this.state.responsesForStudents[deviceId];
+              /* Only add if it's not already been added */
+              var alreadyAdded = false;
+              for (var j=0; j < response.incorrectCardIds.length; j++) {
+                if (response.incorrectCardIds[j] == incorrectId) {
+                  alreadyAdded = true;
+                  break;
+                }
+              }
+              if (!alreadyAdded) {
+                response.incorrectCardIds.push(incorrectId);
+                response.correctCardIds.push(correctCardId);
+                this.state.responsesForStudents[deviceId]=response;
+              }
+            }
+          }
   			}
   			answers.push(curStudentAnswer);
   		}
@@ -286,10 +351,6 @@ var TeacherView = React.createClass({
   	handleEndGame: function() {
   		this.putCurrentAnswersInPast();
   		this.setState({"gameOver": true});
-  	},
-  	/* Returns the div for the results table */
-  	getResultsTable: function () {
-  		
   	},
   	render: function() {
   		/* Get the current question + answer */
