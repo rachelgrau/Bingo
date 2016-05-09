@@ -150,8 +150,8 @@
         { 
             "deviceID": 0,
             "name": "Ricky",
-            "question": "Heavy, dull, or uninteresting; tediously commonplace",
-            "answer": "Stodgy",
+            "question": "Respect or reverence paid or rendered",
+            "answer": "Wrong",
             "didPass": false,
             "cards": [
                 {
@@ -302,8 +302,8 @@
         }, { 
             "deviceID": 1,
             "name": "Alex",
-            "question": "A feature that mars the perfection of something; defect; fault",
-            "answer": "Flaw",
+            "question": "Respect or reverence paid or rendered",
+            "answer": "",
             "didPass": false,
             "cards": [
                 {
@@ -454,8 +454,8 @@
         }, { 
             "deviceID": 2,
             "name": "Daniel",
-            "question": "Heavy, dull, or uninteresting; tediously commonplace",
-            "answer": "Stodgy",
+            "question": "Respect or reverence paid or rendered",
+            "answer": "Homage",
             "didPass": false,
             "cards": [
                 {

@@ -279,13 +279,15 @@ var TeacherView = React.createClass({
   	getResultsTable: function () {
   		/* Put all answers in table header header */
   		var answerHeaders = [];
+  		var wordScores = [];
   		for (var i=0; i <= this.state.indexOfCurrQuestion; i++) {
   			var answer = this.state.cards[i].answer;
   			answerHeaders.push(
-  				<th>
+  				<th className="tableHeader resultsTableHeader">
   					{answer}
   				</th>
   			);
+  			wordScores.push(0);
   		}
 
   		/* Create table */
@@ -294,46 +296,69 @@ var TeacherView = React.createClass({
   			var currStudentInfo = this.state.allQuestions[i];
   			/* This student's overall score */
   			var percentage = Math.floor((currStudentInfo.stats.numCorrect / (this.state.indexOfCurrQuestion + 1)) * 100);
-  			/* Build up table cells for this students answer to every question */
+  			/* Build up table cells for this student's answer to every question */
   			var studentAnswers = [];
   			for (var j=0; j<currStudentInfo.answers.length; j++) {
   				var answer = currStudentInfo.answers[j].answer;
   				if (answer == "") answer = "–";
 				if (currStudentInfo.answers[j].wasCorrect) {
+					/* Increment the number of correct answers for this word */
+					wordScores[j]++;
+					/* Add the table cell for this student's correct answer to this word */
 					studentAnswers.push(
-						<td className="correctAnswer">
+						<td className="correctAnswer bottomGray">
 							{answer}
 						</td>
 					);
 				} else {
 					studentAnswers.push(
-						<td className="incorrectAnswer">
+						<td className="incorrectAnswer bottomGray">
 							{answer}
 						</td>
 					);
 				}
-				
   			}
-
+  			var percentageClassName = "correctAnswer bottomGray";
+  			if (percentage < 50) percentageClassName = "incorrectAnswer bottomGray";
   			table.push(
   				<tr>
-  					<th>{currStudentInfo.name}</th>
-  					<th>{percentage}%</th>
+  					<td>{currStudentInfo.name}</td>
+  					<td className={percentageClassName}>{percentage}%</td>
   					{studentAnswers}
   				</tr>
   			);
   		}
-  		
+  		/* Calculate scores for each word and format them as percentages*/
+  		var percentages = [];
+  		var numTotalStudents = this.state.allQuestions.length;
+  		for (var i=0; i < wordScores.length; i++) {
+  			var numCorrect = wordScores[i];
+  			var percentage = Math.floor((numCorrect/numTotalStudents)*100);
+  			if (percentage >= 50) {
+  				percentages.push(
+  					<td className="correctAnswer">{percentage}%</td>
+  				);
+  			} else {
+  				percentages.push(
+  					<td className="incorrectAnswer">{percentage}%</td>
+  				);
+  			}
+  		}
 
   		return (
-			<table>
+			<table className="simpleTable">
 				<tbody>
 				  <tr className="tableHeader">
-				    <th>Student</th>
-				    <th>Student total</th>
+				    <th className="tableHeader resultsTableHeader"></th>
+				    <th className="tableHeader resultsTableHeader">Student total</th>
 				    {answerHeaders}
 				  </tr>
 				  {table}
+				  <tr>
+				  	<td></td>
+				  	<td></td>
+				  	{percentages}
+				  </tr>
 			  </tbody>
 			</table>
 		); 
@@ -361,7 +386,11 @@ var TeacherView = React.createClass({
   			);
   		/* If game is over, display results */
   		} else {
-  			return this.getResultsTable();
+  			return (
+  				<div className="resultsTable">
+	  				{this.getResultsTable()}
+  				</div>
+  			);
   		}
 	}
 });

@@ -276,6 +276,24 @@ th.tableHeader {
 	border: 2px solid #00a8ff;
 }
 
+/* RESULTS TABLE STUFF */
+.resultsTable {
+	background-color: white;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+th.resultsTableHeader {
+	text-align: left;
+}
+
+th.studentNameHeader {
+	width: 40px;
+}
+
+td.bottomGray {
+	border-bottom: 1px solid #aeaeae;
+}
+
 /* Use this class to vertically center text if container has display: table*/
 .verticallyCenteredText {
 	display: table-cell;
