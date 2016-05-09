@@ -150,8 +150,8 @@
         { 
             "deviceID": 0,
             "name": "Ricky",
-            "question": "Respect or reverence paid or rendered",
-            "answer": "Wrong",
+            "question": "Brazenly obvious; flagrant; offensively noisy or loud",
+            "answer": "Endure",
             "didPass": false,
             "cards": [
                 {
@@ -302,8 +302,8 @@
         }, { 
             "deviceID": 1,
             "name": "Alex",
-            "question": "Respect or reverence paid or rendered",
-            "answer": "",
+            "question": "Brazenly obvious; flagrant; offensively noisy or loud",
+            "answer": "Blatant",
             "didPass": false,
             "cards": [
                 {
@@ -454,9 +454,9 @@
         }, { 
             "deviceID": 2,
             "name": "Daniel",
-            "question": "Respect or reverence paid or rendered",
-            "answer": "Homage",
-            "didPass": false,
+            "question": "Brazenly obvious; flagrant; offensively noisy or loud",
+            "answer": "",
+            "didPass": true,
             "cards": [
                 {
                     "id": 1,

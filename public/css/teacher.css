@@ -4,7 +4,7 @@ body {
 
 .teacherContent {
 	/* Width of current questions + past questions + margin between them */
-	width: 944px;
+	width: 993px;
 	height: 654px;
 	/* Center this stuff */ 
 	margin: auto;
@@ -16,7 +16,7 @@ body {
 	float: left;
 	background-color: white;
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-	width: 551px;
+	width: 600px;
 	height: 650px;
 	/* 1/2 Margin between current question & past questions */
 	margin-right: 15px;
@@ -54,7 +54,7 @@ h1 {
  /* Question + answer stuff  */
 .questionAnswer {
 	float: left;
-	width: 265px;
+	width: 285px;
 	height: 115px;
 	margin-top: 30px
 }
@@ -64,16 +64,13 @@ h1 {
 	background-color: white;
 	border: 2px solid #06aaff;
 	border-radius: 8px;
-	width: 105px;
-	height: 105px;
+	width: 115px;
+	height: 115px;
 	padding: 5px;
 	margin-right: 27px;
 	/* Font */
 	color: black;
 	font-family: "Avenir Next";
-	font-size: 14px;
-	font-weight: 400;
-	line-height: 19px;
 	/* Centering */
 	/* Vertically centers in Safari */
   	display: table;
@@ -83,13 +80,25 @@ h1 {
   	flex-direction: column;
 }
 
+.questionNormal {
+	font-size: 14px;
+	font-weight: 400;
+	line-height: 19px;
+}
+
+.questionSmall {
+	font-size: 12px;
+	font-weight: 400;
+	line-height: 16px;
+}
+
 .answer {
 	float: left;
 	background-color: rgba(6, 170, 255, 0.27);
 	border: 2px solid #06aaff;
 	border-radius: 8px;
-	width: 95px;
-	height: 95px;
+	width: 105px;
+	height: 105px;
 	padding: 10px;
 	/* Font */
 	color: black;
@@ -111,13 +120,17 @@ h1 {
 /* Graph stuff */
 .graph {
 	float: left;
-	height: 119px; /* Same as question/answer */
+	height: 125px; /* Same as question/answer */
 	margin-top: 30px;
+}
+
+.graphImage {
+	margin-left: 25px;
 }
 
 .graphVisual {
 	float: left;
-	width: 103px;
+	width: 165px;
 	margin-right: 11px;
 }
 
@@ -128,7 +141,7 @@ h1 {
 	font-size: 11px;
 	font-weight: 400;
 	line-height: 11px;
-	margin-top: 22px;
+	margin-top: 25px;
 }
 
 .statsTable {
@@ -137,7 +150,7 @@ h1 {
 
 #nextQuestion {
 	clear: both;
-	margin-top: 175px; /* Height of cards (115) + actual margin desired (30)*/
+	margin-top: 195px; /* Height of cards (125) + actual margin desired (40)*/
 	margin-bottom: 30px;
 }
 
@@ -265,7 +278,7 @@ th.tableHeader {
 	color: #06aaff;
 	font-family: "Avenir LT Std";
 	font-size: 20px;
-	font-weight: 400;
+	font-weight: 200;
 	line-height: 38px;
 	/* Horizontally center */
 	margin-left: auto;
@@ -280,18 +293,46 @@ th.tableHeader {
 .resultsTable {
 	background-color: white;
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+	border-collapse: collapse;
+	color: #161e21;
+	font-family: "Avenir LT Std";
+	font-size: 18px;
+	font-weight: 500;
+	line-height: 22px;
+	padding: 5px;
 }
 
 th.resultsTableHeader {
+	padding: 10px;
+}
+
+.resultsTableCell {
+	padding: 10px;
+	text-align: center;
+}
+
+/* First column*/
+.studentNameColumn {
+	width: 30px;
 	text-align: left;
 }
 
-th.studentNameHeader {
-	width: 40px;
+.studentTotalColumn {
+	width: 120px;
+	border-right: 1px solid #aeaeae;
 }
 
-td.bottomGray {
+.bottomGray {
 	border-bottom: 1px solid #aeaeae;
+}
+
+.sortBy {
+	font-family: "Avenir";
+	font-weight: lighter;
+	color: #6C7A86;
+	border: 1px solid #EBEFF2;
+	padding: 4px;
+	border-radius: 3px;
 }
 
 /* Use this class to vertically center text if container has display: table*/

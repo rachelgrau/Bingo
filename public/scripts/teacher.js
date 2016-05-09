@@ -19,7 +19,13 @@
  * 		- "numIncorrect" (int): # of students that have gotten this question incorrect
  * 		- "numUnanswered" (int): # of students that have not yet answered this question incorrect
  *		- "totalStudents" (int): total # of students
- * allQuestions (array): array of dictionaries that look like:
+ * allQuestionsByQuestion (array): array of dictionaries to keep track of all the student responses, by question. Each dictionary looks like: 
+ * 		{
+			"answer": "Blatant",
+			"numCorrect": 3,
+			"numAnswered" 4
+ 		}
+ * allQuestionsByStudent (array): array of dictionaries that look like:
  * 		 {
  			"name": "Ricky",
 			"answers": [
@@ -53,7 +59,8 @@ var TeacherView = React.createClass({
 			currentQuestionAnswers: [],
 			currentQuestionStats: [],
 			responsesForStudents: [],
-			allQuestions: []
+			allQuestionsByQuestion: [],
+			allQuestionsByStudent: [],
 		};
 	},
 	shuffleCards: function(cards) {
@@ -101,26 +108,30 @@ var TeacherView = React.createClass({
     	setInterval(this.loadCardsFromServer, this.props.pollInterval);
   	},
   	/* Goes through all of the student responses for the current question and 
-  	   moves them to the repository of "past" questions (e.g. this.state.allQuestions) 
+  	   moves them to the repositories of "past" questions (e.g. this.state.allQuestionsByStudent and this.state.allQuestionsByQuestion) 
        If the student hasn't answered the question, mark it as incorrect.
-
-        * 		- "name" (string): student's name
- 		* 		- "answer" (string): the student's answer, or "" if no answer yet
- 		*		- "isCorrect" (boolean): whether the student's answer was correct, or false if still hasn't answered
- 		*
   	*/
   	putCurrentAnswersInPast: function() {
   		/* The question we are currently moving on from */
   		var questionToSave = this.state.cards[this.state.indexOfCurrQuestion].question;
+  		/* Create an entry to put in this.state.allQuestionsByQuestion */
+  		var thisQuestion = {
+  			"answer": this.state.cards[this.state.indexOfCurrQuestion].answer,
+  			numCorrect: 0,
+  			numAnswered: 0
+  		};
   		/* Loop over all the students' answers to the question we are about to leave */
   		for (var i=0; i < this.state.currentQuestionAnswers.length; i++) {
   			var currStudentName = this.state.currentQuestionAnswers[i].name;
   			var currAnswer = this.state.currentQuestionAnswers[i].answer;
   			var wasCorrect = this.state.currentQuestionAnswers[i].isCorrect;
   			if (currAnswer == "") wasCorrect = false; /* If current still unanswered, mark as incorrect */ 
+  			/* Update the entry for this.state.allQuestionsByQuestion */
+  			if (wasCorrect) thisQuestion.numCorrect++;
+  			thisQuestion.numAnswered++;
   			/* Find that student in our array for past questions */
-  			for (var j=0; j < this.state.allQuestions.length; j++) {
-  				var currEntry = this.state.allQuestions[j];
+  			for (var j=0; j < this.state.allQuestionsByStudent.length; j++) {
+  				var currEntry = this.state.allQuestionsByStudent[j];
   				if (currEntry.name == currStudentName) {
   					/* Add to their list of answers */
   					var answerDict = {
@@ -138,10 +149,11 @@ var TeacherView = React.createClass({
 
   					currEntry.answers.push(answerDict);
   					currEntry.stats = stats;
-  					this.state.allQuestions[j] = currEntry;
+  					this.state.allQuestionsByStudent[j] = currEntry;
   				}
   			}
   		}
+  		this.state.allQuestionsByQuestion.push(thisQuestion);
   	},
   	/* Called when the teacher clicks "next question"
   	   increments the index of the current question */
@@ -170,13 +182,13 @@ var TeacherView = React.createClass({
 	     });
   	},
   	/* Looks at the current student responses and sees if there are any students that are currently 
-	   not in this.state.allQuestions record. If so, adds an entry for those new students to this.state.allQuestions. */
+	   not in this.state.allQuestionsByStudent record. If so, adds an entry for those new students to this.state.allQuestionsByStudent. */
 	addNewStudents: function(studentResponses) {
 		for (var i=0; i < studentResponses.length; i++) {
 			var name = studentResponses[i].name;
 			var studentIsNew = true;
-			for (var j=0; j < this.state.allQuestions.length; j++) {
-				var currentEntry = this.state.allQuestions[j];
+			for (var j=0; j < this.state.allQuestionsByStudent.length; j++) {
+				var currentEntry = this.state.allQuestionsByStudent[j];
 				if (currentEntry.name == name) {
 					studentIsNew = false;
 					break;
@@ -190,7 +202,7 @@ var TeacherView = React.createClass({
 					"numCorrect": 0,
 					"numIncorrect": 0
 				};
-				this.state.allQuestions.push(newStudent);
+				this.state.allQuestionsByStudent.push(newStudent);
 			}
 		}
 	},
@@ -277,91 +289,7 @@ var TeacherView = React.createClass({
   	},
   	/* Returns the div for the results table */
   	getResultsTable: function () {
-  		/* Put all answers in table header header */
-  		var answerHeaders = [];
-  		var wordScores = [];
-  		for (var i=0; i <= this.state.indexOfCurrQuestion; i++) {
-  			var answer = this.state.cards[i].answer;
-  			answerHeaders.push(
-  				<th className="tableHeader resultsTableHeader">
-  					{answer}
-  				</th>
-  			);
-  			wordScores.push(0);
-  		}
-
-  		/* Create table */
-  		var table = [];
-  		for (var i=0; i < this.state.allQuestions.length; i++) {
-  			var currStudentInfo = this.state.allQuestions[i];
-  			/* This student's overall score */
-  			var percentage = Math.floor((currStudentInfo.stats.numCorrect / (this.state.indexOfCurrQuestion + 1)) * 100);
-  			/* Build up table cells for this student's answer to every question */
-  			var studentAnswers = [];
-  			for (var j=0; j<currStudentInfo.answers.length; j++) {
-  				var answer = currStudentInfo.answers[j].answer;
-  				if (answer == "") answer = "–";
-				if (currStudentInfo.answers[j].wasCorrect) {
-					/* Increment the number of correct answers for this word */
-					wordScores[j]++;
-					/* Add the table cell for this student's correct answer to this word */
-					studentAnswers.push(
-						<td className="correctAnswer bottomGray">
-							{answer}
-						</td>
-					);
-				} else {
-					studentAnswers.push(
-						<td className="incorrectAnswer bottomGray">
-							{answer}
-						</td>
-					);
-				}
-  			}
-  			var percentageClassName = "correctAnswer bottomGray";
-  			if (percentage < 50) percentageClassName = "incorrectAnswer bottomGray";
-  			table.push(
-  				<tr>
-  					<td>{currStudentInfo.name}</td>
-  					<td className={percentageClassName}>{percentage}%</td>
-  					{studentAnswers}
-  				</tr>
-  			);
-  		}
-  		/* Calculate scores for each word and format them as percentages*/
-  		var percentages = [];
-  		var numTotalStudents = this.state.allQuestions.length;
-  		for (var i=0; i < wordScores.length; i++) {
-  			var numCorrect = wordScores[i];
-  			var percentage = Math.floor((numCorrect/numTotalStudents)*100);
-  			if (percentage >= 50) {
-  				percentages.push(
-  					<td className="correctAnswer">{percentage}%</td>
-  				);
-  			} else {
-  				percentages.push(
-  					<td className="incorrectAnswer">{percentage}%</td>
-  				);
-  			}
-  		}
-
-  		return (
-			<table className="simpleTable">
-				<tbody>
-				  <tr className="tableHeader">
-				    <th className="tableHeader resultsTableHeader"></th>
-				    <th className="tableHeader resultsTableHeader">Student total</th>
-				    {answerHeaders}
-				  </tr>
-				  {table}
-				  <tr>
-				  	<td></td>
-				  	<td></td>
-				  	{percentages}
-				  </tr>
-			  </tbody>
-			</table>
-		); 
+  		
   	},
   	render: function() {
   		/* Get the current question + answer */
@@ -381,15 +309,13 @@ var TeacherView = React.createClass({
   			return (
   				<div className="teacherContent">
 					<CurrentQuestion question={currentQuestion} answer={currentAnswer} canPressNext={canPressNext} indexOfCurrentQuestion={this.state.indexOfCurrQuestion} numTotalQuestions={this.state.cards.length} studentAnswers={this.state.currentQuestionAnswers} currentStats={this.state.currentQuestionStats} handleNextQuestion={this.handleNextQuestion}/>
-					<PastQuestions pastQuestions={this.state.allQuestions} onEndGame={this.handleEndGame}/>
+					<PastQuestions allQuestionsByStudent={this.state.allQuestionsByStudent} allQuestionsByQuestion={this.state.allQuestionsByQuestion} onEndGame={this.handleEndGame}/>
 				</div>
   			);
   		/* If game is over, display results */
   		} else {
   			return (
-  				<div className="resultsTable">
-	  				{this.getResultsTable()}
-  				</div>
+				<ResultsTable allQuestionsByStudent={this.state.allQuestionsByStudent} cards={this.state.cards} numQuestions={this.state.indexOfCurrQuestion + 1}/>
   			);
   		}
 	}
@@ -441,9 +367,11 @@ var CurrentQuestion = React.createClass({
  */
 var QuestionAnswer = React.createClass({
 	render: function() {
+		var questionClass = "question questionNormal";
+		if (this.props.question.length > 88) questionClass = "question questionSmall";
 		return (
 			<div className="questionAnswer">
-				<div className="question">
+				<div className={questionClass}>
 					<div className="verticallyCentered">{this.props.question}</div>
 				</div>
 				<div className="answer">
@@ -465,7 +393,7 @@ var Graph = React.createClass({
 		var numStudents = this.props.stats.totalStudents;
 		return (
 			<div className="graph">
-				<div className="graphVisual">Visual</div>
+				<div className="graphVisual"><img className="graphImage" src="../assets/graph.png"/></div>
 				<div className="graphStats">
 					<table className="statsTable">
 						<tbody>
@@ -548,19 +476,37 @@ var CurrentQuestionAnswers = React.createClass({
 });
 
 /*
+ * State
+ * ------
+ * sortBy (string): either "question" or "student" 
+ * 
+ * 
  * Props
  * -----
- * pastQuestions (array): array of dictionaries that contain each student's record for this game. See Teacher
- * 						  component's "allQuestions" array.
+ * allQuestionsByStudent (array): array of dictionaries that contain each student's record for this game. See Teacher
+ * 						  component's "allQuestionsByStudent" array.
+ * allQuestionsByQuestion (array): array of past question + answers, sorted by questions (see Teacher component's state.allQuestionsByQuestion)
  * onEndGame (function): callback that gets called when the teacher presses "End game"
  */
 var PastQuestions = React.createClass({
+	getInitialState: function() {
+		return {
+			sortBy: "student"
+		};
+	},
+	changeSortBy: function() {
+		var newState = "question";
+		if (this.state.sortBy == "question") {
+			newState = "student";
+		} 
+		this.setState({sortBy: newState});
+	},
 	render: function() {
 		return (
 			<div className="pastQuestions">
-				<h1> All questions sorted by: student </h1>
+				<h1> All questions sorted by: <span className="sortBy" onClick={this.changeSortBy}>{this.state.sortBy}</span> </h1>
 				<hr color="#06AAFF"/>
-				<AllAnswers pastQuestions={this.props.pastQuestions}/>
+				<AllAnswers allQuestionsByStudent={this.props.allQuestionsByStudent} sortBy={this.state.sortBy} allQuestionsByQuestion={this.props.allQuestionsByQuestion}/>
 				<div className="outlineButton" onClick={this.props.onEndGame}>
 					End game
 				</div>
@@ -572,60 +518,186 @@ var PastQuestions = React.createClass({
 /*
  * Props
  * -----
- * pastQuestions (array): array of dictionaries that contain each student's record for this game. See Teacher
- * component's "allQuestions" array.
- }*/
+ * allQuestionsByStudent (array): array of dictionaries that contain each student's record for this game. See Teacher
+ * 						  component's "allQuestionsByStudent" array.
+ * allQuestionsByQuestion (array): array of past question + answers, sorted by questions (see Teacher component's state.allQuestionsByQuestion)
+ * sortBy (string): if this string == "question", then we'll sort by question; if it's "student" to sort by student
+ */
 var AllAnswers = React.createClass({
 	render: function() {
 		var table = [];
-		/* Loop over and add table entry for each student answer */
-		for (var i=0; i < this.props.pastQuestions.length; i++) {
-			var cur = this.props.pastQuestions[i];	
-			var curStats = cur.stats;
-			var totalQuestionsAnswered = curStats["numCorrect"] + curStats["numIncorrect"];
-			var percentage = 0;
-			if (totalQuestionsAnswered > 0) {
-				percentage = Math.floor((curStats["numCorrect"] / totalQuestionsAnswered) * 100);
+		if (this.props.sortBy == "student") {			
+			/* SORT BY STUDENT 
+			 * Use this.props.allQuestionsByStudent
+			 */
+			for (var i=0; i < this.props.allQuestionsByStudent.length; i++) {
+				var cur = this.props.allQuestionsByStudent[i];	
+				var curStats = cur.stats;
+				var totalQuestionsAnswered = curStats["numCorrect"] + curStats["numIncorrect"];
+				var percentage = 0;
+				if (totalQuestionsAnswered > 0) {
+					percentage = Math.floor((curStats["numCorrect"] / totalQuestionsAnswered) * 100);
+				}
+				if (totalQuestionsAnswered == 0) {
+					table.push(
+						<tr>
+					    	<td className="studentNamePast">{cur.name}</td>
+					    	<td className="fractionScore unanswered">0/0</td> 
+					  		<td className="percentageScore unanswered">–</td> 
+					 	</tr>
+					);
+				} else if (percentage >= 50) {
+					table.push(
+						<tr>
+					    	<td className="studentNamePast">{cur.name}</td>
+					    	<td className="fractionScore correctAnswer">{curStats["numCorrect"]}/{totalQuestionsAnswered}</td> 
+					  		<td className="percentageScore correctAnswer">{percentage}%</td> 
+					 	</tr>
+					);
+				} else {
+					table.push(
+						<tr>
+						    <td className="studentNamePast">{cur.name}</td>
+						    <td className="fractionScore incorrectAnswer">{curStats["numCorrect"]}/{totalQuestionsAnswered}</td> 
+						  	<td className="percentageScore incorrectAnswer">{percentage}%</td> 
+						 </tr>
+					);
+				}
 			}
-			if (totalQuestionsAnswered == 0) {
-				table.push(
-					<tr>
-				    	<td className="studentNamePast">{cur.name}</td>
-				    	<td className="fractionScore unanswered">0/0</td> 
-				  		<td className="percentageScore unanswered">–</td> 
-				 	</tr>
-				);
-			} else if (percentage >= 50) {
-				table.push(
-					<tr>
-				    	<td className="studentNamePast">{cur.name}</td>
-				    	<td className="fractionScore correctAnswer">{curStats["numCorrect"]}/{totalQuestionsAnswered}</td> 
-				  		<td className="percentageScore correctAnswer">{percentage}%</td> 
-				 	</tr>
-				);
-			} else {
-				table.push(
-				<tr>
-				    <td className="studentNamePast">{cur.name}</td>
-				    <td className="fractionScore incorrectAnswer">{curStats["numCorrect"]}/{totalQuestionsAnswered}</td> 
-				  	<td className="percentageScore incorrectAnswer">{percentage}%</td> 
-				 </tr>
-			);
+		}  else {
+			/* SORT BY QUESTION 
+			 * Use this.props.allQuestionsByQuestion
+			 */
+			for (var i=0; i<this.props.allQuestionsByQuestion.length; i++) {
+				var currQuestion = this.props.allQuestionsByQuestion[i];
+				var percentage = Math.floor((currQuestion.numCorrect/currQuestion.numAnswered) * 100);
+				if (percentage >= 50) {
+					table.push(
+						<tr>
+							<td className="studentNamePast">{currQuestion.answer}</td>
+							<td className="fractionScore correctAnswer">{currQuestion.numCorrect}/{currQuestion.numAnswered}</td> 
+							<td className="percentageScore correctAnswer">{percentage}%</td>
+						</tr>
+					);
+				} else {
+					table.push(
+						<tr>
+							<td className="studentNamePast">{currQuestion.answer}</td>
+							<td className="fractionScore incorrectAnswer">{currQuestion.numCorrect}/{currQuestion.numAnswered}</td> 
+							<td className="percentageScore incorrectAnswer">{percentage}%</td>
+						</tr>
+					);
+				}
 			}
-			
 		}
 		return (
 			<table className="simpleTable">
 				<tbody>
-				  {table}
-			  </tbody>
+					{table}
+				</tbody>
 			</table>
 		);
 	}
 });
 
+/*
+ * Props
+ * -----
+ * allQuestionsByStudent (array): array with results (see Teacher component's state.allQuestionsByStudent)
+ * numQuestions (int): total # of questions asked
+ * cards (array): array of cards in the order that they were asked
+ */
+var ResultsTable = React.createClass({
+	render: function() {
+		/* Put all answers in table header header */
+  		var answerHeaders = [];
+  		var wordScores = [];
+  		for (var i=0; i < this.props.numQuestions; i++) {
+  			var answer = this.props.cards[i].answer;
+  			answerHeaders.push(
+  				<th className="tableHeader resultsTableHeader">
+  					{answer}
+  				</th>
+  			);
+  			wordScores.push(0);
+  		}
+
+  		/* Create table */
+  		var table = [];
+  		for (var i=0; i < this.props.allQuestionsByStudent.length; i++) {
+  			var currStudentInfo = this.props.allQuestionsByStudent[i];
+  			/* This student's overall score */
+  			var percentage = Math.floor((currStudentInfo.stats.numCorrect / (this.props.numQuestions)) * 100);
+  			/* Build up table cells for this student's answer to every question */
+  			var studentAnswers = [];
+  			for (var j=0; j<currStudentInfo.answers.length; j++) {
+  				var answer = currStudentInfo.answers[j].answer;
+  				if (answer == "") answer = "–";
+				if (currStudentInfo.answers[j].wasCorrect) {
+					/* Increment the number of correct answers for this word */
+					wordScores[j]++;
+					/* Add the table cell for this student's correct answer to this word */
+					studentAnswers.push(
+						<td className="correctAnswer bottomGray resultsTableCell">
+							{answer}
+						</td>
+					);
+				} else {
+					studentAnswers.push(
+						<td className="incorrectAnswer bottomGray resultsTableCell">
+							{answer}
+						</td>
+					);
+				}
+  			}
+  			var percentageClassName = "correctAnswer bottomGray resultsTableCell studentTotalColumn";
+  			if (percentage < 50) percentageClassName = "incorrectAnswer bottomGray resultsTableCell studentTotalColumn";
+  			table.push(
+  				<tr>
+  					<td className="studentNameColumn resultsTableCell">{currStudentInfo.name}</td>
+  					<td className={percentageClassName}>{percentage}%</td>
+  					{studentAnswers}
+  				</tr>
+  			);
+  		}
+  		/* Calculate scores for each word and format them as percentages*/
+  		var percentages = [];
+  		var numTotalStudents = this.props.allQuestionsByStudent.length;
+  		for (var i=0; i < wordScores.length; i++) {
+  			var numCorrect = wordScores[i];
+  			var percentage = Math.floor((numCorrect/numTotalStudents)*100);
+  			if (percentage >= 50) {
+  				percentages.push(
+  					<td className="correctAnswer resultsTableCell">{percentage}%</td>
+  				);
+  			} else {
+  				percentages.push(
+  					<td className="incorrectAnswer resultsTableCell">{percentage}%</td>
+  				);
+  			}
+  		}
+
+  		return (
+			<table className="resultsTable">
+				<tbody>
+				  <tr className="tableHeader">
+				    <th className="tableHeader resultsTableHeader studentNameColumn"></th>
+				    <th className="tableHeader resultsTableHeader studentTotalColumn">Student total</th>
+				    {answerHeaders}
+				  </tr>
+				  {table}
+				  <tr>
+				  	<td className="resultsTableCell"></td>
+				  	<td className="resultsTableCell studentTotalColumn"></td>
+				  	{percentages}
+				  </tr>
+			  </tbody>
+			</table>
+		); 
+	}
+});
+
 ReactDOM.render(
-	// <ContentTool cards={cards} />,
 	<TeacherView url="/api/teacher" pollInterval={2000}/>,
 	document.getElementById('content')
 );
