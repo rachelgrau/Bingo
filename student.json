@@ -1,8 +1,8 @@
 {
-    "nextQuestion": "Anotherrr question",
-    "approvedBingo": true,
-    "incorrectCardId": -1,
-    "correctCardId": -1,
+    "nextQuestion": "New question!!",
+    "approvedBingo": false,
+    "incorrectCardId": 14,
+    "correctCardId": 1,
     "cards": [
         {
             "id": 1,

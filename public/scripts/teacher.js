@@ -9,7 +9,7 @@
  * 				- approvedBingo (boolean): whether the student has bingo
  * 				- incorrectCardId (int): 
  * 				- correctCardId (int): 
- * currentQuestionAnswers (array): array of the students' answers to the current question. Each dictionary in the array contains:
+ * currentQuestionAnswers (array): abbreviated version of student responses. An array of the students' answers to the current question. Each dictionary in the array contains:
  * 		- "name" (string): student's name
  * 		- "answer" (string): the student's answer, or "" if no answer yet
  *		- "isCorrect" (boolean): whether the student's answer was correct, or false if still hasn't answered
@@ -140,7 +140,6 @@ var TeacherView = React.createClass({
   				}
   			}
   		}
-  		console.log(this.state.allQuestions);
   	},
   	/* Called when the teacher clicks "next question"
   	   increments the index of the current question */
@@ -193,6 +192,19 @@ var TeacherView = React.createClass({
 			}
 		}
 	},
+	/*
+	 * When the student passes on a question, returns true if that pass was correct (i.e., the correct answer was not on their board)
+	 * and false if they shouldn't have passed (i.e., the correct answer WAS on their board).
+	 * studentBoard (array): array of cards; the student's board
+	 * correctAnswer (string): answer to search board for (if this answer is on their board, they incorrectly passed)
+	 */
+	passWasCorrect: function(studentBoard, correctAnswer) {
+		for (var i=0; i < studentBoard.length; i++) {
+			var card = studentBoard[i];
+			if (card.answer == correctAnswer) return false;
+		}
+		return true;
+	},
   	/*
   	 * Given the student responses from the API, this method returns an array of the student answers
   	 * with 1 dictionary per student, where each dictionary contains "name" "answer" and "isCorrect"
@@ -203,14 +215,24 @@ var TeacherView = React.createClass({
   		for (var i=0; i < studentResponses.length; i++) {
   			var questionStudentIsAnswering = studentResponses[i].question;
   			var currentQuestion = this.state.cards[this.state.indexOfCurrQuestion].question;
-  			var answer = studentResponses[i].answer;
-  			if (questionStudentIsAnswering != currentQuestion) {
-  				answer = "";
-  			}
+  			
   			var curStudentAnswer = {};
   			curStudentAnswer["name"] = studentResponses[i].name;
-  			curStudentAnswer["answer"] =  answer;
-  			curStudentAnswer["isCorrect"] = (studentResponses[i].answer == this.state.cards[this.state.indexOfCurrQuestion].answer);
+
+  			var answer = studentResponses[i].answer;
+  			if (questionStudentIsAnswering != currentQuestion) {
+  				/* We have not yet received the student's answer to this question */
+  				curStudentAnswer["answer"] = "";
+  				curStudentAnswer["isCorrect"] = false;
+  			} else if (studentResponses[i].didPass) {
+  				/* They passed the current question; check if valid */
+  				curStudentAnswer["answer"] = "Pass";
+  				curStudentAnswer["isCorrect"] = this.passWasCorrect(studentResponses[i].cards, this.state.cards[this.state.indexOfCurrQuestion].answer);
+  			} else {
+  				/* We received this student's answer for this question */
+  				curStudentAnswer["answer"] =  studentResponses[i].answer;
+  				curStudentAnswer["isCorrect"] = (studentResponses[i].answer == this.state.cards[this.state.indexOfCurrQuestion].answer);
+  			}
   			answers.push(curStudentAnswer);
   		}
   		return answers;
@@ -459,13 +481,32 @@ var AllAnswers = React.createClass({
 			if (totalQuestionsAnswered > 0) {
 				percentage = Math.floor((curStats["numCorrect"] / totalQuestionsAnswered) * 100);
 			}
-			table.push(
+			if (totalQuestionsAnswered == 0) {
+				table.push(
+					<tr>
+				    	<td className="studentNamePast">{cur.name}</td>
+				    	<td className="fractionScore unanswered">0/0</td> 
+				  		<td className="percentageScore unanswered">–</td> 
+				 	</tr>
+				);
+			} else if (percentage >= 50) {
+				table.push(
+					<tr>
+				    	<td className="studentNamePast">{cur.name}</td>
+				    	<td className="fractionScore correctAnswer">{curStats["numCorrect"]}/{totalQuestionsAnswered}</td> 
+				  		<td className="percentageScore correctAnswer">{percentage}%</td> 
+				 	</tr>
+				);
+			} else {
+				table.push(
 				<tr>
 				    <td className="studentNamePast">{cur.name}</td>
-				    <td className="fractionScore unanswered">{curStats["numCorrect"]}/{totalQuestionsAnswered}</td> 
-				  	<td className="percentageScore unanswered">{percentage}%</td> 
+				    <td className="fractionScore incorrectAnswer">{curStats["numCorrect"]}/{totalQuestionsAnswered}</td> 
+				  	<td className="percentageScore incorrectAnswer">{percentage}%</td> 
 				 </tr>
 			);
+			}
+			
 		}
 		return (
 			<table className="simpleTable">

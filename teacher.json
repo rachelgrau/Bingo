@@ -150,9 +150,9 @@
         { 
             "deviceID": 0,
             "name": "Ricky",
-            "question": "",
-            "answer": "Consult",
-            "didPass": false,
+            "question": "A particular occupation, business, or profession",
+            "answer": "Nomadic",
+            "didPass": true,
             "cards": [
                 {
                     "id": 1,
@@ -302,8 +302,8 @@
         }, { 
             "deviceID": 1,
             "name": "Alex",
-            "question": "Quick and light in movement; moving with ease; agile; active; rapid",
-            "answer": "Nimble",
+            "question": "Widely and unfavorably known",
+            "answer": "",
             "didPass": false,
             "cards": [
                 {
@@ -454,7 +454,7 @@
         }, { 
             "deviceID": 2,
             "name": "Daniel",
-            "question": "To seek advice or information from; ask guidance from",
+            "question": "Widely and unfavorably known",
             "answer": "Blatant",
             "didPass": false,
             "cards": [
