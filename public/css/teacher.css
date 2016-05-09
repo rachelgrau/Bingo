@@ -5,7 +5,7 @@ body {
 .teacherContent {
 	/* Width of current questions + past questions + margin between them */
 	width: 993px;
-	height: 654px;
+	height: 674px;
 	/* Center this stuff */ 
 	margin: auto;
 	margin-top: 30px;
@@ -17,12 +17,11 @@ body {
 	background-color: white;
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 	width: 600px;
-	height: 650px;
+	height: 654px;
 	/* 1/2 Margin between current question & past questions */
 	margin-right: 15px;
-	padding-left: 20px;
-	padding-right: 20px;
-	padding-top: 10px;
+	margin-bottom: 10px;
+	padding: 10px 20px 20px 20px;
 }
 
 .pastQuestions {
@@ -30,12 +29,10 @@ body {
 	background-color: white;
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 	width: 283px;
-	height: 650px;
+	height: 654px;
 	/* 1/2 Margin between current question & past questions */
 	margin-left: 15px;
-	padding-left: 20px;
-	padding-right: 20px;
-	padding-top: 10px;
+	padding: 10px 20px 20px 20px;
 }
 
 h1 {
@@ -157,6 +154,14 @@ h1 {
 /* CURRENT QUESTION ANSWER
  * ----------------------- 
  */
+
+/* Wraps the table rows (not header) of the current question table
+   to make it scrollable */
+.currentQuestionsContainer {
+	height: 300px;
+	overflow-y: scroll;
+}
+
 table.simpleTable {
 	border-collapse: collapse;
 	width: 100%;
@@ -197,6 +202,13 @@ th.tableHeader {
 /* PAST QUESTION STUFF
  * ----------------------- 
  */
+
+/* Wraps the table rows (not header) of the past question table
+   to make it scrollable */
+.pastQuestionsContainer {
+	height: 530px;
+	overflow-y: scroll;
+}
 
 .studentNamePast {
 	padding-top: 10px;

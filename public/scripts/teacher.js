@@ -460,17 +460,26 @@ var CurrentQuestionAnswers = React.createClass({
 				);
 			}
 		}
+    /* First add headers in their own table, then add rest of table in scrollable div */
 		return (
-			<table className="simpleTable">
-				<tbody>
-				  <tr className="tableHeader">
-				    <th className="tableHeader studentName">Student</th>
-				    <th className="tableHeader tableAnswer">Answer</th> 
-				    <th className="tableHeader"></th>
-				  </tr>
-				  {table}
-			  </tbody>
-			</table>
+      <div>
+        <table className="simpleTable">
+            <tbody>
+              <tr className="tableHeader">
+                <th className="tableHeader studentName">Student</th>
+                <th className="tableHeader tableAnswer">Answer</th> 
+                <th className="tableHeader"></th>
+              </tr>
+            </tbody>
+        </table>
+        <div className="currentQuestionsContainer">
+    			<table className="simpleTable">
+    				<tbody>
+    				  {table}
+    			  </tbody>
+    			</table>
+        </div>
+      </div>
 		);
 	}
 });
@@ -591,11 +600,13 @@ var AllAnswers = React.createClass({
 			}
 		}
 		return (
-			<table className="simpleTable">
-				<tbody>
-					{table}
-				</tbody>
-			</table>
+      <div className="pastQuestionsContainer">
+  			<table className="simpleTable">
+  				<tbody>
+  					{table}
+  				</tbody>
+  			</table>
+      </div>
 		);
 	}
 });
