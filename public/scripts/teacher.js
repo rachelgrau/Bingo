@@ -6,9 +6,8 @@
  * responsesForStudents (dictionary): dictionary mapping student deviceIDs to their individualized responses
  * 		- each response has:
  * 				- nextQuestion (string): the current question
- * 				- approvedBingo (boolean): whether the student has bingo
- * 				- incorrectCardIds (array): array of any incorrect cards the student has
- * 				- correctCardIds (array): array of correct card ids (maps to incorrectCardIds)
+ *        - cards (array): the student's board
+ *        - gameOver (boolean): whether the game is over
  * currentQuestionAnswers (array): abbreviated version of student responses. An array of the students' answers to the current question. Each dictionary in the array contains:
  * 		- "name" (string): student's name
  * 		- "answer" (string): the student's answer, or "" if no answer yet
@@ -90,18 +89,29 @@ var TeacherView = React.createClass({
     		}
     		/* Read in the student responses for current question */
     		this.addNewStudents(data["studentResponses"]);
-	    	var currentQuestionAnswers = this.getCurrentAnswers(data["studentResponses"]);
-	    	var currentQuestionStats = this.getCurrentStats(data["studentResponses"]);
-	    	this.setState({
-	      		currentQuestionAnswers: currentQuestionAnswers,
-	      		currentQuestionStats: currentQuestionStats
-	      	});
+        this.update(data["studentResponses"]);
 	      }.bind(this),
 	      error: function(xhr, status, err) {
 	        console.error(this.props.url, status, err.toString());
 	      }.bind(this)
 	    });
   	},
+    /*
+     * Update (very important)
+     * ------------------------
+     * Given "studentResponses" from API ... updates the following: 
+     *   - the students' answers to the current question (this.state.currentQuestionAnswers)
+     *   - the stats for the current question (this.state.currentQuestionStats)
+     *   - student responses: in particular, updates their boards (saying whether they got current question correct)
+     */
+    update: function(studentResponses) {
+      var currentQuestionAnswers = this.getCurrentAnswers(studentResponses);
+      var currentQuestionStats = this.getCurrentStats(studentResponses);
+      this.setState({
+          currentQuestionAnswers: currentQuestionAnswers,
+          currentQuestionStats: currentQuestionStats
+      });
+    },
   	componentDidMount: function() {
     	this.loadCardsFromServer();
     	setInterval(this.loadCardsFromServer, this.props.pollInterval);
@@ -134,7 +144,7 @@ var TeacherView = React.createClass({
   				if (currEntry.name == currStudentName) {
   					/* Add to their list of answers */
   					var answerDict = {
-  						"question": questionToSave,
+  					"question": questionToSave,
 						"answer": currAnswer,
 						"wasCorrect": wasCorrect
   					}
@@ -221,14 +231,12 @@ var TeacherView = React.createClass({
 					"numIncorrect": 0
 				};
 				this.state.allQuestionsByStudent.push(newStudent);
-        /* 2. Create entry in allQuestionsByStudent */
+        /* 2. Create entry in responsesForStudents */
         var newStudentResponse = {};
         var deviceID = studentResponses[i].deviceID;
         var currentQuestion = this.state.cards[this.state.indexOfCurrQuestion].question;
         newStudentResponse["nextQuestion"] = currentQuestion;
-        newStudentResponse["approvedBingo"] = false;
-        newStudentResponse["incorrectCardIds"] = [];
-        newStudentResponse["correctCardIds"] = [];
+        newStudentResponse["cards"] = studentResponses[i].cards;
         newStudentResponse["gameOver"] = this.state.gameOver;
         this.state.responsesForStudents[deviceID] = newStudentResponse;
 			}
@@ -257,13 +265,54 @@ var TeacherView = React.createClass({
     }
     return -1;
   },
+  /*
+   * Given a student's device ID and the ID of a card on their board, 
+   * sets that card as "teacherApproved" in this.state.responsesForStudents
+   * for that particular student. 
+   */
+  approveCardForStudent: function(deviceID, cardID) {
+    var studentCards = this.state.responsesForStudents[deviceID].cards;
+    for (var i=0; i < studentCards.length; i++) {
+      var currCard = studentCards[i];
+      if (currCard.id == cardID) {
+        currCard["teacherApproved"] = true;
+        studentCards[i] = currCard;
+        break;
+      }
+    }
+    this.state.responsesForStudents[deviceID].cards = studentCards;
+  },
+  /*
+   * Updates the given student's board in this.state.responsesForStudents
+   * so that the card they got wrong holds the correct answer + question they
+   * were answering. 
+   * 
+   * deviceID: ID of student that got question wrong
+   * studentAnswer (string): whatever the student answered (that was incorrect)
+   * correctCardID (int): ID of the card they should have answered
+   * question (string): question they answered incorrectly 
+   */
+  markCardIncorrectForStudent: function(deviceID, studentAnswer, correctCardID, question) {
+    var studentCards = this.state.responsesForStudents[deviceID].cards;
+    for (var i=0; i < studentCards.length; i++) {
+      var currCard = studentCards[i];
+      if (currCard.answer == studentAnswer) {
+        currCard["teacherApproved"] = false;
+        currCard["correctCardID"] = correctCardID;
+        currCard["questionIncorrectlyAnswered"] = question;
+        studentCards[i] = currCard;
+        break;
+      }
+    }
+    this.state.responsesForStudents[deviceID].cards = studentCards;
+  },
   	/*
   	 * Given the student responses from the API, this method returns an array of the student answers
   	 * with 1 dictionary per student, where each dictionary contains "name" "answer" and "isCorrect"
   	 * (What this.state.currentQuestionAnswers should be)
      * 
      * Along the way, it also updates this.state.responsesForStudent based on their current
-     * responses. 
+     * responses (updates each student's "cards" by marking cards as teacherApproved or not)
   	 */
   	getCurrentAnswers: function (studentResponses) {
   		var answers = [];
@@ -276,44 +325,29 @@ var TeacherView = React.createClass({
 
   			var answer = studentResponses[i].answer;
   			if (questionStudentIsAnswering != currentQuestion) {
-  				/* We have not yet received the student's answer to this question */
+  				/* 1) NOT YET ANSWERED: We have not yet received the student's answer to this question */
   				curStudentAnswer["answer"] = "";
   				curStudentAnswer["isCorrect"] = false;
   			} else if (studentResponses[i].didPass) {
-  				/* They passed the current question; check if valid */
+  				/* 2) PASSED: They passed the current question; check if valid */
   				curStudentAnswer["answer"] = "Pass";
   				curStudentAnswer["isCorrect"] = this.passWasCorrect(studentResponses[i].cards, this.state.cards[this.state.indexOfCurrQuestion].answer);
   			} else {
   				/* We received this student's answer for this question */
   				curStudentAnswer["answer"] =  studentResponses[i].answer;
           if (studentResponses[i].answer == this.state.cards[this.state.indexOfCurrQuestion].answer) {
+            /* 3) CORRECT: Mark this card in the student's board as teacher approved */
             curStudentAnswer["isCorrect"] = true;
+            this.approveCardForStudent(studentResponses[i].deviceID, this.state.cards[this.state.indexOfCurrQuestion].id);
           } else {
+            /* 4) INCORRECT: Mark this card in student's board as NOT teacher approved, give correct answer */
             curStudentAnswer["isCorrect"] = false;
-            /* If they've answered, update incorrectCardId in responses for student */
-            if (answer.length > 0) {
-              var deviceId = studentResponses[i].deviceID;
-              var incorrectId = this.getCardIdFromAnswer(answer);
-              var correctCardId = this.state.cards[this.state.indexOfCurrQuestion].id;
-              var response = this.state.responsesForStudents[deviceId];
-              /* Only add if it's not already been added */
-              var alreadyAdded = false;
-              for (var j=0; j < response.incorrectCardIds.length; j++) {
-                if (response.incorrectCardIds[j] == incorrectId) {
-                  alreadyAdded = true;
-                  break;
-                }
-              }
-              if (!alreadyAdded) {
-                response.incorrectCardIds.push(incorrectId);
-                response.correctCardIds.push(correctCardId);
-                this.state.responsesForStudents[deviceId]=response;
-              }
-            }
+            this.markCardIncorrectForStudent(studentResponses[i].deviceID, studentResponses[i].answer, this.state.cards[this.state.indexOfCurrQuestion].id, currentQuestion);
           }
   			}
   			answers.push(curStudentAnswer);
   		}
+
   		return answers;
   	},
   	/*
