@@ -11,8 +11,7 @@
  * hasBingo (boolean): false until the student gets bingo correctly!
  * incorrectCardIds (array): if the student has at least 1 incorrect answer, this array holds the IDs of all the incorrect cards on their board. 
  * correctCardIds (array): if the student has at least 1 incorrect answer, this array holds the IDs of all the correct answers (indices match up with incorrectIds)
- * incorrectCardToDisplay (int): if you are going to display an incorrect card, this is the ID of that card 
- * correctCardToDisplay (int): if you are going to display an incorrect card, this is the ID of the correct one
+ * indexOfIncorrectCard (int): if there is an incorrect card to display, this variable holds the index (in state.cards) of that card
  */
 var StudentView = React.createClass({
 	getInitialState: function() {
@@ -26,10 +25,7 @@ var StudentView = React.createClass({
 			readyForNextQuestion: false,
 			numBingoChecksLeft: 3,
 			hasBingo: false, 
-			incorrectCardIds: [],
-			correctCardIds: [], 
-			incorrectCardToDisplay: -1,
-			correctCardToDisplay: -1
+			indexOfIncorrectCard: -1
 		};
 	},
 	loadCardsFromServer: function() {
@@ -43,22 +39,8 @@ var StudentView = React.createClass({
 	      	 */
 	      	var cards = this.state.cards;
 	      	if (cards.length == 0) {
-    			cards = this.shuffleCards(data["cards"]);
-    		}
-    		/* Find incorrect index and correct index from ids */
-    		var incorrectId= data["incorrectCardId"];
-    		var correctId = data["correctCardId"];
-    		var incorrectIndex = -1;
-    		var correctIndex = -1;
-    		if (incorrectId != -1) {
-    			for (var i=0; i<cards.length; i++) {
-    				if (cards[i].id == incorrectId) {
-    					incorrectIndex = i;
-    				}
-    				if (cards[i].id == correctId) {
-    					correctIndex = i;
-    				}
-    			}
+    			// cards = this.shuffleCards(data["cards"]);
+    			cards = data["cards"];
     		}
 
     		/* See if it's time for next question */
@@ -234,7 +216,7 @@ var StudentView = React.createClass({
     /* Pre-condition: The students' chips make at least 1 valid Bingo formation. 
      * This method checks to see if all the chips in at least 1 of the student's Bingo 
      * rows were correctly placed. If all of the Bingo rows have at least one mistake, then 
-     * this method will return the index in state.incorrectCardIds where an incorrect card is.
+     * this method will return the index in this.state.cards where an incorrect card is.
      * if there were no mistakes, then returns -1.
      */
     hasIncorrectAnswer: function() {
@@ -261,11 +243,9 @@ var StudentView = React.createClass({
 					}
 					/* Check if chip was incorrectly placed on this card */
 					var curCard = this.state.cards[currIndex];
-					for (var j=0; j < this.state.incorrectCardIds.length; j++) {
-						if (curCard.id == this.state.incorrectCardIds[j]) {
-							incorrectIndex = j;
-							currRowHasBingo = false; /* Sorry, not actually bingo! */
-						}
+					if (!curCard.teacherApproved) {
+						incorrectIndex = currIndex;
+						currRowHasBingo = false; /* Sorry, not actually bingo! */
 					}
 				}
 			} 
@@ -290,11 +270,9 @@ var StudentView = React.createClass({
 					}
 					/* Check if chip was incorrectly placed on this card */
 					var curCard = this.state.cards[currIndex];
-					for (var j=0; j < this.state.incorrectCardIds.length; j++) {
-						if (curCard.id == this.state.incorrectCardIds[j]) {
-							incorrectIndex = j;
-							currColHasBingo = false; /* Sorry, not actually bingo! */
-						}
+					if (!curCard.teacherApproved) {
+						incorrectIndex = currIndex;
+						currColHasBingo = false; /* Sorry, not actually bingo! */
 					}
 				}
 			} 
@@ -315,12 +293,9 @@ var StudentView = React.createClass({
 				if (currIndex > wildCardIndex) currIndex--;
 				if (currIndex == wildCardIndex) continue;
 				var curCard = this.state.cards[currIndex];
-				/* Check if chip was incorrectly placed on this card */
-				for (var j=0; j < this.state.incorrectCardIds.length; j++) {
-					if (curCard.id == this.state.incorrectCardIds[j]) {
-						incorrectIndex = j;
-						diagonalHasBingo = false; /* Sorry, not actually bingo! */
-					}
+				if (!curCard.teacherApproved) {
+					incorrectIndex = currIndex;
+					diagonalHasBingo = false; /* Sorry, not actually bingo! */
 				}
 			}
 			if (diagonalHasBingo) return -1;
@@ -338,12 +313,9 @@ var StudentView = React.createClass({
 				if (currIndex > wildCardIndex) currIndex--;
 				if (currIndex == wildCardIndex) continue;
 				var curCard = this.state.cards[currIndex];
-				/* Check if chip was incorrectly placed on this card */
-				for (var j=0; j < this.state.incorrectCardIds.length; j++) {
-					if (curCard.id == this.state.incorrectCardIds[j]) {
-						incorrectIndex = j;
-						upDiagonalHasBingo = false; /* Sorry, not actually bingo! */
-					}
+				if (!curCard.teacherApproved) {
+					incorrectIndex = currIndex;
+					upDiagonalHasBingo = false; /* Sorry, not actually bingo! */
 				}
 			}
 			if (upDiagonalHasBingo) return -1;
@@ -372,15 +344,19 @@ var StudentView = React.createClass({
     		case "checkBingo":
     			var numBoardChecksLeft = this.state.numBingoChecksLeft - 1;
     			/* Check if they have bingo */
-    			var incorrectAnswerIndex = this.hasIncorrectAnswer();
-    			if (incorrectAnswerIndex == -1) {
+    			var incorrectCardIndex = this.hasIncorrectAnswer();
+    			if (incorrectCardIndex == -1) {
     				this.setState({hasBingo: true, numBingoChecksLeft: numBoardChecksLeft, isModalOpen: false, modalType:"", selectedCardIndex: -1, readyForNextQuestion: true});
     				this.openModal("youGotBingo");    				
     			} else {
     				/* Get the IDs of the incorrect and correct card */
-    				var incorrectId = this.state.incorrectCardIds[incorrectAnswerIndex];
-    				var correctId = this.state.correctCardIds[incorrectAnswerIndex];
-    				this.setState({hasBingo: false, numBingoChecksLeft: numBoardChecksLeft, isModalOpen: false, modalType:"", selectedCardIndex: -1, readyForNextQuestion: true, incorrectCardToDisplay: incorrectId, correctCardToDisplay: correctId});
+    				this.setState({
+    					hasBingo: false, 
+    					numBingoChecksLeft: numBoardChecksLeft, 
+    					isModalOpen: false, modalType:"", 
+    					selectedCardIndex: -1, 
+    					readyForNextQuestion: true, 
+    					indexOfIncorrectCard: incorrectCardIndex });
     				this.openModal("incorrect");
     			}
         		break;
@@ -390,11 +366,18 @@ var StudentView = React.createClass({
         		break;
         	case "incorrect":
         		var cards = this.state.cards;
-        		var incorrectCardIndex = this.getCardIndexFromId(this.state.incorrectCardToDisplay);
-        		var correctCardIndex = this.getCardIndexFromId(this.state.correctCardToDisplay);
-        		cards[incorrectCardIndex].hasChip = false;
+        		var incorrectCard = this.state.cards[this.state.indexOfIncorrectCard];
+        		var correctCardIndex = this.getCardIndexFromId(incorrectCard.correctCardID);
+        		cards[this.state.indexOfIncorrectCard].hasChip = false;
+        		cards[this.state.indexOfIncorrectCard].correctCardID = -1;
+        		cards[this.state.indexOfIncorrectCard].questionIncorrectlyAnswered = "";
         		cards[correctCardIndex].hasChip = true;
-        		this.setState({isModalOpen: false, cards: cards, modalType:"", selectedCardIndex: -1, incorrectCardToDisplay: -1, correctCardToDisplay: -1});
+        		/* Set the card as teacher approved, clear other fields associated w/ being incorrect */
+        		cards[correctCardIndex].teacherApproved = true;
+        		cards[correctCardIndex].correctCardID = -1;
+        		cards[correctCardIndex].questionIncorrectlyAnswered = "";
+        		this.setState({isModalOpen: false, cards: cards, modalType:"", selectedCardIndex: -1, indexOfIncorrectCard: -1});
+        		console.log(this.state.cards);
         		break;
     		default:
     			/* Close modal */
@@ -470,16 +453,18 @@ var StudentView = React.createClass({
 
   		/* Only display a card as incorrect if they decided that they wanted to check bingo (i.e., we are currently displaying the incorrect modal)
   		 * Otherwise keep it hidden for now (by setting incorrect index to -1). */
-  		var incorrectCardIndex = this.getCardIndexFromId(this.state.incorrectCardToDisplay);
-  		var correctCardIndex = this.getCardIndexFromId(this.state.correctCardToDisplay);
+  		var incorrectCardIndex = this.state.indexOfIncorrectCard;
+  		var incorrectCard = {};
   		var incorrectAnswer = "";
   		var correctAnswer = "";
+  		var correctCardIndex = -1;
   		var incorrectlyAnsweredQuestion = "";
-  		if ((incorrectCardIndex != -1) && (correctCardIndex != -1)) {
-  			incorrectAnswer = this.state.cards[incorrectCardIndex].answer;
+  		if (incorrectCardIndex != -1) {
+  			incorrectCard = this.state.cards[incorrectCardIndex];
+  			incorrectAnswer = incorrectCard.answer;
+  			correctCardIndex = this.getCardIndexFromId(incorrectCard.correctCardID);
+  			incorrectlyAnsweredQuestion = incorrectCard.questionIncorrectlyAnswered;
   			correctAnswer = this.state.cards[correctCardIndex].answer;
-  			/* Get the question too */
-  			question = this.getQuestionAnsweredWithId(this.state.incorrectCardToDisplay);
   		}
   		/* If they happen to have incorrectly put a chip on the "correct" answer, change message */
   		var incorrectButtonMessage = "Place chip on '" + correctAnswer + "'";

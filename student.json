@@ -1,135 +1,159 @@
 {
-    "nextQuestion": "2",
-    "approvedBingo": false,
-    "incorrectCardIds": [11],
-    "correctCardIds": [8],
+    "nextQuestion": "3",
+    "gameOver": false,
     "cards": [
         {
             "id": 1,
             "index": 1,
             "answer": "Blatant",
-            "hasChip": true
+            "hasChip": true,
+            "teacherApproved": true
         },
         {
             "id": 2,
             "index": 2,
             "answer": "Docile",
-            "hasChip": true
+            "hasChip": true,
+            "teacherApproved": false,
+            "questionIncorrectlyAnswered": "To take up or go on with again after interruption; continue",
+            "correctCardID": 6 
         },
         {
             "id": 3,
             "index": 3,
             "answer": "Hybrid",
-            "hasChip": true
+            "hasChip": true,
+            "teacherApproved": true
         },
         {
             "id": 4,
             "index": 4,
             "answer": "Nomadic",
-            "hasChip": true
+            "hasChip": true,
+            "teacherApproved": true
         },
         {
             "id": 5,
             "index": 5,
             "answer": "Persist",
-            "hasChip": true
+            "hasChip": true,
+            "teacherApproved": true
         },
         {
             "id": 6,
             "index": 6,
             "answer": "Resume",
-            "hasChip": true
+            "hasChip": false,
+            "teacherApproved": false
         },
         {
             "id": 7,
             "index": 7,
             "answer": "Wrath",
-            "hasChip": true
+            "hasChip": false,
+            "teacherApproved": false
         },
         {
             "id": 8,
             "index": 8,
-            "answer": "Affliction"
+            "answer": "Affliction",
+            "teacherApproved": false
         },
         {
             "id": 9,
             "index": 9,
-            "answer": "Endure"
+            "answer": "Endure",
+            "teacherApproved": false
         },
         {
             "id": 10,
             "index": 10,
-            "answer": "Dependent"
+            "answer": "Dependent",
+            "teacherApproved": false
         },
         {
             "id": 11,
             "index": 11,
-            "answer": "Stodgy"
+            "answer": "Stodgy",
+            "teacherApproved": true
         },
         {
             "id": 12,
             "index": 12,
-            "answer": "Notorious"
+            "answer": "Notorious",
+            "teacherApproved": false
         },
         {
             "id": 13,
             "index": 13,
-            "answer": "Irate"
+            "answer": "Irate",
+            "teacherApproved": false
         },
         {
             "id": 14,
             "index": 14,
-            "answer": "Grim"
+            "answer": "Grim",
+            "teacherApproved": false
         },
         {
             "id": 15,
             "index": 15,
-            "answer": "Legacy"
+            "answer": "Legacy",
+            "teacherApproved": false
         },
         {
             "id": 16,
             "index": 16,
-            "answer": "Vindictive"
+            "answer": "Vindictive",
+            "teacherApproved": false
         },
         {
             "id": 17,
             "index": 17,
-            "answer": "Flaw"
+            "answer": "Flaw",
+            "teacherApproved": false
         },
         {
             "id": 18,
             "index": 18,
-            "answer": "Trivial"
+            "answer": "Trivial",
+            "teacherApproved": false
         },
         {
             "id": 19,
             "index": 19,
-            "answer": "Consult"
+            "answer": "Consult",
+            "teacherApproved": false
         },
         {
             "id": 20,
             "index": 20,
-            "answer": "Nimble"
+            "answer": "Nimble",
+            "teacherApproved": false
         },
         {
             "id": 21,
             "index": 21,
-            "answer": "Homage"
+            "answer": "Homage",
+            "teacherApproved": false
         },
         {
             "id": 22,
             "index": 22,
-            "answer": "Sham"
+            "answer": "Sham",
+            "teacherApproved": false
         },
         {
             "id": 23,
             "index": 23,
-            "answer": "Capricious"
+            "answer": "Capricious",
+            "teacherApproved": false
         },
         {
             "id": 24,
             "index": 24,
-            "answer": "Perjury"
+            "answer": "Perjury",
+            "teacherApproved": false
         }
     ]
 }
