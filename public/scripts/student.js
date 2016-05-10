@@ -2,30 +2,34 @@
  * -------
  * cards (array): an array of this students bingo cards, in the order that they appear on his/her board.
  * question (string): the current question, or "" if none.
+ * myAnswers (dictionary): map of questions to the id of the card that this student answered that question with ("question": cardId)
  * modalType (string): the type of modal to display, or "" if none. Should be set to something before chanign isModalOpen to true.
  * isModalOpen (boolean): whether or not a modal is currently being displayed.
  * selectedCardIndex (int): when a student clicks on a card, this holds the index in |cards| of the card they selected. Default value is -1 (no selection)
  * readyForNextQuestion (boolean): false until the student answers the current question, then becomes true. When a new question arrives, turns to false again unitl they answer.
  * numBingoChecksLeft (int): the number of chances this student has left to check if they have bingo. Starts at 3. 
- * approvedBingo (boolean): true when the teacher notices that the student correctly has bingo 
  * hasBingo (boolean): false until the student gets bingo correctly!
- * incorrectCardIndex (int): if the student has an incorrect answer, this is the index of one incorrect card on their board. At all other times it's -1.
- * correctCardIndex (int): if the student has an incorrect answer, this is the index of the correct answer to that question on their board. At all other times it's -1.
+ * incorrectCardIds (array): if the student has at least 1 incorrect answer, this array holds the IDs of all the incorrect cards on their board. 
+ * correctCardIds (array): if the student has at least 1 incorrect answer, this array holds the IDs of all the correct answers (indices match up with incorrectIds)
+ * incorrectCardToDisplay (int): if you are going to display an incorrect card, this is the ID of that card 
+ * correctCardToDisplay (int): if you are going to display an incorrect card, this is the ID of the correct one
  */
 var StudentView = React.createClass({
 	getInitialState: function() {
 		return {
 			cards:[], 
 			question:"", 
+			myAnswers: {},
 			modalType:"", 
 			isModalOpen: false, 
 			selectedCardIndex: -1, 
 			readyForNextQuestion: false,
 			numBingoChecksLeft: 3,
-			approvedBingo: false,
 			hasBingo: false, 
-			incorrectCardIndex: -1,
-			correctCardIndex: -1
+			incorrectCardIds: [],
+			correctCardIds: [], 
+			incorrectCardToDisplay: -1,
+			correctCardToDisplay: -1
 		};
 	},
 	loadCardsFromServer: function() {
@@ -67,9 +71,8 @@ var StudentView = React.createClass({
     		/* Update state! */
 	      	this.setState({
 	      		question: data["nextQuestion"], 
-	      		incorrectCardIndex: incorrectIndex,
-	      		correctCardIndex: correctIndex,
-	      		approvedBingo: data["approvedBingo"],
+	      		incorrectCardIds: data["incorrectCardIds"],
+	      		correctCardIds: data["correctCardIds"],
 	      		cards: cards,
 	      		readyForNextQuestion: readyForNext
 	      	});
@@ -79,11 +82,6 @@ var StudentView = React.createClass({
 	      }.bind(this)
 	    });
   	},
-	/* Dummy function that will be eventually done on teacher side. 
-	   Sets the incorrectCardIndex and returns whether or not the student successfully got bingo */
-	hasBingo: function(cards) {
-		return false;
-	},
 	shuffleCards: function(cards) {
 		if (!cards) return [];
 		var currentIndex = cards.length, temporaryValue, randomIndex;
@@ -99,59 +97,64 @@ var StudentView = React.createClass({
   		}
 		return cards;
 	},
-	/* Returns true if the student currently has bingo (based on where 
-	   their chips are placed, and not whether the chips were placed 
-	   correctly), and false if bingo is not possible with current chip 
-	   layout */
-	bingoButtonShouldActivate: function() {
+	/* 
+	 * Returns true if the given row has a chip on every spot, 
+	 * and false if any chips are missing.
+	 */
+	rowHasBingo: function(row) {
 		var numPerRow = Math.sqrt(this.state.cards.length + 1);
 		var wildCardRow = Math.floor(numPerRow/2);
-		/* Check horizontal */
-		for (var row=0; row<numPerRow; row++) {
-			/* Account for row with wild card (has one less real card) */
-			var numCardsInRow = numPerRow;
-			if (row == wildCardRow) {
-				numCardsInRow--; 
-			}
-			var currRowHasBingo = true;
-			for (var col=0; col<numCardsInRow; col++) {
-				var currIndex = row * numPerRow + col;
-				if (row > wildCardRow) {
-					currIndex--;
-				}
-				/* Skipped wild card */
-				var currentCard = this.state.cards[currIndex];
-				if (!currentCard["hasChip"]) {
-					currRowHasBingo = false;
-					break;
-				}
-			}
-			if (currRowHasBingo) return true;
+		/* Account for row with wild card (has one less real card) */
+		var numCardsInRow = numPerRow;
+		if (row == wildCardRow) {
+			numCardsInRow--; 
 		}
-
-		/* Check vertical */
+		var currRowHasBingo = true;
+		for (var col=0; col<numCardsInRow; col++) {
+			var currIndex = row * numPerRow + col;
+			if (row > wildCardRow) {
+				currIndex--;
+			}
+			/* Skipped wild card */
+			var currentCard = this.state.cards[currIndex];
+			if (!currentCard["hasChip"]) {
+				return false;
+			}
+		}
+		if (currRowHasBingo) return true;
+	},
+	/* 
+	 * Returns true if the given col has a chip on every spot, 
+	 * and false if any chips are missing.
+	 */
+	colHasBingo: function(col) {
+		var numPerRow = Math.sqrt(this.state.cards.length + 1);
+		var currColHasBingo = true; 
 		var wildCardIndex = Math.floor(this.state.cards.length/2);
-		for (var col=0; col<numPerRow; col++) {
-			var currColHasBingo = true; 
-			for (var row=0; row<numPerRow; row++) {
-				/* Check col i */
-				currIndex = col + (row*numPerRow);
-				if (currIndex == wildCardIndex) {
-					continue;
-				} else if (currIndex > wildCardIndex) {
-					currIndex--;
-				}
-				var currentCard = this.state.cards[currIndex];
-				if (!currentCard["hasChip"]) {
-					currColHasBingo = false;
-					break;
-				}
+		for (var row=0; row<numPerRow; row++) {
+			/* Check col i */
+			var currIndex = col + (row*numPerRow);
+			if (currIndex == wildCardIndex) {
+				continue;
+			} else if (currIndex > wildCardIndex) {
+				currIndex--;
 			}
-			if (currColHasBingo) return true;
+			var currentCard = this.state.cards[currIndex];
+			if (!currentCard["hasChip"]) {
+				currColHasBingo = false;
+				break;
+			}
 		}
-
-		/* Check diagonal from top left to bottom right corners */
-		var downDiagonalHasBingo = true;
+		if (currColHasBingo) return true;
+	},
+    /* 
+	 * Returns true if the diagonal from top left to bottom right has a chip 
+	 * on every spot, and false if it's missing any.
+	 */
+	downDiagonalHasBingo: function() {
+	    var numPerRow = Math.sqrt(this.state.cards.length + 1);		
+	    var wildCardIndex = Math.floor(this.state.cards.length/2);
+	    var downDiagonalHasBingo = true;
 		for (var i=0; i<numPerRow; i++) {
 			var currIndex = i + (i * numPerRow);
 			if (currIndex > wildCardIndex) currIndex--;
@@ -163,8 +166,14 @@ var StudentView = React.createClass({
 			}
 		}
 		if (downDiagonalHasBingo) return true;
-
-		/* Check diagonal from top right to bottom left corners */
+	},
+	/* 
+	 * Returns true if the diagonal from top right to bottom left has a chip 
+	 * on every spot, and false if it's missing any.
+	 */
+	upDiagonalHasBingo: function() {
+		var numPerRow = Math.sqrt(this.state.cards.length + 1);		
+	    var wildCardIndex = Math.floor(this.state.cards.length/2);
 		var upDiagonalHasBingo = true;
 		for (var i=(numPerRow-1); i>=0; i--) {
 			var currRow = (numPerRow-1) - i;
@@ -178,6 +187,32 @@ var StudentView = React.createClass({
 			}
 		}
 		if (upDiagonalHasBingo) return true;
+	},
+	/* Returns true if the student currently has bingo (based on where 
+	   their chips are placed, and not whether the chips were placed 
+	   correctly), and false if bingo is not possible with current chip 
+	   layout */
+	bingoButtonShouldActivate: function() {
+		var numPerRow = Math.sqrt(this.state.cards.length + 1);
+		var wildCardRow = Math.floor(numPerRow/2);
+		var wildCardIndex = Math.floor(this.state.cards.length/2);
+		/* Check horizontal */
+		for (var row=0; row<numPerRow; row++) {
+			/* Account for row with wild card (has one less real card) */
+			if (this.rowHasBingo(row)) {
+				return true;
+			}
+		}
+		/* Check vertical */
+		for (var col=0; col<numPerRow; col++) {
+			if (this.colHasBingo(col)) {
+				return true;
+			}
+		}
+		/* Check diagonal from top left to bottom right corners */
+		if (this.downDiagonalHasBingo()) return true;
+		/* Check diagonal from top right to bottom left corners */
+		if (this.upDiagonalHasBingo()) return true; 
 
 		return false;
 	},
@@ -196,8 +231,129 @@ var StudentView = React.createClass({
   	openModal: function(modalType) {
         this.setState({modalType: modalType, isModalOpen: true});
     },
+    /* Pre-condition: The students' chips make at least 1 valid Bingo formation. 
+     * This method checks to see if all the chips in at least 1 of the student's Bingo 
+     * rows were correctly placed. If all of the Bingo rows have at least one mistake, then 
+     * this method will return the index in state.incorrectCardIds where an incorrect card is.
+     * if there were no mistakes, then returns -1.
+     */
+    hasIncorrectAnswer: function() {
+    	var incorrectIndex = -1;
+    	var numPerRow = Math.sqrt(this.state.cards.length + 1);
+		var wildCardRow = Math.floor(numPerRow/2);
+		var wildCardIndex = Math.floor(this.state.cards.length/2);
+		/* CHECK HORIZONTAL 
+    	 * ----------------- */
+		for (var row=0; row<numPerRow; row++) {
+			/* See if there are chips on every card in this row */
+			var currRowHasBingo = this.rowHasBingo(row);
+			if (currRowHasBingo) {
+				/* If so, check if all chips in row were CORRECTLY placed */
+				var numCardsInRow = numPerRow;
+				if (row == wildCardRow) {
+					numCardsInRow--; 
+				}
+				for (var i=0; i<numCardsInRow; i++) {
+					/* Get current card */
+					var currIndex = row * numPerRow + i;
+					if (row > wildCardRow) {
+						currIndex--;
+					}
+					/* Check if chip was incorrectly placed on this card */
+					var curCard = this.state.cards[currIndex];
+					for (var j=0; j < this.state.incorrectCardIds.length; j++) {
+						if (curCard.id == this.state.incorrectCardIds[j]) {
+							incorrectIndex = j;
+							currRowHasBingo = false; /* Sorry, not actually bingo! */
+						}
+					}
+				}
+			} 
+			/* If all the chips were correctly placed, then currRowHasBingo will still be true! */
+			if (currRowHasBingo) return -1; /* Successful bingo! */
+		}
+
+	    /* CHECK VERTICAL 
+    	 * ----------------- */
+    	for (var col=0; col<numPerRow; col++) {
+			/* See if there are chips on every card in this row */
+			var currColHasBingo = this.colHasBingo(col);
+			if (currColHasBingo) {
+				/* If so, check if all chips in row were CORRECTLY placed */
+				for (var i=0; i<numPerRow; i++) {
+					/* Get current card */
+					var currIndex = col + (i*numPerRow);
+					if (currIndex == wildCardIndex) {
+						continue;
+					} else if (currIndex > wildCardIndex) {
+						currIndex--;
+					}
+					/* Check if chip was incorrectly placed on this card */
+					var curCard = this.state.cards[currIndex];
+					for (var j=0; j < this.state.incorrectCardIds.length; j++) {
+						if (curCard.id == this.state.incorrectCardIds[j]) {
+							incorrectIndex = j;
+							currColHasBingo = false; /* Sorry, not actually bingo! */
+						}
+					}
+				}
+			} 
+			/* If all the chips were correctly placed, then currRowHasBingo will still be true! */
+			if (currColHasBingo) return -1; /* Successful bingo! */
+		}
+
+		/* CHECK UP DIAGONAL
+		 * ------------------ */
+		 var diagonalHasBingo = true;
+		 if (this.upDiagonalHasBingo()) {
+		 	var numPerRow = Math.sqrt(this.state.cards.length + 1);		
+	    	var wildCardIndex = Math.floor(this.state.cards.length/2);
+			var upDiagonalHasBingo = true;
+			for (var i=(numPerRow-1); i>=0; i--) {
+				var currRow = (numPerRow-1) - i;
+				var currIndex = (currRow * numPerRow) + i;
+				if (currIndex > wildCardIndex) currIndex--;
+				if (currIndex == wildCardIndex) continue;
+				var curCard = this.state.cards[currIndex];
+				/* Check if chip was incorrectly placed on this card */
+				for (var j=0; j < this.state.incorrectCardIds.length; j++) {
+					if (curCard.id == this.state.incorrectCardIds[j]) {
+						incorrectIndex = j;
+						diagonalHasBingo = false; /* Sorry, not actually bingo! */
+					}
+				}
+			}
+			if (diagonalHasBingo) return -1;
+		 }
+
+		 /* CHECK DOWN DIAGONAL
+		  * -------------------- */
+		 var upDiagonalHasBingo = true;
+		 if (this.downDiagonalHasBingo()) {
+		 	var numPerRow = Math.sqrt(this.state.cards.length + 1);		
+	   	 	var wildCardIndex = Math.floor(this.state.cards.length/2);
+	    	var downDiagonalHasBingo = true;
+			for (var i=0; i<numPerRow; i++) {
+				var currIndex = i + (i * numPerRow);
+				if (currIndex > wildCardIndex) currIndex--;
+				if (currIndex == wildCardIndex) continue;
+				var curCard = this.state.cards[currIndex];
+				/* Check if chip was incorrectly placed on this card */
+				for (var j=0; j < this.state.incorrectCardIds.length; j++) {
+					if (curCard.id == this.state.incorrectCardIds[j]) {
+						incorrectIndex = j;
+						upDiagonalHasBingo = false; /* Sorry, not actually bingo! */
+					}
+				}
+			}
+			if (upDiagonalHasBingo) return -1;
+		 }
+
+    	/* If you get here, then they didn't have any successful bingos. */
+    	return incorrectIndex;
+    },
     /* Called when the user clicks "yes" to close the modal. Check what the curent modal type is and act accordingly.
-     * "confirmChipPlacement": place a chip on the card they selected
+     * "confirmChipPlacement": place a chip on the card they selected, and update our map of questions --> my answers 
      * "checkBingo": check if they have bingo
      * "skip": don't place any chips, just become ready for next question
      * "incorrect": place a chip on the correct answer, and set incorrectCardIndex to -1
@@ -208,17 +364,23 @@ var StudentView = React.createClass({
         		/* Place the chip */
     			var cards = this.state.cards;
 				cards[this.state.selectedCardIndex]["hasChip"] = true;
+				/* Mark it as answer in our map of questions --> our answers */
+				this.state.myAnswers[this.state.question] = cards[this.state.selectedCardIndex].id;
 				this.bingoButtonShouldActivate();
         		this.setState({cards: cards, isModalOpen: false, modalType:"", selectedCardIndex: -1, readyForNextQuestion: true});
        			break;
     		case "checkBingo":
     			var numBoardChecksLeft = this.state.numBingoChecksLeft - 1;
     			/* Check if they have bingo */
-    			if (this.state.approvedBingo) {
+    			var incorrectAnswerIndex = this.hasIncorrectAnswer();
+    			if (incorrectAnswerIndex == -1) {
     				this.setState({hasBingo: true, numBingoChecksLeft: numBoardChecksLeft, isModalOpen: false, modalType:"", selectedCardIndex: -1, readyForNextQuestion: true});
-    				this.openModal("youGotBingo");
+    				this.openModal("youGotBingo");    				
     			} else {
-    				this.setState({hasBingo: false, numBingoChecksLeft: numBoardChecksLeft, isModalOpen: false, modalType:"", selectedCardIndex: -1, readyForNextQuestion: true});
+    				/* Get the IDs of the incorrect and correct card */
+    				var incorrectId = this.state.incorrectCardIds[incorrectAnswerIndex];
+    				var correctId = this.state.correctCardIds[incorrectAnswerIndex];
+    				this.setState({hasBingo: false, numBingoChecksLeft: numBoardChecksLeft, isModalOpen: false, modalType:"", selectedCardIndex: -1, readyForNextQuestion: true, incorrectCardToDisplay: incorrectId, correctCardToDisplay: correctId});
     				this.openModal("incorrect");
     			}
         		break;
@@ -228,9 +390,11 @@ var StudentView = React.createClass({
         		break;
         	case "incorrect":
         		var cards = this.state.cards;
-        		cards[this.state.incorrectCardIndex].hasChip = false;
-        		cards[this.state.correctCardIndex].hasChip = true;
-        		this.setState({isModalOpen: false, cards: cards, modalType:"", selectedCardIndex: -1, incorrectCardIndex: -1});
+        		var incorrectCardIndex = this.getCardIndexFromId(this.state.incorrectCardToDisplay);
+        		var correctCardIndex = this.getCardIndexFromId(this.state.correctCardToDisplay);
+        		cards[incorrectCardIndex].hasChip = false;
+        		cards[correctCardIndex].hasChip = true;
+        		this.setState({isModalOpen: false, cards: cards, modalType:"", selectedCardIndex: -1, incorrectCardToDisplay: -1, correctCardToDisplay: -1});
         		break;
     		default:
     			/* Close modal */
@@ -274,9 +438,26 @@ var StudentView = React.createClass({
     handleSkipQuestion: function() {
     	this.openModal("skip");
     },
+    /* Given the ID of a card, returns the index of that card on this student's board, or -1 if it's not on the board. */
+    getCardIndexFromId: function(cardId) {
+    	for (var i=0; i < this.state.cards.length; i++) {
+    		var currCard = this.state.cards[i];
+    		if (currCard.id == cardId) return i;
+    	}
+    	return -1; 
+    },
+    getQuestionAnsweredWithId: function(answerCardId) {
+    	for (var key in this.state.myAnswers) {
+    		var cardId = this.state.myAnswers[key];
+    		if (cardId == answerCardId) {
+    			return key;
+    		}
+    	}
+    	return "";
+    },
   	render: function() {
   		var hasBingo = this.bingoButtonShouldActivate();
-
+  		var question = this.state.question;
   		/* If the user just selected a card, figure out what the word was so we
   		   can display it in modal */
   		var selectedCardWord = "";
@@ -289,17 +470,21 @@ var StudentView = React.createClass({
 
   		/* Only display a card as incorrect if they decided that they wanted to check bingo (i.e., we are currently displaying the incorrect modal)
   		 * Otherwise keep it hidden for now (by setting incorrect index to -1). */
-  		var incorrectCardIndex = this.state.incorrectCardIndex;
-  		var correctCardIndex = this.state.correctCardIndex;
-  		if (this.state.modalType != "incorrect") {
-  			incorrectCardIndex = -1;
-  			correctCardIndex = -1;
-  		}
+  		var incorrectCardIndex = this.getCardIndexFromId(this.state.incorrectCardToDisplay);
+  		var correctCardIndex = this.getCardIndexFromId(this.state.correctCardToDisplay);
   		var incorrectAnswer = "";
   		var correctAnswer = "";
+  		var incorrectlyAnsweredQuestion = "";
   		if ((incorrectCardIndex != -1) && (correctCardIndex != -1)) {
   			incorrectAnswer = this.state.cards[incorrectCardIndex].answer;
   			correctAnswer = this.state.cards[correctCardIndex].answer;
+  			/* Get the question too */
+  			question = this.getQuestionAnsweredWithId(this.state.incorrectCardToDisplay);
+  		}
+  		/* If they happen to have incorrectly put a chip on the "correct" answer, change message */
+  		var incorrectButtonMessage = "Place chip on '" + correctAnswer + "'";
+  		if ((correctCardIndex != -1) && (this.state.cards[correctCardIndex].hasChip)) {
+  			incorrectButtonMessage = "Continue";
   		}
 		return (
 			<div className="studentView ">
@@ -311,7 +496,17 @@ var StudentView = React.createClass({
 					</div>
 					<BingoBoard cards={this.state.cards} handleClickedCard={this.handleClickedCard} clicksEnabled={canSelectCard} incorrectCardIndex={incorrectCardIndex}/>
 				</div>
-				<Modal modalType={this.state.modalType} isOpen={this.state.isModalOpen} question={this.state.question} answer={selectedCardWord} onAccept={this.closeModalAccept} onCancel={this.closeModalCancel} numBingoChecksLeft={this.state.numBingoChecksLeft} incorrectAnswer={incorrectAnswer} correctAnswer={correctAnswer}/>
+				<Modal 
+					modalType={this.state.modalType} 
+					isOpen={this.state.isModalOpen} 
+					question={question} 
+					answer={selectedCardWord} 
+					onAccept={this.closeModalAccept} 
+					onCancel={this.closeModalCancel} 
+					numBingoChecksLeft={this.state.numBingoChecksLeft} 
+					incorrectAnswer={incorrectAnswer} 
+					correctAnswer={correctAnswer}
+					incorrectButtonMessage={incorrectButtonMessage}/>
 			</div>
 		);
 	}
@@ -502,6 +697,7 @@ var BingoCard = React.createClass ({
  * correctAnswer (string): if modal type = "incorrectAnswer" this is the correct answer  
  * onCancel (function): the callback for when student clicks "cancel" button (regardless of modal type)
  * onAccept (function): the callback for when student clicks "yes" button (regardless of modal type)
+ * incorrectButtonMessage (string): the message to display on the button when showing the student they got a card incorrect
  */
 var Modal = React.createClass({
     render: function() {
@@ -586,7 +782,7 @@ var Modal = React.createClass({
 		        			<span className="incorrectHeader">Question:</span> {this.props.question} <br/><br/>
 		        			<span className="incorrectHeader">You said:</span> {this.props.incorrectAnswer}<br/><br/>
 		        			<span className="incorrectHeader">Correct answer:</span> {this.props.correctAnswer}<br/><br/>
-        					<div className="button transparentOutlineButton" id="placeCorrectChip" onClick={this.props.onAccept}> Place chip on <b>{this.props.correctAnswer}</b></div>
+        					<div className="button transparentOutlineButton" id="placeCorrectChip" onClick={this.props.onAccept}> {this.props.incorrectButtonMessage}</div>
         				</div>
         			</div>
         		);

@@ -1,43 +1,50 @@
 {
-    "nextQuestion": "New question!!",
+    "nextQuestion": "2",
     "approvedBingo": false,
-    "incorrectCardId": 14,
-    "correctCardId": 1,
+    "incorrectCardIds": [11],
+    "correctCardIds": [8],
     "cards": [
         {
             "id": 1,
             "index": 1,
-            "answer": "Blatant"
+            "answer": "Blatant",
+            "hasChip": true
         },
         {
             "id": 2,
             "index": 2,
-            "answer": "Docile"
+            "answer": "Docile",
+            "hasChip": true
         },
         {
             "id": 3,
             "index": 3,
-            "answer": "Hybrid"
+            "answer": "Hybrid",
+            "hasChip": true
         },
         {
             "id": 4,
             "index": 4,
-            "answer": "Nomadic"
+            "answer": "Nomadic",
+            "hasChip": true
         },
         {
             "id": 5,
             "index": 5,
-            "answer": "Persist"
+            "answer": "Persist",
+            "hasChip": true
         },
         {
             "id": 6,
             "index": 6,
-            "answer": "Resume"
+            "answer": "Resume",
+            "hasChip": true
         },
         {
             "id": 7,
             "index": 7,
-            "answer": "Wrath"
+            "answer": "Wrath",
+            "hasChip": true
         },
         {
             "id": 8,
