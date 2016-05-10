@@ -39,7 +39,7 @@ var StudentView = React.createClass({
 	      	 */
 	      	var cards = this.state.cards;
 	      	if (cards.length == 0) {
-    			// cards = this.shuffleCards(data["cards"]);
+    			cards = this.shuffleCards(data["cards"]);
     			cards = data["cards"];
     		}
 
@@ -350,6 +350,9 @@ var StudentView = React.createClass({
     				this.openModal("youGotBingo");    				
     			} else {
     				/* Get the IDs of the incorrect and correct card */
+    				/* TO DO: if "correctCardId" and "questionIncorrectlyAnswered" are not
+    				   yet filled out for the unapproved card, then keep waiting for a teacher
+    				   response... */
     				this.setState({
     					hasBingo: false, 
     					numBingoChecksLeft: numBoardChecksLeft, 

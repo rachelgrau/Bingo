@@ -9,7 +9,9 @@
  *        - cards (array): the student's board
  *        - gameOver (boolean): whether the game is over
  * currentQuestionAnswers (array): abbreviated version of student responses. An array of the students' answers to the current question. Each dictionary in the array contains:
- * 		- "name" (string): student's name
+ * 		- "deviceID": student's deviceID
+ *    - "hasBingo" (boolean): whether the student has bingo 
+ *    - "name" (string): student's name
  * 		- "answer" (string): the student's answer, or "" if no answer yet
  *		- "isCorrect" (boolean): whether the student's answer was correct, or false if still hasn't answered
  * currentQuestionStats (dictionary): the stats for the current question overall
@@ -17,6 +19,7 @@
  * 		- "numIncorrect" (int): # of students that have gotten this question incorrect
  * 		- "numUnanswered" (int): # of students that have not yet answered this question incorrect
  *		- "totalStudents" (int): total # of students
+ * leaderBoard (array): array of students who have bingo 
  * allQuestionsByQuestion (array): array of dictionaries to keep track of all the student responses, by question. Each dictionary looks like: 
  * 		{
 			"answer": "Blatant",
@@ -59,6 +62,7 @@ var TeacherView = React.createClass({
 			responsesForStudents: {},
 			allQuestionsByQuestion: [],
 			allQuestionsByStudent: [],
+      leaderBoard: []
 		};
 	},
 	shuffleCards: function(cards) {
@@ -312,7 +316,8 @@ var TeacherView = React.createClass({
   	 * (What this.state.currentQuestionAnswers should be)
      * 
      * Along the way, it also updates this.state.responsesForStudent based on their current
-     * responses (updates each student's "cards" by marking cards as teacherApproved or not)
+     * responses (updates each student's "cards" by marking cards as teacherApproved or not), and 
+     * Also updates the leaderboard if a student gets bingo.
   	 */
   	getCurrentAnswers: function (studentResponses) {
   		var answers = [];
@@ -322,7 +327,17 @@ var TeacherView = React.createClass({
   			
   			var curStudentAnswer = {};
   			curStudentAnswer["name"] = studentResponses[i].name;
+        curStudentAnswer["deviceID"] = studentResponses[i].deviceID;
 
+        /* If student got bingo, add them to leader board */
+        if (studentResponses[i].hasBingo) {
+          for (var j=0; j<this.state.leaderBoard.length; j++) {
+          if (this.state.leaderBoard[j] == studentResponses[i].deviceID)
+            break;
+          }
+          this.state.leaderBoard.push(studentResponses[i].deviceID);
+        }
+      
   			var answer = studentResponses[i].answer;
   			if (questionStudentIsAnswering != currentQuestion) {
   				/* 1) NOT YET ANSWERED: We have not yet received the student's answer to this question */
@@ -403,7 +418,7 @@ var TeacherView = React.createClass({
   		if (!this.state.gameOver) {
   			return (
   				<div className="teacherContent">
-					<CurrentQuestion question={currentQuestion} answer={currentAnswer} canPressNext={canPressNext} indexOfCurrentQuestion={this.state.indexOfCurrQuestion} numTotalQuestions={this.state.cards.length} studentAnswers={this.state.currentQuestionAnswers} currentStats={this.state.currentQuestionStats} handleNextQuestion={this.handleNextQuestion}/>
+					<CurrentQuestion question={currentQuestion} answer={currentAnswer} canPressNext={canPressNext} indexOfCurrentQuestion={this.state.indexOfCurrQuestion} numTotalQuestions={this.state.cards.length} studentAnswers={this.state.currentQuestionAnswers} currentStats={this.state.currentQuestionStats} handleNextQuestion={this.handleNextQuestion} leaderBoard={this.state.leaderBoard}/>
 					<PastQuestions allQuestionsByStudent={this.state.allQuestionsByStudent} allQuestionsByQuestion={this.state.allQuestionsByQuestion} onEndGame={this.handleEndGame}/>
 				</div>
   			);
@@ -426,6 +441,7 @@ var TeacherView = React.createClass({
  * canPressNext (boolean): true if the "Next question" button should be active, false otherwise
  * studentAnswers (array): the students' answers to the current question
  * currentStats (dictionary): a dictionary with the stats for this question ("numCorrect" "numIncorrect" "numUnanswered" and "totatlStudents")
+ * leaderBoard (array): array of students that have bingo 
  */
 var CurrentQuestion = React.createClass({
 	pressedNext: function() {
@@ -447,7 +463,7 @@ var CurrentQuestion = React.createClass({
 				<div className={nextButtonClass} id="nextQuestion" onClick={this.pressedNext}>
 					Next question
 				</div>
-				<CurrentQuestionAnswers studentAnswers={this.props.studentAnswers}/>
+				<CurrentQuestionAnswers studentAnswers={this.props.studentAnswers} leaderBoard={this.props.leaderBoard}/>
 			</div>
 		);
 	}
@@ -519,6 +535,7 @@ var Graph = React.createClass({
  * 		- "name": student's name
  * 		- "answer": the student's answer, or "" if no answer yet
  *		- "isCorrect": whether the student's answer was correct, or false if still hasn't answered
+* leaderBoard (array): array of students that have bingo 
  */
 var CurrentQuestionAnswers = React.createClass({
 	render: function() {
@@ -526,11 +543,26 @@ var CurrentQuestionAnswers = React.createClass({
 		/* Loop over and add table entry for each student answer */
 		for (var i=0; i < this.props.studentAnswers.length; i++) {
 			var cur = this.props.studentAnswers[i];	
+      var studentName = [];
+      studentName.push(cur.name);
+
+      /* See if this student has bingo */
+      var leaderBoardPos = -1;
+      for (var j=0; j < this.props.leaderBoard.length; j++) {
+        if (this.props.leaderBoard[j] == this.props.studentAnswers[i].deviceID) {
+          leaderBoardPos = j;
+        }
+      }
+      if (leaderBoardPos != -1) {
+        studentName.push(<img src="../assets/blankBingoChip.png" width="25px" height="25px"/>);
+      } 
 			if (cur.answer == "") {
 				/* Question still unanswered */
 				table.push(
 					<tr>
-						<td className="studentName">{cur.name}</td>
+						<td className="studentName">
+              {studentName}
+            </td>
 					    <td className="tableAnswer unanswered">–</td> 
 					  	<td className="emptyColumn"></td>
 					</tr>
@@ -539,7 +571,7 @@ var CurrentQuestionAnswers = React.createClass({
 				/* Question correct*/
 				table.push(
 					<tr>
-						<td className="studentName">{cur.name}</td>
+						<td className="studentName">{studentName}</td>
 					    <td className="tableAnswer correctAnswer">{cur.answer}</td> 
 					  	<td className="emptyColumn"></td>
 					</tr>
@@ -548,7 +580,7 @@ var CurrentQuestionAnswers = React.createClass({
 				/* Question incorrect */
 				table.push(
 					<tr>
-						<td className="studentName">{cur.name}</td>
+						<td className="studentName">{studentName}</td>
 					    <td className="tableAnswer incorrectAnswer">{cur.answer}</td> 
 					  	<td className="emptyColumn"></td>
 					</tr>
