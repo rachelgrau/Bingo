@@ -325,7 +325,7 @@ th.resultsTableHeader {
 
 /* First column*/
 .studentNameColumn {
-	width: 30px;
+	width: 90px;
 	text-align: left;
 }
 
@@ -345,6 +345,12 @@ th.resultsTableHeader {
 	border: 1px solid #EBEFF2;
 	padding: 4px;
 	border-radius: 3px;
+}
+
+.leaderChip {
+	display: inline-block;
+	color: #06aaff;
+	font-size: 14px;
 }
 
 /* Use this class to vertically center text if container has display: table*/

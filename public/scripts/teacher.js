@@ -1,3 +1,11 @@
+
+var leaderBoardPositions = {
+  0: "1st",
+  1: "2nd",
+  2: "3rd",
+  3: "4th"
+}
+
 /* State
  * -------
  * gameOver (boolean): true when the teacher has ended the game, false otherwise
@@ -29,6 +37,7 @@
  * allQuestionsByStudent (array): array of dictionaries that look like:
  * 		 {
  			"name": "Ricky",
+      "deviceID": 1,
 			"answers": [
 				{ 
 					"question": "Brazenly obvious; flagrant; offensively noisy or loud",
@@ -135,7 +144,7 @@ var TeacherView = React.createClass({
   		};
   		/* Loop over all the students' answers to the question we are about to leave */
   		for (var i=0; i < this.state.currentQuestionAnswers.length; i++) {
-  			var currStudentName = this.state.currentQuestionAnswers[i].name;
+        var currStudentDeviceID = this.state.currentQuestionAnswers[i].deviceID;
   			var currAnswer = this.state.currentQuestionAnswers[i].answer;
   			var wasCorrect = this.state.currentQuestionAnswers[i].isCorrect;
   			if (currAnswer == "") wasCorrect = false; /* If current still unanswered, mark as incorrect */ 
@@ -145,7 +154,7 @@ var TeacherView = React.createClass({
   			/* Find that student in our array for past questions */
   			for (var j=0; j < this.state.allQuestionsByStudent.length; j++) {
   				var currEntry = this.state.allQuestionsByStudent[j];
-  				if (currEntry.name == currStudentName) {
+  				if (currEntry.deviceID == currStudentDeviceID) {
   					/* Add to their list of answers */
   					var answerDict = {
   					"question": questionToSave,
@@ -208,7 +217,6 @@ var TeacherView = React.createClass({
 	      	currentQuestionStats: stats,
           responsesForStudents: responsesForStudents
 	     });
-      console.log(this.state.responsesForStudents);
   	},
   	/* Looks at the current student responses and sees if there are any students 
      * that are currently not in this.state.allQuestionsByStudent record. If so, 
@@ -229,6 +237,7 @@ var TeacherView = React.createClass({
         /* 1. Create entry in allQuestionsByStudent */
 				var newStudent = {};
 				newStudent["name"] = name;
+        newStudent["deviceID"] = studentResponses[i].deviceID;
 				newStudent["answers"] = [];
 				newStudent["stats"] = {
 					"numCorrect": 0,
@@ -331,11 +340,16 @@ var TeacherView = React.createClass({
 
         /* If student got bingo, add them to leader board */
         if (studentResponses[i].hasBingo) {
+          var alreadyInLeaderboard = false;
           for (var j=0; j<this.state.leaderBoard.length; j++) {
-          if (this.state.leaderBoard[j] == studentResponses[i].deviceID)
-            break;
+            if (this.state.leaderBoard[j] == studentResponses[i].deviceID) {
+              alreadyInLeaderboard = true;
+              break;
+            }
           }
-          this.state.leaderBoard.push(studentResponses[i].deviceID);
+          if (!alreadyInLeaderboard) {
+            this.state.leaderBoard.push(studentResponses[i].deviceID);
+          }
         }
       
   			var answer = studentResponses[i].answer;
@@ -419,13 +433,13 @@ var TeacherView = React.createClass({
   			return (
   				<div className="teacherContent">
 					<CurrentQuestion question={currentQuestion} answer={currentAnswer} canPressNext={canPressNext} indexOfCurrentQuestion={this.state.indexOfCurrQuestion} numTotalQuestions={this.state.cards.length} studentAnswers={this.state.currentQuestionAnswers} currentStats={this.state.currentQuestionStats} handleNextQuestion={this.handleNextQuestion} leaderBoard={this.state.leaderBoard}/>
-					<PastQuestions allQuestionsByStudent={this.state.allQuestionsByStudent} allQuestionsByQuestion={this.state.allQuestionsByQuestion} onEndGame={this.handleEndGame}/>
+					<PastQuestions allQuestionsByStudent={this.state.allQuestionsByStudent} allQuestionsByQuestion={this.state.allQuestionsByQuestion} onEndGame={this.handleEndGame} leaderBoard={this.state.leaderBoard}/>
 				</div>
   			);
   		/* If game is over, display results */
   		} else {
   			return (
-				<ResultsTable allQuestionsByStudent={this.state.allQuestionsByStudent} cards={this.state.cards} numQuestions={this.state.indexOfCurrQuestion + 1}/>
+				<ResultsTable allQuestionsByStudent={this.state.allQuestionsByStudent} cards={this.state.cards} numQuestions={this.state.indexOfCurrQuestion + 1} leaderBoard={this.state.leaderBoard}/>
   			);
   		}
 	}
@@ -535,7 +549,7 @@ var Graph = React.createClass({
  * 		- "name": student's name
  * 		- "answer": the student's answer, or "" if no answer yet
  *		- "isCorrect": whether the student's answer was correct, or false if still hasn't answered
-* leaderBoard (array): array of students that have bingo 
+ * leaderBoard (array): array of students that have bingo 
  */
 var CurrentQuestionAnswers = React.createClass({
 	render: function() {
@@ -544,7 +558,7 @@ var CurrentQuestionAnswers = React.createClass({
 		for (var i=0; i < this.props.studentAnswers.length; i++) {
 			var cur = this.props.studentAnswers[i];	
       var studentName = [];
-      studentName.push(cur.name);
+      studentName.push(cur.name + " ");
 
       /* See if this student has bingo */
       var leaderBoardPos = -1;
@@ -554,7 +568,11 @@ var CurrentQuestionAnswers = React.createClass({
         }
       }
       if (leaderBoardPos != -1) {
-        studentName.push(<img src="../assets/blankBingoChip.png" width="25px" height="25px"/>);
+        var leaderBoardPosStr = leaderBoardPositions[leaderBoardPos];
+        if (!leaderBoardPosStr || (leaderBoardPosStr.length==0)) {
+          leaderBoardPosStr = (leaderBoardPos + 1) + "th";
+        }
+        studentName.push(<div className="leaderChip">{leaderBoardPosStr}</div>);
       } 
 			if (cur.answer == "") {
 				/* Question still unanswered */
@@ -623,6 +641,7 @@ var CurrentQuestionAnswers = React.createClass({
  * 						  component's "allQuestionsByStudent" array.
  * allQuestionsByQuestion (array): array of past question + answers, sorted by questions (see Teacher component's state.allQuestionsByQuestion)
  * onEndGame (function): callback that gets called when the teacher presses "End game"
+ * leaderBoard (array): array of students that have bingo 
  */
 var PastQuestions = React.createClass({
 	getInitialState: function() {
@@ -642,7 +661,7 @@ var PastQuestions = React.createClass({
 			<div className="pastQuestions">
 				<h1> All questions sorted by: <span className="sortBy" onClick={this.changeSortBy}>{this.state.sortBy}</span> </h1>
 				<hr color="#06AAFF"/>
-				<AllAnswers allQuestionsByStudent={this.props.allQuestionsByStudent} sortBy={this.state.sortBy} allQuestionsByQuestion={this.props.allQuestionsByQuestion}/>
+				<AllAnswers allQuestionsByStudent={this.props.allQuestionsByStudent} sortBy={this.state.sortBy} allQuestionsByQuestion={this.props.allQuestionsByQuestion} leaderBoard={this.props.leaderBoard}/>
 				<div className="outlineButton" onClick={this.props.onEndGame}>
 					End game
 				</div>
@@ -658,6 +677,7 @@ var PastQuestions = React.createClass({
  * 						  component's "allQuestionsByStudent" array.
  * allQuestionsByQuestion (array): array of past question + answers, sorted by questions (see Teacher component's state.allQuestionsByQuestion)
  * sortBy (string): if this string == "question", then we'll sort by question; if it's "student" to sort by student
+ * leaderBoard (array): array of students that have bingo
  */
 var AllAnswers = React.createClass({
 	render: function() {
@@ -673,11 +693,31 @@ var AllAnswers = React.createClass({
 				var percentage = 0;
 				if (totalQuestionsAnswered > 0) {
 					percentage = Math.floor((curStats["numCorrect"] / totalQuestionsAnswered) * 100);
-				}
+				} 
+
+        /* See if this student has bingo */
+        var studentName = [];
+        studentName.push(cur.name + " ");
+        var leaderBoardPos = -1;
+        for (var j=0; j < this.props.leaderBoard.length; j++) {
+          if (this.props.leaderBoard[j] == cur.deviceID) {
+            leaderBoardPos = j;
+          }
+        }
+        if (leaderBoardPos != -1) {
+          if (leaderBoardPos != -1) {
+            var leaderBoardPosStr = leaderBoardPositions[leaderBoardPos];
+            if (!leaderBoardPosStr || (leaderBoardPosStr.length==0)) {
+              leaderBoardPosStr = (leaderBoardPos + 1) + "th";
+            }
+            studentName.push(<div className="leaderChip">{leaderBoardPosStr}</div>);
+          }
+        } 
+
 				if (totalQuestionsAnswered == 0) {
 					table.push(
 						<tr>
-					    	<td className="studentNamePast">{cur.name}</td>
+					    	<td className="studentNamePast">{studentName}</td>
 					    	<td className="fractionScore unanswered">0/0</td> 
 					  		<td className="percentageScore unanswered">–</td> 
 					 	</tr>
@@ -685,7 +725,7 @@ var AllAnswers = React.createClass({
 				} else if (percentage >= 50) {
 					table.push(
 						<tr>
-					    	<td className="studentNamePast">{cur.name}</td>
+					    	<td className="studentNamePast">{studentName}</td>
 					    	<td className="fractionScore correctAnswer">{curStats["numCorrect"]}/{totalQuestionsAnswered}</td> 
 					  		<td className="percentageScore correctAnswer">{percentage}%</td> 
 					 	</tr>
@@ -693,7 +733,7 @@ var AllAnswers = React.createClass({
 				} else {
 					table.push(
 						<tr>
-						    <td className="studentNamePast">{cur.name}</td>
+						    <td className="studentNamePast">{studentName}</td>
 						    <td className="fractionScore incorrectAnswer">{curStats["numCorrect"]}/{totalQuestionsAnswered}</td> 
 						  	<td className="percentageScore incorrectAnswer">{percentage}%</td> 
 						 </tr>
@@ -744,10 +784,11 @@ var AllAnswers = React.createClass({
  * allQuestionsByStudent (array): array with results (see Teacher component's state.allQuestionsByStudent)
  * numQuestions (int): total # of questions asked
  * cards (array): array of cards in the order that they were asked
+ * leaderBoard (array): array of students that have bingo
  */
 var ResultsTable = React.createClass({
 	render: function() {
-		/* Put all answers in table header header */
+		/* Put all answers in table header */
   		var answerHeaders = [];
   		var wordScores = [];
   		for (var i=0; i < this.props.numQuestions; i++) {
@@ -786,13 +827,34 @@ var ResultsTable = React.createClass({
 							{answer}
 						</td>
 					);
-				}
-  			}
-  			var percentageClassName = "correctAnswer bottomGray resultsTableCell studentTotalColumn";
-  			if (percentage < 50) percentageClassName = "incorrectAnswer bottomGray resultsTableCell studentTotalColumn";
-  			table.push(
+				  }
+  		  }
+  		  var percentageClassName = "correctAnswer bottomGray resultsTableCell studentTotalColumn";
+  		  if (percentage < 50) percentageClassName = "incorrectAnswer bottomGray resultsTableCell studentTotalColumn";
+
+        /* See if this student has bingo */
+        var studentName = [];
+        studentName.push(currStudentInfo.name + " ");
+        var leaderBoardPos = -1;
+        for (var j=0; j < this.props.leaderBoard.length; j++) {
+          if (this.props.leaderBoard[j] == currStudentInfo.deviceID) {
+            leaderBoardPos = j;
+          }
+        }
+        if (leaderBoardPos != -1) {
+          if (leaderBoardPos != -1) {
+            var leaderBoardPosStr = leaderBoardPositions[leaderBoardPos];
+            if (!leaderBoardPosStr || (leaderBoardPosStr.length==0)) {
+              leaderBoardPosStr = (leaderBoardPos + 1) + "th";
+            }
+            studentName.push(<div className="leaderChip">{leaderBoardPosStr}</div>);
+          }
+        }
+
+
+      table.push(
   				<tr>
-  					<td className="studentNameColumn resultsTableCell">{currStudentInfo.name}</td>
+  					<td className="studentNameColumn resultsTableCell">{studentName}</td>
   					<td className={percentageClassName}>{percentage}%</td>
   					{studentAnswers}
   				</tr>
