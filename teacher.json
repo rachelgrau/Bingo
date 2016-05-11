@@ -1,170 +1,740 @@
-[
-    {
-        "id": 1,
-        "index": 1,
-        "answer": "Blatant",
-        "question": "Brazenly obvious; flagrant; offensively noisy or loud",
-        "completed": "true"
-    },
-    {
-        "id": 2,
-        "index": 2,
-        "answer": "Abate",
-        "question": "To reduce in amount, degree, intensity, etc",
-        "completed": "true"
-    },
-    {
-        "id": 3,
-        "index": 3,
-        "answer": "",
-        "question": "",
-        "completed": "false"
-    },
-    {
-        "id": 4,
-        "index": 4,
-        "answer": "",
-        "question": "",
-        "completed": "false"
-    },
-    {
-        "id": 5,
-        "index": 5,
-        "answer": "",
-        "question": "",
-        "completed": "false"
-    },
-    {
-        "id": 6,
-        "index": 6,
-        "answer": "",
-        "question": "",
-        "completed": "false"
-    },
-    {
-        "id": 7,
-        "index": 7,
-        "answer": "",
-        "question": "",
-        "completed": "false"
-    },
-    {
-        "id": 8,
-        "index": 8,
-        "answer": "",
-        "question": "",
-        "completed": "false"
-    },
-    {
-        "id": 9,
-        "index": 9,
-        "answer": "",
-        "question": "",
-        "completed": "false"
-    },
-    {
-        "id": 10,
-        "index": 10,
-        "answer": "",
-        "question": "",
-        "completed": "false"
-    },
-    {
-        "id": 11,
-        "index": 11,
-        "answer": "",
-        "question": "",
-        "completed": "false"
-    },
-    {
-        "id": 12,
-        "index": 12,
-        "answer": "",
-        "question": "",
-        "completed": "false"
-    },
-    {
-        "id": 13,
-        "index": 13,
-        "answer": "",
-        "question": "",
-        "completed": "false"
-    },
-    {
-        "id": 14,
-        "index": 14,
-        "answer": "",
-        "question": "",
-        "completed": "false"
-    },
-    {
-        "id": 15,
-        "index": 15,
-        "answer": "",
-        "question": "",
-        "completed": "false"
-    },
-    {
-        "id": 16,
-        "index": 16,
-        "answer": "",
-        "question": "",
-        "completed": "false"
-    },
-    {
-        "id": 17,
-        "index": 17,
-        "answer": "",
-        "question": "",
-        "completed": "false"
-    },
-    {
-        "id": 18,
-        "index": 18,
-        "answer": "",
-        "question": "",
-        "completed": "false"
-    },
-    {
-        "id": 19,
-        "index": 19,
-        "answer": "",
-        "question": "",
-        "completed": "false"
-    },
-    {
-        "id": 20,
-        "index": 20,
-        "answer": "",
-        "question": "",
-        "completed": "false"
-    },
-    {
-        "id": 21,
-        "index": 21,
-        "answer": "",
-        "question": "",
-        "completed": "false"
-    },
-    {
-        "id": 22,
-        "index": 22,
-        "answer": "",
-        "question": "",
-        "completed": "false"
-    },
-    {
-        "id": 23,
-        "index": 23,
-        "answer": "",
-        "question": "",
-        "completed": "false"
-    },
-    {
-        "id": 24,
-        "index": 24,
-        "answer": "",
-        "question": "",
-        "completed": "false"
-    }
-]
+{
+    "cards": [
+        {
+            "id": 1,
+            "answer": "Abate",
+            "question": "To reduce in amount, degree, intensity, etc; lessen; diminish"
+        },
+        {
+            "id": 2,
+            "answer": "Blatant",
+            "question": "Brazenly obvious; flagrant; offensively noisy or loud"
+        },
+        {
+            "id": 3,
+            "answer": "Capricious",
+            "question": "Subject to, led by, or indicative of a sudden, odd notion or unpredictable change; erratic"
+        },
+        {
+            "id": 4,
+            "answer": "Consult",
+            "question": "To seek advice or information from; ask guidance from"
+        },
+        {
+            "id": 5,
+            "answer": "Docile",
+            "question": "Easily managed or handled; tractable"
+        },
+        {
+            "id": 6,
+            "answer": "Endure",
+            "question": "To hold out against; sustain without impairment or yielding; undergo"
+        },
+        {
+            "id": 7,
+            "answer": "Flaw",
+            "question": "A feature that mars the perfection of something; defect; fault"
+        },
+        {
+            "id": 8,
+            "answer": "Homage",
+            "question": "Respect or reverence paid or rendered"
+        },
+        {
+            "id": 9,
+            "answer": "Hybrid",
+            "question": "Anything composed of elements of different or incongruous kinds"
+        },
+        {
+            "id": 10,
+            "answer": "Irate",
+            "question": "Angry; enraged"
+        },
+        {
+            "id": 11,
+            "answer": "Legacy",
+            "question": "Anything handed down from the past"
+        },
+        {
+            "id": 12,
+            "answer": "Murky",
+            "question": "Dark, gloomy, and cheerless; obscure or thick with mist, haze, etc"
+        },
+        {
+            "id": 13,
+            "answer": "Nimble",
+            "question": "Quick and light in movement; moving with ease; agile; active; rapid"
+        },
+        {
+            "id": 14,
+            "answer": "Nomadic",
+            "question": "Of, relating to, or characteristic of nomads"
+        },
+        {
+            "id": 15,
+            "answer": "Notorious",
+            "question": "Widely and unfavorably known",
+            "completed": "false"
+        },
+        {
+            "id": 16,
+            "answer": "Orthodox",
+            "question": "Of, relating to, or conforming to the approved form of any doctrine, philosophy, ideology, etc"
+        },
+        {
+            "id": 17,
+            "answer": "Perjury",
+            "question": "The willful giving of false testimony under oath or affirmation, before a competent tribunal, upon a point material to a legal inquiry"
+        },
+        {
+            "id": 18,
+            "answer": "Persist",
+            "question": "To continue steadfastly or firmly in some state, purpose, course of action, or the like, especially in spite of opposition, remonstrance, etc"
+        },
+        {
+            "id": 19,
+            "answer": "Resume",
+            "question": "To take up or go on with again after interruption; continue"
+        },
+        {
+            "id": 20,
+            "answer": "Stodgy",
+            "question": "Heavy, dull, or uninteresting; tediously commonplace"
+        },
+        {
+            "id": 21,
+            "answer": "Trivial",
+            "question": "Of very little importance or value; insignificant"
+        },
+        {
+            "id": 22,
+            "answer": "Vindictive",
+            "question": "Disposed or inclined to revenge; vengeful"
+        },
+        {
+            "id": 23,
+            "answer": "Vocation",
+            "question": "A particular occupation, business, or profession"
+        },
+        {
+            "id": 24,
+            "answer": "Wrath",
+            "question": "Strong, stern, or fierce anger"
+        }
+    ], 
+    "studentResponses": [
+        { 
+            "deviceID": 0,
+            "name": "Maria",
+            "question": "Subject to, led by, or indicative of a sudden, odd notion or unpredictable change; erratic",
+            "answer": "Capricious",
+            "didPass": false,
+            "hasBingo": false,
+            "cards": [
+                {
+                    "id": 1,
+                    "answer": "Abate",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 2,
+                    "answer": "Blatant",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 3,
+                    "answer": "Capricious",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 4,
+                    "anwer": "Consult",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 5,
+                    "answer": "Docile",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 6,
+                    "answer": "Endure",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 7,
+                    "answer": "Flaw",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 8,
+                    "answer": "Homage",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 9,
+                    "answer": "Hybrid",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 10,
+                    "answer": "Irate",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 11,
+                    "answer": "Legacy",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 12,
+                    "answer": "Murky",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 13,
+                    "answer": "Nimble",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 14,
+                    "answer": "Nomadic",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 15,
+                    "answer": "Notorious",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 16,
+                    "answer": "Orthodox",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 17,
+                    "answer": "Perjury",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 18,
+                    "answer": "Persist",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 19,
+                    "answer": "Resume",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 20,
+                    "answer": "Stodgy",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 21,
+                    "answer": "Trivial",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 22,
+                    "answer": "Vindictive",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 23,
+                    "answer": "Vocation",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 24,
+                    "answer": "Wrath",
+                    "hasChip": false,
+                    "teacherApproved": false
+                }
+            ]
+        }, { 
+            "deviceID": 1,
+            "name": "Fede",
+            "question": "Subject to, led by, or indicative of a sudden, odd notion or unpredictable change; erratic",
+            "answer": "Capricious",
+            "didPass": false,
+            "hasBingo": false,
+            "cards": [
+                {
+                    "id": 1,
+                    "answer": "Abate",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 2,
+                    "answer": "Blatant",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 3,
+                    "answer": "Capricious",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 4,
+                    "anwer": "Consult",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 5,
+                    "answer": "Docile",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 6,
+                    "answer": "Endure",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 7,
+                    "answer": "Flaw",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 8,
+                    "answer": "Homage",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 9,
+                    "answer": "Hybrid",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 10,
+                    "answer": "Irate",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 11,
+                    "answer": "Legacy",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 12,
+                    "answer": "Murky",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 13,
+                    "answer": "Nimble",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 14,
+                    "answer": "Nomadic",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 15,
+                    "answer": "Notorious",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 16,
+                    "answer": "Orthodox",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 17,
+                    "answer": "Perjury",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 18,
+                    "answer": "Persist",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 19,
+                    "answer": "Resume",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 20,
+                    "answer": "Stodgy",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 21,
+                    "answer": "Trivial",
+                    "hasChip": false,
+                    "teacherApproved": true
+                },
+                {
+                    "id": 22,
+                    "answer": "Vindictive",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 23,
+                    "answer": "Vocation",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 24,
+                    "answer": "Wrath",
+                    "hasChip": false,
+                    "teacherApproved": false
+                }
+            ]
+        }, { 
+            "deviceID": 2,
+            "name": "Lucas",
+            "question": "Subject to, led by, or indicative of a sudden, odd notion or unpredictable change; erratic",
+            "answer": "Capricious",
+            "didPass": false,
+            "hasBingo": false,
+            "cards": [
+                {
+                    "id": 1,
+                    "answer": "Abate",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 2,
+                    "answer": "Blatant",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 3,
+                    "answer": "Capricious",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 4,
+                    "anwer": "Consult",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 5,
+                    "answer": "Docile",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 6,
+                    "answer": "Endure",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 7,
+                    "answer": "Flaw",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 8,
+                    "answer": "Homage",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 9,
+                    "answer": "Hybrid",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 10,
+                    "answer": "Irate",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 11,
+                    "answer": "Legacy",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 12,
+                    "answer": "Murky",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 13,
+                    "answer": "Nimble",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 14,
+                    "answer": "Nomadic",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 15,
+                    "answer": "Notorious",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 16,
+                    "answer": "Orthodox",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 17,
+                    "answer": "Perjury",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 18,
+                    "answer": "Persist",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 19,
+                    "answer": "Resume",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 20,
+                    "answer": "Stodgy",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 21,
+                    "answer": "Trivial",
+                    "hasChip": false,
+                    "teacherApproved": true
+                },
+                {
+                    "id": 22,
+                    "answer": "Vindictive",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 23,
+                    "answer": "Vocation",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 24,
+                    "answer": "Wrath",
+                    "hasChip": false,
+                    "teacherApproved": false
+                }
+            ]
+        }, { 
+            "deviceID": 3,
+            "name": "Hernan",
+            "question": "Subject to, led by, or indicative of a sudden, odd notion or unpredictable change; erratic",
+            "answer": "Capricious",
+            "didPass": false,
+            "hasBingo": false,
+            "cards": [
+                {
+                    "id": 1,
+                    "answer": "Abate",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 2,
+                    "answer": "Blatant",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 3,
+                    "answer": "Capricious",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 4,
+                    "anwer": "Consult",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 5,
+                    "answer": "Docile",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 6,
+                    "answer": "Endure",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 7,
+                    "answer": "Flaw",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 8,
+                    "answer": "Homage",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 9,
+                    "answer": "Hybrid",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 10,
+                    "answer": "Irate",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 11,
+                    "answer": "Legacy",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 12,
+                    "answer": "Murky",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 13,
+                    "answer": "Nimble",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 14,
+                    "answer": "Nomadic",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 15,
+                    "answer": "Notorious",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 16,
+                    "answer": "Orthodox",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 17,
+                    "answer": "Perjury",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 18,
+                    "answer": "Persist",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 19,
+                    "answer": "Resume",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 20,
+                    "answer": "Stodgy",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 21,
+                    "answer": "Trivial",
+                    "hasChip": false,
+                    "teacherApproved": true
+                },
+                {
+                    "id": 22,
+                    "answer": "Vindictive",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 23,
+                    "answer": "Vocation",
+                    "hasChip": false,
+                    "teacherApproved": false
+                },
+                {
+                    "id": 24,
+                    "answer": "Wrath",
+                    "hasChip": false,
+                    "teacherApproved": false
+                }
+            ]
+        }
+    ]
+}
