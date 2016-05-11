@@ -126,8 +126,8 @@
         { 
             "deviceID": 0,
             "name": "Maria",
-            "question": "Dark, gloomy, and cheerless; obscure or thick with mist, haze, etc",
-            "answer": "Consult",
+            "question": "Subject to, led by, or indicative of a sudden, odd notion or unpredictable change; erratic",
+            "answer": "Capricious",
             "didPass": false,
             "hasBingo": false,
             "cards": [
@@ -279,8 +279,8 @@
         }, { 
             "deviceID": 1,
             "name": "Fede",
-            "question": "Dark, gloomy, and cheerless; obscure or thick with mist, haze, etc",
-            "answer": "Abate",
+            "question": "Subject to, led by, or indicative of a sudden, odd notion or unpredictable change; erratic",
+            "answer": "Capricious",
             "didPass": false,
             "hasBingo": false,
             "cards": [
@@ -432,8 +432,8 @@
         }, { 
             "deviceID": 2,
             "name": "Lucas",
-            "question": "Dark, gloomy, and cheerless; obscure or thick with mist, haze, etc",
-            "answer": "Vindictive",
+            "question": "Subject to, led by, or indicative of a sudden, odd notion or unpredictable change; erratic",
+            "answer": "Capricious",
             "didPass": false,
             "hasBingo": false,
             "cards": [
@@ -585,8 +585,8 @@
         }, { 
             "deviceID": 3,
             "name": "Hernan",
-            "question": "Dark, gloomy, and cheerless; obscure or thick with mist, haze, etc",
-            "answer": "Murky",
+            "question": "Subject to, led by, or indicative of a sudden, odd notion or unpredictable change; erratic",
+            "answer": "Capricious",
             "didPass": false,
             "hasBingo": false,
             "cards": [
