@@ -28,7 +28,7 @@ var leaderBoardPositions = {
  * 		- "numUnanswered" (int): # of students that have not yet answered this question incorrect
  *		- "totalStudents" (int): total # of students
  * leaderBoard (array): array of students who have bingo 
- * canPressNext (boolean): a boolean that lets us know whether we can press next button or if we need to wait for a response to come in
+ * buttonsEnabled (boolean): a boolean that lets us know whether we can press next/end game button or if we need to wait for a response to come in
  *    - set to false at the end of handleNextButtonPressed, and set to true after updating data that came in
  *    - only do stuff when they press th enext button if canPressNext = true
  * allQuestionsByQuestion (array): array of dictionaries to keep track of all the student responses, by question. Each dictionary looks like: 
@@ -75,7 +75,7 @@ var TeacherView = React.createClass({
 			allQuestionsByQuestion: [],
 			allQuestionsByStudent: [],
       leaderBoard: [],
-      canPressNext: false,
+      buttonsEnabled: false,
 		};
 	},
 	shuffleCards: function(cards) {
@@ -127,7 +127,7 @@ var TeacherView = React.createClass({
       this.setState({
           currentQuestionAnswers: currentQuestionAnswers,
           currentQuestionStats: currentQuestionStats,
-          canPressNext: true
+          buttonsEnabled: true
       });
     },
   	componentDidMount: function() {
@@ -188,7 +188,7 @@ var TeacherView = React.createClass({
      * and updates the responses for students (changes their current question).
   	 * */
   	handleNextQuestion: function() {
-      if (this.state.canPressNext) {
+      if (this.state.buttonsEnabled) {
         this.putCurrentAnswersInPast();
         var indexOfNextQuestion = this.state.indexOfCurrQuestion + 1;
         /* Clear current question answers */
@@ -222,7 +222,7 @@ var TeacherView = React.createClass({
             currentQuestionAnswers: currentAnswers,
             currentQuestionStats: stats,
             responsesForStudents: responsesForStudents,
-            canPressNext: false
+            buttonsEnabled: false
          });
       }
   	},
@@ -420,8 +420,10 @@ var TeacherView = React.createClass({
   		return stats;
   	},
   	handleEndGame: function() {
-  		this.putCurrentAnswersInPast();
-  		this.setState({"gameOver": true});
+      if (this.state.buttonsEnabled) {
+        this.putCurrentAnswersInPast();
+        this.setState({"gameOver": true});
+      }
   	},
   	render: function() {
   		/* Get the current question + answer */
@@ -431,19 +433,14 @@ var TeacherView = React.createClass({
   			currentQuestion = this.state.cards[this.state.indexOfCurrQuestion].question;
   			currentAnswer = this.state.cards[this.state.indexOfCurrQuestion].answer;
   		}
-  		// var canPressNext = true;
   		if (this.state.indexOfCurrQuestion == this.state.cards.length - 1) {
-  			this.state.canPressNext = false;
+  			this.state.buttonsEnabled = false;
   		}
-      // if (!this.state.canPressNext) {
-      //   canPressNext = false;
-      // }
-
   		/* Display game normally */
   		if (!this.state.gameOver) {
   			return (
   				<div className="teacherContent">
-					<CurrentQuestion question={currentQuestion} answer={currentAnswer} canPressNext={this.state.canPressNext} indexOfCurrentQuestion={this.state.indexOfCurrQuestion} numTotalQuestions={this.state.cards.length} studentAnswers={this.state.currentQuestionAnswers} currentStats={this.state.currentQuestionStats} handleNextQuestion={this.handleNextQuestion} leaderBoard={this.state.leaderBoard}/>
+					<CurrentQuestion question={currentQuestion} answer={currentAnswer} canPressNext={this.state.buttonsEnabled} indexOfCurrentQuestion={this.state.indexOfCurrQuestion} numTotalQuestions={this.state.cards.length} studentAnswers={this.state.currentQuestionAnswers} currentStats={this.state.currentQuestionStats} handleNextQuestion={this.handleNextQuestion} leaderBoard={this.state.leaderBoard}/>
 					<PastQuestions allQuestionsByStudent={this.state.allQuestionsByStudent} allQuestionsByQuestion={this.state.allQuestionsByQuestion} onEndGame={this.handleEndGame} leaderBoard={this.state.leaderBoard}/>
 				</div>
   			);
