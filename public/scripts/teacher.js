@@ -28,6 +28,9 @@ var leaderBoardPositions = {
  * 		- "numUnanswered" (int): # of students that have not yet answered this question incorrect
  *		- "totalStudents" (int): total # of students
  * leaderBoard (array): array of students who have bingo 
+ * canPressNext (boolean): a boolean that lets us know whether we can press next button or if we need to wait for a response to come in
+ *    - set to false at the end of handleNextButtonPressed, and set to true after updating data that came in
+ *    - only do stuff when they press th enext button if canPressNext = true
  * allQuestionsByQuestion (array): array of dictionaries to keep track of all the student responses, by question. Each dictionary looks like: 
  * 		{
 			"answer": "Blatant",
@@ -71,7 +74,8 @@ var TeacherView = React.createClass({
 			responsesForStudents: {},
 			allQuestionsByQuestion: [],
 			allQuestionsByStudent: [],
-      leaderBoard: []
+      leaderBoard: [],
+      canPressNext: false,
 		};
 	},
 	shuffleCards: function(cards) {
@@ -122,7 +126,8 @@ var TeacherView = React.createClass({
       var currentQuestionStats = this.getCurrentStats(studentResponses);
       this.setState({
           currentQuestionAnswers: currentQuestionAnswers,
-          currentQuestionStats: currentQuestionStats
+          currentQuestionStats: currentQuestionStats,
+          canPressNext: true
       });
     },
   	componentDidMount: function() {
@@ -183,40 +188,43 @@ var TeacherView = React.createClass({
      * and updates the responses for students (changes their current question).
   	 * */
   	handleNextQuestion: function() {
-  		this.putCurrentAnswersInPast();
-  		var indexOfNextQuestion = this.state.indexOfCurrQuestion + 1;
-  		/* Clear current question answers */
-  		var currentAnswers = [];
-  		for (var i=0; i < this.state.currentQuestionAnswers.length; i++) {
-  			var curStudentAnswer = {};
-  			curStudentAnswer["name"] = this.state.currentQuestionAnswers[i].name;
-  			curStudentAnswer["answer"] =  "";
-  			curStudentAnswer["isCorrect"] = false;
-  			currentAnswers.push(curStudentAnswer);
-  		}
-      /* Clear stats */
-  		var stats = {
-  			"numCorrect": 0,
-  			"numIncorrect": 0,
-  			"numUnanswered": this.state.currentQuestionAnswers.length,
-  			"totalStudents": this.state.currentQuestionAnswers.length
-  		};
-      /* Update responses for students by moving onto next question, if there is another question */ 
-      var responsesForStudents = this.state.responsesForStudents;
-      if (indexOfNextQuestion < this.state.cards.length) {
-        var nextQuestion = this.state.cards[indexOfNextQuestion].question;
-        for (var key in responsesForStudents) {
-          var currResponse = responsesForStudents[key];
-          currResponse["nextQuestion"] = nextQuestion;
-          responsesForStudents[key] = currResponse;
+      if (this.state.canPressNext) {
+        this.putCurrentAnswersInPast();
+        var indexOfNextQuestion = this.state.indexOfCurrQuestion + 1;
+        /* Clear current question answers */
+        var currentAnswers = [];
+        for (var i=0; i < this.state.currentQuestionAnswers.length; i++) {
+          var curStudentAnswer = {};
+          curStudentAnswer["name"] = this.state.currentQuestionAnswers[i].name;
+          curStudentAnswer["answer"] =  "";
+          curStudentAnswer["isCorrect"] = false;
+          currentAnswers.push(curStudentAnswer);
         }
+        /* Clear stats */
+        var stats = {
+          "numCorrect": 0,
+          "numIncorrect": 0,
+          "numUnanswered": this.state.currentQuestionAnswers.length,
+          "totalStudents": this.state.currentQuestionAnswers.length
+        };
+        /* Update responses for students by moving onto next question, if there is another question */ 
+        var responsesForStudents = this.state.responsesForStudents;
+        if (indexOfNextQuestion < this.state.cards.length) {
+          var nextQuestion = this.state.cards[indexOfNextQuestion].question;
+          for (var key in responsesForStudents) {
+            var currResponse = responsesForStudents[key];
+            currResponse["nextQuestion"] = nextQuestion;
+            responsesForStudents[key] = currResponse;
+          }
+        }
+        this.setState({
+            indexOfCurrQuestion: indexOfNextQuestion,
+            currentQuestionAnswers: currentAnswers,
+            currentQuestionStats: stats,
+            responsesForStudents: responsesForStudents,
+            canPressNext: false
+         });
       }
-  		this.setState({
-	      	indexOfCurrQuestion: indexOfNextQuestion,
-	      	currentQuestionAnswers: currentAnswers,
-	      	currentQuestionStats: stats,
-          responsesForStudents: responsesForStudents
-	     });
   	},
   	/* Looks at the current student responses and sees if there are any students 
      * that are currently not in this.state.allQuestionsByStudent record. If so, 
@@ -423,23 +431,26 @@ var TeacherView = React.createClass({
   			currentQuestion = this.state.cards[this.state.indexOfCurrQuestion].question;
   			currentAnswer = this.state.cards[this.state.indexOfCurrQuestion].answer;
   		}
-  		var canPressNext = true;
+  		// var canPressNext = true;
   		if (this.state.indexOfCurrQuestion == this.state.cards.length - 1) {
-  			canPressNext = false;
+  			this.state.canPressNext = false;
   		}
+      // if (!this.state.canPressNext) {
+      //   canPressNext = false;
+      // }
 
   		/* Display game normally */
   		if (!this.state.gameOver) {
   			return (
   				<div className="teacherContent">
-					<CurrentQuestion question={currentQuestion} answer={currentAnswer} canPressNext={canPressNext} indexOfCurrentQuestion={this.state.indexOfCurrQuestion} numTotalQuestions={this.state.cards.length} studentAnswers={this.state.currentQuestionAnswers} currentStats={this.state.currentQuestionStats} handleNextQuestion={this.handleNextQuestion} leaderBoard={this.state.leaderBoard}/>
+					<CurrentQuestion question={currentQuestion} answer={currentAnswer} canPressNext={this.state.canPressNext} indexOfCurrentQuestion={this.state.indexOfCurrQuestion} numTotalQuestions={this.state.cards.length} studentAnswers={this.state.currentQuestionAnswers} currentStats={this.state.currentQuestionStats} handleNextQuestion={this.handleNextQuestion} leaderBoard={this.state.leaderBoard}/>
 					<PastQuestions allQuestionsByStudent={this.state.allQuestionsByStudent} allQuestionsByQuestion={this.state.allQuestionsByQuestion} onEndGame={this.handleEndGame} leaderBoard={this.state.leaderBoard}/>
 				</div>
   			);
   		/* If game is over, display results */
   		} else {
   			return (
-				<ResultsTable allQuestionsByStudent={this.state.allQuestionsByStudent} cards={this.state.cards} numQuestions={this.state.indexOfCurrQuestion + 1} leaderBoard={this.state.leaderBoard}/>
+				  <ResultsTable allQuestionsByStudent={this.state.allQuestionsByStudent} cards={this.state.cards} numQuestions={this.state.indexOfCurrQuestion + 1} leaderBoard={this.state.leaderBoard}/>
   			);
   		}
 	}
@@ -850,8 +861,6 @@ var ResultsTable = React.createClass({
             studentName.push(<div className="leaderChip">{leaderBoardPosStr}</div>);
           }
         }
-
-
       table.push(
   				<tr>
   					<td className="studentNameColumn resultsTableCell">{studentName}</td>
