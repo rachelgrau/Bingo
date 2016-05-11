@@ -31,6 +31,8 @@ var leaderBoardPositions = {
  * buttonsEnabled (boolean): a boolean that lets us know whether we can press next/end game button or if we need to wait for a response to come in
  *    - set to false at the end of handleNextButtonPressed, and set to true after updating data that came in
  *    - only do stuff when they press th enext button if canPressNext = true
+ * modalType (string): type of modal to open
+ * isModalOpen (boolean): whether or not to open the modal 
  * allQuestionsByQuestion (array): array of dictionaries to keep track of all the student responses, by question. Each dictionary looks like: 
  * 		{
 			"answer": "Blatant",
@@ -76,6 +78,8 @@ var TeacherView = React.createClass({
 			allQuestionsByStudent: [],
       leaderBoard: [],
       buttonsEnabled: false,
+      isModalOpen: false,
+      modalType: ""
 		};
 	},
 	shuffleCards: function(cards) {
@@ -421,10 +425,47 @@ var TeacherView = React.createClass({
   	},
   	handleEndGame: function() {
       if (this.state.buttonsEnabled) {
-        this.putCurrentAnswersInPast();
-        this.setState({"gameOver": true});
+        this.openModal("endGame");
       }
   	},
+    /* Called when the user clicks "yes" to close the modal. Check what the curent modal type is and act accordingly.
+     * "endGame": set gameOver to true 
+     */
+    closeModalAccept: function() {
+      switch(this.state.modalType) {
+        case "endGame":
+          this.putCurrentAnswersInPast();
+          this.setState({
+            "gameOver": true,
+            modalType: "",
+            isModalOpen: false
+          });
+          break;
+        default:
+          /* Close modal */
+          this.setState({isModalOpen: false, modalType:""});
+          break;
+      }
+    },
+    /* Called when the user clicks "cancel" to close the modal. Just close the modal.
+     */
+    closeModalCancel: function() {
+      switch(this.state.modalType) {
+        case "endGame":
+          this.setState({modalType: "", isModalOpen: false});
+          break;
+        default:
+          /* Close modal */
+          this.setState({isModalOpen: false, modalType:""});
+          break;
+      }
+    },
+    /* The app uses one shared modal, so we open & close it as needed and just change its inner content.
+     * modalType (string): the type of modal you want to open
+     */
+    openModal: function(modalType) {
+        this.setState({modalType: modalType, isModalOpen: true});
+    },
   	render: function() {
   		/* Get the current question + answer */
   		var currentQuestion = "";
@@ -440,9 +481,10 @@ var TeacherView = React.createClass({
   		if (!this.state.gameOver) {
   			return (
   				<div className="teacherContent">
-					<CurrentQuestion question={currentQuestion} answer={currentAnswer} canPressNext={this.state.buttonsEnabled} indexOfCurrentQuestion={this.state.indexOfCurrQuestion} numTotalQuestions={this.state.cards.length} studentAnswers={this.state.currentQuestionAnswers} currentStats={this.state.currentQuestionStats} handleNextQuestion={this.handleNextQuestion} leaderBoard={this.state.leaderBoard}/>
-					<PastQuestions allQuestionsByStudent={this.state.allQuestionsByStudent} allQuestionsByQuestion={this.state.allQuestionsByQuestion} onEndGame={this.handleEndGame} leaderBoard={this.state.leaderBoard}/>
-				</div>
+					 <CurrentQuestion question={currentQuestion} answer={currentAnswer} canPressNext={this.state.buttonsEnabled} indexOfCurrentQuestion={this.state.indexOfCurrQuestion} numTotalQuestions={this.state.cards.length} studentAnswers={this.state.currentQuestionAnswers} currentStats={this.state.currentQuestionStats} handleNextQuestion={this.handleNextQuestion} leaderBoard={this.state.leaderBoard}/>
+					 <PastQuestions allQuestionsByStudent={this.state.allQuestionsByStudent} allQuestionsByQuestion={this.state.allQuestionsByQuestion} onEndGame={this.handleEndGame} leaderBoard={this.state.leaderBoard}/>
+				   <Modal isOpen={this.state.isModalOpen} modalType={this.state.modalType} onAccept={this.closeModalAccept} onCancel={this.closeModalCancel}/>
+          </div>
   			);
   		/* If game is over, display results */
   		} else {
@@ -670,7 +712,7 @@ var PastQuestions = React.createClass({
 				<h1> All questions sorted by: <span className="sortBy" onClick={this.changeSortBy}>{this.state.sortBy}</span> </h1>
 				<hr color="#06AAFF"/>
 				<AllAnswers allQuestionsByStudent={this.props.allQuestionsByStudent} sortBy={this.state.sortBy} allQuestionsByQuestion={this.props.allQuestionsByQuestion} leaderBoard={this.props.leaderBoard}/>
-				<div className="outlineButton" onClick={this.props.onEndGame}>
+				<div className="outlineButton" id="endGameButton" onClick={this.props.onEndGame}>
 					End game
 				</div>
 			</div>
@@ -901,6 +943,47 @@ var ResultsTable = React.createClass({
 			</table>
 		); 
 	}
+});
+
+/*
+ * Props
+ * -----
+ * isOpen (boolean): whether or not the modal is currently open
+ * modalType(string): one of the following
+ *    - "endGame": Text + two buttons (yes / go back)
+ * onCancel (function): the callback for when student clicks "cancel" button (regardless of modal type)
+ * onAccept (function): the callback for when student clicks "yes" button (regardless of modal type)
+ */
+var Modal = React.createClass({
+    render: function() {
+      if (this.props.isOpen) {
+        if (this.props.modalType == "endGame") {
+          return (
+            <div className="modalBg">
+              <div className="modal">
+                <div className="modalHeader">Are you sure you want to end the game? </div>
+                <div className="modalFooter">
+                  <div id="twoButtonContainer">
+                    <div className="modalButton outlineButton" id="leftModalButton" onClick={this.props.onCancel}>No, go back.</div>
+                    <div className="modalButton blueButton" id="rightModalButton" onClick={this.props.onAccept}>Yes, end the game.</div>
+                  </div>
+               </div>
+              </div>
+            </div>
+          );
+        } else {
+          return (
+            <div>
+            </div>
+          );
+        }
+      } else {
+        return (
+          <div>
+          </div>
+        );
+      }
+    }
 });
 
 ReactDOM.render(
