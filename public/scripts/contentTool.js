@@ -4,6 +4,10 @@
  * cards (array): the cards themselves
  * selectedCard (int): the index of the card that is currently selected (or -1) if none
  */
+
+var slideId = getUrlVars()["id"];
+var presentationId = getUrlVars()["presentation_id"];
+
 var ContentTool = React.createClass({
 
 	getUrlVars: function() {
@@ -17,7 +21,7 @@ var ContentTool = React.createClass({
 
 	setHeaders: function(){
 		//TODO FIGURE OUT WHAT APP ID SHOULD BE
-		return {"x-api-key":"7dabac64681a7c12c1cb97183c44de93", "JWT": getUrlVars()["jwt"]};
+		return {"x-api-key":"7dabac64681a7c12c1cb97183c44de93", "JWT": this.getUrlVars()["jwt"]};
 	},
 
 	showError: function(json){
@@ -34,12 +38,14 @@ var ContentTool = React.createClass({
 			  method: "GET",
 			  async: false,
 			  data: params,
-			  headers: setHeaders(),
+			  headers: this.setHeaders(),
 			  success: function(data, textStatus, jqXHR){
 				  successCallback(jqXHR.responseJSON);
+				  console.log("success in get");
 			  },
 			  error: function(jqXHR, textStatus, errorThrown){
 				  showError(jqXHR.responseJSON);
+				  console.log("failure in get");
 			  }
 		});	
 	},
@@ -50,28 +56,39 @@ var ContentTool = React.createClass({
 			  method: "POST",
 			  async: false,
 			  data: JSON.stringify(params),
-			  headers: setHeaders(),
+			  headers: this.setHeaders(),
 			  success: function(data, textStatus, jqXHR){
 				  successCallback(jqXHR.responseJSON);
+				  console.log("success in post");
 			  },
 			  error: function(jqXHR, textStatus, errorThrown){
 				  showError(jqXHR.responseJSON);
+				  console.log("failure in post");
 			  }
-		});	
+		});
 	},
 
 	loadCardsFromServer: function() {
-    	$.ajax({
-	      url: this.props.url,
-	      dataType: 'json',
-	      cache: false,
-	      success: function(cards) {
-	        this.setState({cards: cards});
-	      }.bind(this),
-	      error: function(xhr, status, err) {
-	        console.error(this.props.url, status, err.toString());
-	      }.bind(this)
-	    });
+    	// $.ajax({
+	    //   url: this.props.url,
+	    //   dataType: 'json',
+	    //   cache: false,
+	    //   success: function(cards) {
+	    //     this.setState({cards: cards});
+	    //   }.bind(this),
+	    //   error: function(xhr, status, err) {
+	    //     console.error(this.props.url, status, err.toString());
+	    //   }.bind(this)
+	    // });
+		console.log("load cards from server");
+		if (this.state.cards.length == 0) {
+			console.log("EMPTY");
+		}
+		this.get(this.props.url, this.state.cards, this.showSuccess);
+
+
+
+
 		// post(this.props.url, null, showSuccess);
   	},
   	getInitialState: function() {
@@ -126,8 +143,9 @@ var ContentTool = React.createClass({
 	   //    }.bind(this)
 	   //  });
 		console.log("handle save");
-		post(this.props.url, this.state.cards, showSuccess);
+		this.post(this.props.url, this.state.cards, this.showSuccess);
   	},
+
 	render: function() {
 		if (this.state.selectedCard == -1) {	
 			return (
@@ -234,6 +252,7 @@ var Editor = React.createClass({
 	    }
 	    return answer;
 	},
+
 	render: function() {
 		if (this.props.isSelected) {
 			/* If they've already edited, use state, otherwise use props passed in (currently saved question/answer for the currently selected card). */
