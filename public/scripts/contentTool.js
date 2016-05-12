@@ -1,9 +1,4 @@
-//completed
-// 10
-// title
-// data all
-// data teacher 
-
+var NUM_CARDS = 24;
 /*
  * POSTS to API when the user hits "create" or "save & exit" -- 
  * 		completed: this.state.isCompleted
@@ -25,8 +20,12 @@ var ContentTool = React.createClass({
 	      dataType: 'json',
 	      cache: false,
 	      success: function(data) {
+	      	var cards = data["data_teacher"];
+	      	if (cards.length == 0) {
+	      		cards = this.getInitialCards();
+	      	}
 	        this.setState({
-	        	cards: data["cards"],
+	        	cards: cards,
 	        	isCompleted: data["completed"]
 	        });
 	      }.bind(this),
@@ -41,8 +40,21 @@ var ContentTool = React.createClass({
 			dataStudent: [],
 			selectedCard:-1,
 			isCompleted: false,
-			title: "Bingo",
+			title: "Bingo"
 		};
+	},
+	/* Returns an array of 24 empty cards (teacher cards) */
+	getInitialCards: function() {
+		var cards = [];
+		for (var i=0; i < NUM_CARDS; i++) {
+			var card = {};
+			card["id"] = i;
+			card["answer"] = "";
+			card["question"] = "";
+			card["completed"] = false;
+			cards.push(card);
+ 		}	
+ 		return cards;
 	},
   	componentDidMount: function() {
     	this.loadCardsFromServer();
