@@ -1,8 +1,22 @@
+//completed
+// 10
+// title
+// data all
+// data teacher 
+
 /*
+ * POSTS to API when the user hits "create" or "save & exit" -- 
+ * 		completed: this.state.isCompleted
+ * 		title: this.state.title
+ * 		data_all: this.state.dataStudent // doesn't have the answer
+ *		data_teacher: this.state.cards
+ * 
  * State 
  * ------
- * cards (array): the cards themselves
+ * cards (array): the cards themselves as they will be sent to the teacher
+ * dataStudent (array): the cards as they will be sent to the student
  * selectedCard (int): the index of the card that is currently selected (or -1) if none
+ * isCompleted (boolean): whether or not the current slide has been "created" 
  */
 var ContentTool = React.createClass({
 	loadCardsFromServer: function() {
@@ -10,8 +24,11 @@ var ContentTool = React.createClass({
 	      url: this.props.url,
 	      dataType: 'json',
 	      cache: false,
-	      success: function(cards) {
-	        this.setState({cards: cards});
+	      success: function(data) {
+	        this.setState({
+	        	cards: data["cards"],
+	        	isCompleted: data["completed"]
+	        });
 	      }.bind(this),
 	      error: function(xhr, status, err) {
 	        console.error(this.props.url, status, err.toString());
@@ -21,7 +38,10 @@ var ContentTool = React.createClass({
   	getInitialState: function() {
 		return {
 			cards:[], 
-			selectedCard:-1
+			dataStudent: [],
+			selectedCard:-1,
+			isCompleted: false,
+			title: "Bingo",
 		};
 	},
   	componentDidMount: function() {
@@ -52,11 +72,33 @@ var ContentTool = React.createClass({
   		}
   		this.setState({selectedCard: cardNumber});
   	},
-  	/* Called when the user clicks "create" */
+  	/* Updates this.state.dataStudent to contain all the cards in this.state.cards, but wihtout 
+  	   the "answer" field and with a "hasChip" (false) and "teacherApproved" (false) field */
+  	updateCardsForStudent: function() {
+  		var studentCards = [];
+  		for (var i=0; i < this.state.cards.length; i++) {
+  			var currentCard = this.state.cards[i];
+  			var studentCard = {};
+  			studentCard["id"] = currentCard.id;
+  			studentCard["answer"] = currentCard.answer;
+  			studentCard["hasChip"] = false;
+  			studentCard["teacherApproved"] = false;
+  			studentCards.push(studentCard);
+  		}
+  		this.state.dataStudent = studentCards;
+  	},
+  	/* Called when the user clicks "create". Set completed to true */
   	handleCreate: function() {
+  		this.updateCardsForStudent();
+  		this.state.isCompleted = true;
+  		console.log("STUDENT DATA");
+  		console.log(this.state.dataStudent);
+  		console.log("TEACHER DATA");
+  		console.log(this.state.cards);
   	},
   	/* Called when the user clicks "save and exit" – saves current state of all cards */
   	handleSave: function() {
+  		this.updateCardsForStudent();
   		$.ajax({
 	      url: this.props.url,
 	      dataType: 'json',
