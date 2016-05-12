@@ -100,13 +100,19 @@ var ContentTool = React.createClass({
   		}
   		this.state.dataStudent = studentCards;
   	},
-  	/* Called when the user clicks "create". Set completed to true */
+  	/* Called when the user clicks "create". If create button is inactive, do nothing. 
+  	   Otherwise, set completed to true, set up dataStudent, and post to API. */
   	handleCreate: function() {
-  		this.updateCardsForStudent();
-  		this.state.isCompleted = true;
+  		var createButtonClass = $("#footerCreateButton").attr('class');
+  		if (createButtonClass == "button footerButton blueButtonActive") {
+  			this.updateCardsForStudent();
+  			this.state.isCompleted = true;
+  			/* POST to API here */
+  		}
   	},
   	/* Called when the user clicks "save and exit" – saves current state of all cards */
   	handleSave: function() {
+  		/* PUT to API here, replace all code in this method */
   		this.updateCardsForStudent();
   		$.ajax({
 	      url: this.props.url,
