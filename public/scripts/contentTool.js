@@ -23,7 +23,7 @@ var ContentTool = React.createClass({
 	      	var cards = data["data_teacher"];
 	      	if (cards.length == 0) {
 	      		cards = this.getInitialCards();
-	      	}
+	      	}	    
 	        this.setState({
 	        	cards: cards,
 	        	isCompleted: data["completed"]
@@ -40,7 +40,8 @@ var ContentTool = React.createClass({
 			dataStudent: [],
 			selectedCard:-1,
 			isCompleted: false,
-			title: "Bingo"
+			title: "Bingo", 
+			numCardsCompleted: 0
 		};
 	},
 	/* Returns an array of 24 empty cards (teacher cards) */
@@ -103,10 +104,6 @@ var ContentTool = React.createClass({
   	handleCreate: function() {
   		this.updateCardsForStudent();
   		this.state.isCompleted = true;
-  		console.log("STUDENT DATA");
-  		console.log(this.state.dataStudent);
-  		console.log("TEACHER DATA");
-  		console.log(this.state.cards);
   	},
   	/* Called when the user clicks "save and exit" – saves current state of all cards */
   	handleSave: function() {
@@ -125,13 +122,25 @@ var ContentTool = React.createClass({
 	    });
 		console.log("handle save");
   	},
+  	createButtonShouldActivate: function() {
+  		/* Count up any completed cards */
+	    var numCardsCompleted = 0;
+	    for (var i=0; i < this.state.cards.length; i++) {
+	      	if (this.state.cards[i].completed) {
+	      		numCardsCompleted++;
+	      	}
+	    }
+	    if (numCardsCompleted == NUM_CARDS) return true;
+	    else return false; 
+  	},
 	render: function() {
+		var createButtonActivated = this.createButtonShouldActivate();
 		if (this.state.selectedCard == -1) {	
 			return (
 				<div className="contentTool">
 					<Editor onCardSubmit={this.handleCardSubmit} isSelected={false}/>
 					<BingoBoard cards={this.state.cards} onSelectCard={this.handleSelectCard}/>
-					<Footer onCreate={this.handleCreate} onSave={this.handleSave} />
+					<Footer createButtonActivated={createButtonActivated} onCreate={this.handleCreate} onSave={this.handleSave} />
 				</div>
 			);
 		} else {
@@ -139,7 +148,7 @@ var ContentTool = React.createClass({
 				<div className="contentTool">
 					<Editor ref="myEditor" onCardSubmit={this.handleCardSubmit} isSelected={true} card={this.state.cards[this.state.selectedCard]}/>
 					<BingoBoard cards={this.state.cards} onSelectCard={this.handleSelectCard} selectedCard={this.state.selectedCard}/>
-					<Footer onCreate={this.handleCreate} onSave={this.handleSave}/>
+					<Footer createButtonActivated={createButtonActivated} onCreate={this.handleCreate} onSave={this.handleSave}/>
 				</div>
 			);
 		}
@@ -352,6 +361,7 @@ var BingoCard = React.createClass({
  * -----
  * onSave (function): callback that should get called when the user clicks save
  * onCreate (function): callback that should get called when the user clicks create
+ * createButtonActivated (boolean): true if the create button should be activated, false otherwise
  */
 var Footer = React.createClass({
 	handleSave: function(e) {
@@ -363,11 +373,17 @@ var Footer = React.createClass({
 	    this.props.onCreate();
 	},
 	render: function() {
+		var createButtonClass = "button footerButton ";
+		if (this.props.createButtonActivated) {
+			createButtonClass += "blueButtonActive";
+		} else {
+			createButtonClass += "blueButtonInactive";
+		}
 		return (
 			<div id="footer">
 				<div id="footerButtons">
     				<input className="button footerButton greenButtonActive" id="footerSaveButton" type="submit" value="Save & Exit" onClick={this.handleSave}/>
-    				<input className="button footerButton blueButtonInactive" id="footerCreateButton" type="submit" value="Create" onClick={this.handleCreate}/>
+    				<input className={createButtonClass} id="footerCreateButton" type="submit" value="Create" onClick={this.handleCreate}/>
     			</div>
     		</div>
 		);

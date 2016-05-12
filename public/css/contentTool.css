@@ -191,15 +191,23 @@ textArea {
 }
 
 .blueButtonActive {
-	background-color: #00a8ff;
+	background-color: #06AAFF;
+}
+
+.blueButtonActive:hover {
+	background-color: #6CCDFF;
 }
 
 .blueButtonInactive {
-	background-color: #bce9ff;
+	background-color: #CDD3D7;
 }
 
 .greenButtonActive {
-	background-color: #5fd598;
+	background-color: #5FD598;
+}
+
+.greenButtonActive:hover {
+	background-color: #9DEBC3;
 }
 
 .footerButton {
