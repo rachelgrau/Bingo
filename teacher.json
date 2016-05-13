@@ -126,8 +126,8 @@
         { 
             "deviceID": 0,
             "name": "Maria",
-            "question": "Subject to, led by, or indicative of a sudden, odd notion or unpredictable change; erratic",
-            "answer": "Capricious",
+            "question": "To hold out against; sustain without impairment or yielding; undergo",
+            "answer": "Endure",
             "didPass": false,
             "hasBingo": false,
             "cards": [
@@ -432,7 +432,7 @@
         }, { 
             "deviceID": 2,
             "name": "Lucas",
-            "question": "Subject to, led by, or indicative of a sudden, odd notion or unpredictable change; erratic",
+            "question": "Easily managed or handled; tractable",
             "answer": "Capricious",
             "didPass": false,
             "hasBingo": false,

@@ -1,36 +1,36 @@
 {
-    "nextQuestion": "next questionnn",
+    "nextQuestion": "question 5",
     "gameOver": false,
     "cards": [
         {
             "id": 1,
             "answer": "Blatant",
-            "hasChip": true,
-            "teacherApproved": true
+            "hasChip": false,
+            "teacherApproved": false
         },
         {
             "id": 2,
             "answer": "Docile",
-            "hasChip": true,
-            "teacherApproved": true
+            "hasChip": false,
+            "teacherApproved": false
         },
         {
             "id": 3,
             "answer": "Hybrid",
-            "hasChip": true,
-            "teacherApproved": true
+            "hasChip": false,
+            "teacherApproved": false
         },
         {
             "id": 4,
             "answer": "Nomadic",
-            "hasChip": true,
-            "teacherApproved": true
+            "hasChip": false,
+            "teacherApproved": false
         },
         {
             "id": 5,
             "answer": "Persist",
-            "hasChip": true,
-            "teacherApproved": true
+            "hasChip": false,
+            "teacherApproved": false
         },
         {
             "id": 6,
@@ -62,7 +62,7 @@
         {
             "id": 11,
             "answer": "Stodgy",
-            "teacherApproved": true
+            "teacherApproved": false
         },
         {
             "id": 12,
