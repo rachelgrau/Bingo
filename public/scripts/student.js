@@ -320,7 +320,6 @@ var StudentView = React.createClass({
 			}
 			if (upDiagonalHasBingo) return -1;
 		 }
-
     	/* If you get here, then they didn't have any successful bingos. */
     	return incorrectIndex;
     },
@@ -380,7 +379,6 @@ var StudentView = React.createClass({
         		cards[correctCardIndex].correctCardID = -1;
         		cards[correctCardIndex].questionIncorrectlyAnswered = "";
         		this.setState({isModalOpen: false, cards: cards, modalType:"", selectedCardIndex: -1, indexOfIncorrectCard: -1});
-        		console.log(this.state.cards);
         		break;
     		default:
     			/* Close modal */

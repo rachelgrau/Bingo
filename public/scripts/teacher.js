@@ -561,14 +561,31 @@ var QuestionAnswer = React.createClass({
 /*
  * Props
  * -----
- * stats (dictionary): a dictionary with the stats for this question ("numCorrect" "numIncorrect" "numUnanswered" and "totatlStudents")
+ * stats (dictionary): a dictionary with the stats for this question ("numCorrect" "numIncorrect" "numUnanswered" and "totatStudents")
  */
 var Graph = React.createClass({
 	render: function() {
 		var numStudents = this.props.stats.totalStudents;
+
+    /* Create slices for pie chart */
+    var slices = [];
+    if (numStudents > 0) {
+      slices = [
+        { color: '#5FD598', value: (this.props.stats.numCorrect/numStudents)*100 }, // correct
+        { color: '#F26C59', value: (this.props.stats.numIncorrect/numStudents)*100 }, // incorrect
+        { color: '#E7E7E7', value: (this.props.stats.numUnanswered/numStudents)*100 } // unanswered
+      ];
+    } else {
+      slices = [
+        { color: '#E7E7E7', value: 100 } // unanswered
+      ];
+    }
+    
 		return (
 			<div className="graph">
-				<div className="graphVisual"><img className="graphImage" src="../assets/graph.png"/></div>
+				<div className="graphVisual">
+          <PieChart slices={slices} />
+        </div>
 				<div className="graphStats">
 					<table className="statsTable">
 						<tbody>
@@ -986,7 +1003,112 @@ var Modal = React.createClass({
     }
 });
 
+
+'use strict';
+
+var PropTypes = React.PropTypes;
+
+/**
+ * Generates an SVG pie chart.
+ * @see {http://wiki.scribus.net/canvas/Making_a_Pie_Chart}
+ */
+var PieChart = React.createClass({
+  displayName: 'PieChart',
+
+  propTypes: {
+    className: PropTypes.string,
+    size: PropTypes.number,
+    slices: PropTypes.arrayOf(PropTypes.shape({
+      color: PropTypes.string.isRequired, // hex color
+      value: PropTypes.number.isRequired })).isRequired },
+
+  /**
+   * @return {Object}
+   */
+  getDefaultProps: function getDefaultProps() {
+    return {
+      size: 60 };
+  },
+
+  /**
+   * @return {Object[]}
+   */
+  _renderPaths: function _renderPaths() {
+    var radCircumference = Math.PI * 2;
+    var center = this.props.size / 2;
+    var radius = center - 1; // padding to prevent clipping
+    var total = this.props.slices.reduce(function (totalValue, slice) {
+      return totalValue + slice.value;
+    }, 0);
+
+    var radSegment = 0;
+    var lastX = radius;
+    var lastY = 0;
+
+    return this.props.slices.map(function (slice, index) {
+      var color = slice.color;
+      var value = slice.value;
+
+      // Should we just draw a circle?
+      if (value === total) {
+        return React.createElement('circle', {
+          r: radius,
+          cx: radius,
+          cy: radius,
+          fill: color,
+          key: index
+        });
+      }
+
+      if (value === 0) {
+        return;
+      }
+
+      var valuePercentage = value / total;
+
+      // Should the arc go the long way round?
+      var longArc = valuePercentage <= 0.5 ? 0 : 1;
+
+      radSegment += valuePercentage * radCircumference;
+      var nextX = Math.cos(radSegment) * radius;
+      var nextY = Math.sin(radSegment) * radius;
+
+      // d is a string that describes the path of the slice.
+      // The weirdly placed minus signs [eg, (-(lastY))] are due to the fact
+      // that our calculations are for a graph with positive Y values going up,
+      // but on the screen positive Y values go down.
+      var d = ['M ' + center + ',' + center, 'l ' + lastX + ',' + -lastY, 'a' + radius + ',' + radius, '0', '' + longArc + ',0', '' + (nextX - lastX) + ',' + -(nextY - lastY), 'z'].join(' ');
+
+      lastX = nextX;
+      lastY = nextY;
+
+      return React.createElement('path', { d: d, fill: color, key: index });
+    });
+  },
+
+  /**
+   * @return {Object}
+   */
+  render: function render() {
+    var size = this.props.size;
+
+    var center = size / 2;
+
+    return React.createElement(
+      'svg',
+      { viewBox: '0 0 ' + size + ' ' + size },
+      React.createElement(
+        'g',
+        { transform: 'rotate(-90 ' + center + ' ' + center + ')' },
+        this._renderPaths()
+      )
+    );
+  }
+});
+
 ReactDOM.render(
 	<TeacherView url="/api/teacher" pollInterval={2000}/>,
 	document.getElementById('content')
 );
+
+

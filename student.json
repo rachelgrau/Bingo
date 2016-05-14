@@ -1,5 +1,5 @@
 {
-    "nextQuestion": "question 5",
+    "nextQuestion": "qutionsss",
     "gameOver": false,
     "cards": [
         {
@@ -24,7 +24,7 @@
             "id": 4,
             "answer": "Nomadic",
             "hasChip": false,
-            "teacherApproved": false
+            "teacherApproved": false        
         },
         {
             "id": 5,
@@ -47,12 +47,13 @@
         {
             "id": 8,
             "answer": "Affliction",
+            "hasChip": false,
             "teacherApproved": false
         },
         {
             "id": 9,
             "answer": "Endure",
-            "teacherApproved": false
+            "teacherApproved": false        
         },
         {
             "id": 10,
@@ -67,11 +68,13 @@
         {
             "id": 12,
             "answer": "Notorious",
-            "teacherApproved": false
+            "teacherApproved": false,
+            "hasChip": false
         },
         {
             "id": 13,
             "answer": "Irate",
+            "hasChip": false,
             "teacherApproved": false
         },
         {
@@ -102,7 +105,8 @@
         {
             "id": 19,
             "answer": "Consult",
-            "teacherApproved": false
+            "teacherApproved": false,
+            "hasChip": false
         },
         {
             "id": 20,
@@ -112,6 +116,7 @@
         {
             "id": 21,
             "answer": "Homage",
+            "hasChip": false,
             "teacherApproved": false
         },
         {
@@ -121,8 +126,8 @@
         },
         {
             "id": 23,
-            "index": 23,
             "answer": "Capricious",
+            "hasChip": false,
             "teacherApproved": false
         },
         {
