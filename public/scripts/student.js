@@ -562,7 +562,7 @@ var BingoChecker = React.createClass ({
 		} else if (this.props.hasBingo) {
 			return (
 				<div className="bingoChecker">
-	    			<div className="button blueButtonShadow" onClick={this.props.onBingoClicked}>
+	    			<div className="button blueButton" id="checkBingoButton" onClick={this.props.onBingoClicked}>
 						I have bingo!
 					</div><br/>
 					Board checks left: <b>{this.props.numBingoChecksLeft}</b>

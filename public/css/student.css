@@ -195,6 +195,10 @@ body {
 	color: #06aaff;
 }
 
+.outlineButton:hover {
+	border: 2px solid #00a8ff;
+}
+
 .transparentOutlineButton {
 	/* Button */
 	width: 180px;
@@ -209,10 +213,7 @@ body {
 	line-height: 37px;
 }
 
-.blueButtonShadow {
-	color: white;
-	background-color: #06aaff;
-	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+#checkBingoButton {
 	display: inline-block;
 }
 
@@ -220,6 +221,10 @@ body {
 	color: white;
 	background-color: #06aaff;
 	border-radius: 4px;
+}
+
+.blueButton:hover {
+	background-color: #6CCDFF;
 }
 
 .grayButtonInactive {
