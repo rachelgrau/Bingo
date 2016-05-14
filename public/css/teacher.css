@@ -1,0 +1,453 @@
+body {
+	background-color: #ededed;
+}
+
+.teacherContent {
+	/* Width of current questions + past questions + margin between them */
+	width: 993px;
+	height: 674px;
+	/* Center this stuff */ 
+	margin: auto;
+	margin-top: 30px;
+	margin-bottom: 30px;
+}
+
+.currentQuestion {
+	float: left;
+	background-color: white;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+	width: 600px;
+	height: 654px;
+	/* 1/2 Margin between current question & past questions */
+	margin-right: 15px;
+	margin-bottom: 10px;
+	padding: 10px 20px 20px 20px;
+}
+
+.pastQuestions {
+	float: left;
+	background-color: white;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+	width: 283px;
+	height: 654px;
+	/* 1/2 Margin between current question & past questions */
+	margin-left: 15px;
+	padding: 10px 20px 20px 20px;
+}
+
+h1 {
+	/* Font */
+	font-family: "Avenir LT Std";
+	font-size: 18px;
+	font-weight: 500;
+	line-height: 21px;
+}
+
+/* 
+ * CURRENT QUESTION STUFF
+ * ----------------------- 
+ */
+
+ /* Question + answer stuff  */
+.questionAnswer {
+	float: left;
+	width: 285px;
+	height: 115px;
+	margin-top: 30px
+}
+
+.question {
+	float: left;
+	background-color: white;
+	border: 2px solid #06aaff;
+	border-radius: 8px;
+	width: 115px;
+	height: 115px;
+	padding: 5px;
+	margin-right: 27px;
+	/* Font */
+	color: black;
+	font-family: "Avenir Next";
+	/* Centering */
+	/* Vertically centers in Safari */
+  	display: table;
+  	/* Vertically centers in Chrome */
+	display: flex;
+  	justify-content: center;
+  	flex-direction: column;
+}
+
+.questionNormal {
+	font-size: 14px;
+	font-weight: 400;
+	line-height: 19px;
+}
+
+.questionSmall {
+	font-size: 12px;
+	font-weight: 400;
+	line-height: 16px;
+}
+
+.answer {
+	float: left;
+	background-color: rgba(6, 170, 255, 0.27);
+	border: 2px solid #06aaff;
+	border-radius: 8px;
+	width: 105px;
+	height: 105px;
+	padding: 10px;
+	/* Font */
+	color: black;
+	font-family: "Avenir Next";
+	font-size: 20px;
+	font-weight: 400;
+	line-height: 28px;
+	/* Center */
+	text-align: center;
+	/* Vertically centers in Safari */
+  	display: table;
+	/* Vertically centers in Chrome */
+  	display: flex;
+  	justify-content: center;
+  	flex-direction: column;
+
+  }
+
+/* Graph stuff */
+.graph {
+	float: left;
+	height: 125px; /* Same as question/answer */
+	margin-top: 30px;
+}
+
+.graphImage {
+	margin-left: 25px;
+}
+
+.graphVisual {
+	float: left;
+	width: 165px;
+	margin-right: 11px;
+}
+
+.graphStats {
+	float: left;
+	/* Font */
+	font-family: "Avenir Next";
+	font-size: 11px;
+	font-weight: 400;
+	line-height: 11px;
+	margin-top: 25px;
+}
+
+.statsTable {
+	border-spacing: 0 5px;
+}
+
+#nextQuestion {
+	clear: both;
+	margin-top: 195px; /* Height of cards (125) + actual margin desired (40)*/
+	margin-bottom: 30px;
+	width: 256px;
+	height: 44px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+/* CURRENT QUESTION ANSWER
+ * ----------------------- 
+ */
+
+/* Wraps the table rows (not header) of the current question table
+   to make it scrollable */
+.currentQuestionsContainer {
+	height: 300px;
+	overflow-y: scroll;
+}
+
+table.simpleTable {
+	border-collapse: collapse;
+	width: 100%;
+	color: #161e21;
+	font-family: "Avenir LT Std";
+	font-size: 18px;
+	font-weight: 500;
+	line-height: 22px;
+}
+
+th.tableHeader {
+	border-bottom: 2px solid #06aaff;
+}
+
+/* Column with student names */
+.studentName {
+	width: 25%;
+	text-align: left;
+	padding-top: 10px;
+	padding-bottom: 10px;
+	border-bottom: 1px solid #aeaeae;
+}
+
+/* Column with student answers */
+.tableAnswer {
+	text-align: center;
+	width: 30%;
+	padding-top: 10px;
+	padding-bottom: 10px;
+	border-bottom: 1px solid #aeaeae;
+}
+
+/* Empty column */
+.emptyColumn {
+	border-bottom: 1px solid #aeaeae;
+}
+
+/* PAST QUESTION STUFF
+ * ----------------------- 
+ */
+
+/* Wraps the table rows (not header) of the past question table
+   to make it scrollable */
+.pastQuestionsContainer {
+	height: 530px;
+	overflow-y: scroll;
+}
+
+.studentNamePast {
+	padding-top: 10px;
+	padding-bottom: 10px;
+	border-bottom: 1px solid #aeaeae;
+	width: 65%;
+}
+
+.fractionScore {
+	width: 20%;
+	text-align: center;
+	border-bottom: 1px solid #aeaeae;
+}
+
+.percentageScore {
+	width: 15%;
+	text-align: center;
+	border-bottom: 1px solid #aeaeae;
+}
+
+.correctAnswer {
+	color: #5fd598;
+}
+
+.incorrectAnswer {
+	color: #f26c59;
+}
+
+.unanswered {
+	color: #aeaeae;
+}
+
+/* Buttons */
+.blueButton {
+	background-color: #06aaff;
+	border-radius: 6px;
+	/* Font */
+	font-family: "Avenir LT Std";
+	font-size: 20px;
+	font-weight: 200;
+	line-height: 44px; /* Same as height of button */
+	color: white;
+	text-align: center;
+}
+
+.blueButton:hover {
+	background-color: #6CCDFF;
+}
+
+.inactiveButton {
+	width: 256px;
+	height: 44px;
+	background-color: #CDD3D7;
+	border-radius: 6px;
+	/* Font */
+	font-family: "Avenir LT Std";
+	font-size: 20px;
+	font-weight: 200;
+	line-height: 44px; /* Same as height of button */
+	color: white;
+	text-align: center;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.outlineButton {
+	background-color: white;
+	border: 1px solid #00a8ff;
+	border-radius: 6px;
+	/* Font */
+	text-align: center;
+	color: #06aaff;
+	font-family: "Avenir LT Std";
+	font-size: 20px;
+	font-weight: 200;
+}
+
+#endGameButton {
+	width: 238px;
+	height: 38px;
+	margin-top: 20px;
+	/* Horizontally center */
+	margin-left: auto;
+	margin-right: auto;
+	line-height: 38px;
+}
+
+.outlineButton:hover {
+	border: 2px solid #00a8ff;
+}
+
+/* RESULTS TABLE STUFF */
+.resultsTable {
+	background-color: white;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+	border-collapse: collapse;
+	color: #161e21;
+	font-family: "Avenir LT Std";
+	font-size: 18px;
+	font-weight: 500;
+	line-height: 22px;
+	padding: 5px;
+}
+
+th.resultsTableHeader {
+	padding: 10px;
+}
+
+.resultsTableCell {
+	padding: 10px;
+	text-align: center;
+}
+
+/* First column*/
+.studentNameColumn {
+	width: 90px;
+	text-align: left;
+}
+
+.studentTotalColumn {
+	width: 120px;
+	border-right: 1px solid #aeaeae;
+}
+
+.bottomGray {
+	border-bottom: 1px solid #aeaeae;
+}
+
+.sortBy {
+	font-family: "Avenir";
+	font-weight: lighter;
+	color: #6C7A86;
+	border: 1px solid #EBEFF2;
+	padding: 4px;
+	border-radius: 3px;
+}
+
+.leaderChip {
+	display: inline-block;
+	color: #06aaff;
+	font-size: 14px;
+}
+
+/* MODAL STUFF */
+
+.modalBg {
+	position: fixed;
+	left: 0;
+	top: 0;
+	background-color: rgba(86, 86, 86, .65);
+	width: 100%;
+	height: 100%;
+}
+
+.modal {
+	position: absolute;
+	width: 445px;
+	height: 200px;
+	background-image: linear-gradient(180deg, white 0%, #f8fafb 100%);
+	border: 1px solid #ebeff2;
+	border-radius: 10px;
+	box-shadow: 2px 2px 4px rgba(168, 168, 168, 0.5);
+	/* Center on screen */
+	position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-top: -176px;
+    margin-left: -262px;
+    padding-top: 31px;
+    padding-left: 40px;
+    padding-right: 40px;
+    /* Font */
+    text-align: center;
+    color: #454545;
+	font-family: "Avenir Next";
+	font-size: 22px;
+	font-weight: 500;
+	line-height: 30px;
+}
+
+.modalFooter {
+	background-color: white;
+	background-color: white;
+	border: 1px solid #ebeff2;	
+	width: 525px; /* Same as modal */
+	height: 100px;
+	border-bottom-left-radius: 5px;
+	border-bottom-right-radius: 5px;
+	/* position */
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	margin-left: -264px;
+	margin-top: 20px;
+}
+
+/* Wrap around two buttons in footer of modal to center them */
+#twoButtonContainer {
+	height: 100px; /* Same as modal button*/
+	width: 430px; /* (2*width of question/answer) + margin between question & answer */
+	/* Center it in modal box */
+	position: relative;
+	left: 50%;
+	margin-left: -215px; /* 1/2 width */
+	margin-top: 25px; /* Between boxes & header */
+}
+
+.modalHeader {
+	margin-top: 20px;
+}
+
+.modalButton {
+	width: 206px;
+	height: 42px;
+	/* Font */
+	font-family: "Avenir Next";
+	font-size: 16px;
+	font-weight: 400;
+	line-height: 42px;
+	/* Vertically centers */
+  	display: flex;
+  	justify-content: center;
+  	flex-direction: column;
+}
+
+#leftModalButton {
+	float: left;
+}
+
+#rightModalButton {
+	float: right;
+}
+
+/* Use this class to vertically center text if container has display: table*/
+.verticallyCenteredText {
+	display: table-cell;
+	vertical-align: middle;
+}

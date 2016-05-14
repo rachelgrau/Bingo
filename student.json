@@ -1,125 +1,134 @@
 {
-    "question": "Brazenly obvious; flagrant; offensively noisy or loud",
+    "nextQuestion": "next questionnn",
+    "gameOver": false,
     "cards": [
         {
             "id": 1,
-            "index": 1,
-            "word": "Blatant"
+            "answer": "Blatant",
+            "hasChip": true,
+            "teacherApproved": true
         },
         {
             "id": 2,
-            "index": 2,
-            "word": "Docile"
+            "answer": "Docile",
+            "hasChip": true,
+            "teacherApproved": true
         },
         {
             "id": 3,
-            "index": 3,
-            "word": "Hybrid"
+            "answer": "Hybrid",
+            "hasChip": true,
+            "teacherApproved": true
         },
         {
             "id": 4,
-            "index": 4,
-            "word": "Nomadic"
+            "answer": "Nomadic",
+            "hasChip": true,
+            "teacherApproved": true
         },
         {
             "id": 5,
-            "index": 5,
-            "word": "Persist"
+            "answer": "Persist",
+            "hasChip": true,
+            "teacherApproved": true
         },
         {
             "id": 6,
-            "index": 6,
-            "word": "Resume"
+            "answer": "Resume",
+            "hasChip": false,
+            "teacherApproved": false
         },
         {
             "id": 7,
-            "index": 7,
-            "word": "Wrath"
+            "answer": "Wrath",
+            "hasChip": false,
+            "teacherApproved": false
         },
         {
             "id": 8,
-            "index": 8,
-            "word": "Affliction"
+            "answer": "Affliction",
+            "teacherApproved": false
         },
         {
             "id": 9,
-            "index": 9,
-            "word": "Endure"
+            "answer": "Endure",
+            "teacherApproved": false
         },
         {
             "id": 10,
-            "index": 10,
-            "word": "Dependent"
+            "answer": "Dependent",
+            "teacherApproved": false
         },
         {
             "id": 11,
-            "index": 11,
-            "word": "Stodgy"
+            "answer": "Stodgy",
+            "teacherApproved": true
         },
         {
             "id": 12,
-            "index": 12,
-            "word": "Notorious"
+            "answer": "Notorious",
+            "teacherApproved": false
         },
         {
             "id": 13,
-            "index": 13,
-            "word": "Irate"
+            "answer": "Irate",
+            "teacherApproved": false
         },
         {
             "id": 14,
-            "index": 14,
-            "word": "Grim"
+            "answer": "Grim",
+            "teacherApproved": false
         },
         {
             "id": 15,
-            "index": 15,
-            "word": "Legacy"
+            "answer": "Legacy",
+            "teacherApproved": false
         },
         {
             "id": 16,
-            "index": 16,
-            "word": "Vindictive"
+            "answer": "Vindictive",
+            "teacherApproved": false
         },
         {
             "id": 17,
-            "index": 17,
-            "word": "Flaw"
+            "answer": "Flaw",
+            "teacherApproved": false
         },
         {
             "id": 18,
-            "index": 18,
-            "word": "Trivial"
+            "answer": "Trivial",
+            "teacherApproved": false
         },
         {
             "id": 19,
-            "index": 19,
-            "word": "Consult"
+            "answer": "Consult",
+            "teacherApproved": false
         },
         {
             "id": 20,
-            "index": 20,
-            "word": "Nimble"
+            "answer": "Nimble",
+            "teacherApproved": false
         },
         {
             "id": 21,
-            "index": 21,
-            "word": "Homage"
+            "answer": "Homage",
+            "teacherApproved": false
         },
         {
             "id": 22,
-            "index": 22,
-            "word": "Sham"
+            "answer": "Sham",
+            "teacherApproved": false
         },
         {
             "id": 23,
             "index": 23,
-            "word": "Capricious"
+            "answer": "Capricious",
+            "teacherApproved": false
         },
         {
             "id": 24,
-            "index": 24,
-            "word": "Perjury"
+            "answer": "Perjury",
+            "teacherApproved": false
         }
     ]
 }

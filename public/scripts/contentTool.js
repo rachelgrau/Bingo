@@ -1,8 +1,17 @@
+var NUM_CARDS = 24;
 /*
+ * POSTS to API when the user hits "create" or "save & exit" -- 
+ * 		completed: this.state.isCompleted
+ * 		title: this.state.title
+ * 		data_all: this.state.dataStudent // doesn't have the answer
+ *		data_teacher: this.state.cards
+ * 
  * State 
  * ------
- * cards (array): the cards themselves
+ * cards (array): the cards themselves as they will be sent to the teacher
+ * dataStudent (array): the cards as they will be sent to the student
  * selectedCard (int): the index of the card that is currently selected (or -1) if none
+ * isCompleted (boolean): whether or not the current slide has been "created" 
  */
 
 var slideId = getUrlVars()["id"];
@@ -18,7 +27,6 @@ var ContentTool = React.createClass({
 	    return vars;
 	},
 
-
 	setHeaders: function(){
 		//TODO FIGURE OUT WHAT APP ID SHOULD BE
 		return {"x-api-key":"7dabac64681a7c12c1cb97183c44de93", "JWT": this.getUrlVars()["jwt"]};
@@ -32,22 +40,46 @@ var ContentTool = React.createClass({
 		alert("code: " + json.error_code + "\nmessage: " + json.message + "\n\nfull: " + JSON.stringify(json) );
 	},
 
+	loadCardsFromServer: function() {
+		console.log("load cards from server");
+		
+		/* Pretty sure this needs to be fixed to reflect the example code more */
+		var params = {
+			"id": slideId,
+			"completed": this.state.isCompleted,
+			"title": this.state.title,
+			"data_all": this.state.dataStudent,
+			"data_teacher": this.state.cards
+			};
+		this.get("custom_slides/" + slideId, params, this.showSuccess);
+  	},
+
 	get: function(path, params, successCallback){
 		$.ajax({
 			  url: "https://api-dev.nearpod.com/v1/ct/" + path,
 			  method: "GET",
 			  async: false,
+			  dataType: 'json',
+	    	  cache: false,
 			  data: params,
 			  headers: this.setHeaders(),
 			  success: function(data, textStatus, jqXHR){
-				  successCallback(jqXHR.responseJSON);
-				  console.log("success in get");
+		      	var cards = data["data_teacher"];
+		      	if (cards.length == 0) {
+		      		cards = this.getInitialCards();
+		      	}	    
+		        this.setState({
+		        	cards: cards,
+		        	isCompleted: data["completed"]
+		        });			  
+				successCallback(jqXHR.responseJSON);
+				console.log("success in get");
 			  },
 			  error: function(jqXHR, textStatus, errorThrown){
 				  showError(jqXHR.responseJSON);
 				  console.log("failure in get");
 			  }
-		});	
+		});
 	},
 
 	post: function(path, params, successCallback){
@@ -68,34 +100,28 @@ var ContentTool = React.createClass({
 		});
 	},
 
-	loadCardsFromServer: function() {
-    	// $.ajax({
-	    //   url: this.props.url,
-	    //   dataType: 'json',
-	    //   cache: false,
-	    //   success: function(cards) {
-	    //     this.setState({cards: cards});
-	    //   }.bind(this),
-	    //   error: function(xhr, status, err) {
-	    //     console.error(this.props.url, status, err.toString());
-	    //   }.bind(this)
-	    // });
-		console.log("load cards from server");
-		if (this.state.cards.length == 0) {
-			console.log("EMPTY");
-		}
-		this.get(this.props.url, this.state.cards, this.showSuccess);
-
-
-
-
-		// post(this.props.url, null, showSuccess);
-  	},
   	getInitialState: function() {
 		return {
 			cards:[], 
-			selectedCard:-1
+			dataStudent: [],
+			selectedCard:-1,
+			isCompleted: false,
+			title: "Bingo", 
+			numCardsCompleted: 0
 		};
+	},
+	/* Returns an array of 24 empty cards (teacher cards) */
+	getInitialCards: function() {
+		var cards = [];
+		for (var i=0; i < NUM_CARDS; i++) {
+			var card = {};
+			card["id"] = i;
+			card["answer"] = "";
+			card["question"] = "";
+			card["completed"] = false;
+			cards.push(card);
+ 		}	
+ 		return cards;
 	},
   	componentDidMount: function() {
     	this.loadCardsFromServer();
@@ -125,34 +151,77 @@ var ContentTool = React.createClass({
   		}
   		this.setState({selectedCard: cardNumber});
   	},
-  	/* Called when the user clicks "create" */
+  	/* Updates this.state.dataStudent to contain all the cards in this.state.cards, but wihtout 
+  	   the "answer" field and with a "hasChip" (false) and "teacherApproved" (false) field */
+  	updateCardsForStudent: function() {
+  		var studentCards = [];
+  		for (var i=0; i < this.state.cards.length; i++) {
+  			var currentCard = this.state.cards[i];
+  			var studentCard = {};
+  			studentCard["id"] = currentCard.id;
+  			studentCard["answer"] = currentCard.answer;
+  			studentCard["hasChip"] = false;
+  			studentCard["teacherApproved"] = false;
+  			studentCards.push(studentCard);
+  		}
+  		this.state.dataStudent = studentCards;
+  	},
+  	/* Called when the user clicks "create". If create button is inactive, do nothing. 
+  	   Otherwise, set completed to true, set up dataStudent, and post to API. */
   	handleCreate: function() {
+  		console.log("handle create");
+
+  		var createButtonClass = $("#footerCreateButton").attr('class');
+  		if (createButtonClass == "button footerButton blueButtonActive") {
+  			this.updateCardsForStudent();
+  			this.state.isCompleted = true;
+  			/* POST to API here */
+  			var params = {
+				"presentationId": "123",
+				"completed": this.state.isCompleted,
+				"title": this.state.title,
+				"data_all": this.state.dataStudent,
+				"data_teacher": this.state.cards
+			};
+			this.post("custom_slides", params, this.showSuccess);
+  		}
   	},
   	/* Called when the user clicks "save and exit" – saves current state of all cards */
   	handleSave: function() {
-  		// $.ajax({
-	   //    url: this.props.url,
-	   //    dataType: 'json',
-	   //    type: 'POST',
-	   //    data: JSON.stringify(this.state.cards),
-	   //    success: function(cards) {
-	   //    	console.log("success");
-	   //    }.bind(this),
-	   //    error: function(xhr, status, err) {
-	   //      console.error(this.props.url, status, err.toString());
-	   //    }.bind(this)
-	   //  });
-		console.log("handle save");
-		this.post("custom_slides", this.state.cards, this.showSuccess);
+  		/* PUT to API here, replace all code in this method */
+  		console.log("handle save");
+  		
+  		this.updateCardsForStudent();
+		var params = {
+			"presentationId": "123",
+			"completed": this.state.isCompleted,
+			"title": this.state.title,
+			"data_all": this.state.dataStudent,
+			"data_teacher": this.state.cards
+			};
+		this.post("custom_slides", params, this.showSuccess);
+  	},
+
+  	createButtonShouldActivate: function() {
+  		/* Count up any completed cards */
+	    var numCardsCompleted = 0;
+	    for (var i=0; i < this.state.cards.length; i++) {
+	      	if (this.state.cards[i].completed) {
+	      		numCardsCompleted++;
+	      	}
+	    }
+	    if (numCardsCompleted == NUM_CARDS) return true;
+	    else return false; 
   	},
 
 	render: function() {
+		var createButtonActivated = this.createButtonShouldActivate();
 		if (this.state.selectedCard == -1) {	
 			return (
 				<div className="contentTool">
 					<Editor onCardSubmit={this.handleCardSubmit} isSelected={false}/>
 					<BingoBoard cards={this.state.cards} onSelectCard={this.handleSelectCard}/>
-					<Footer onCreate={this.handleCreate} onSave={this.handleSave} />
+					<Footer createButtonActivated={createButtonActivated} onCreate={this.handleCreate} onSave={this.handleSave} />
 				</div>
 			);
 		} else {
@@ -160,7 +229,7 @@ var ContentTool = React.createClass({
 				<div className="contentTool">
 					<Editor ref="myEditor" onCardSubmit={this.handleCardSubmit} isSelected={true} card={this.state.cards[this.state.selectedCard]}/>
 					<BingoBoard cards={this.state.cards} onSelectCard={this.handleSelectCard} selectedCard={this.state.selectedCard}/>
-					<Footer onCreate={this.handleCreate} onSave={this.handleSave}/>
+					<Footer createButtonActivated={createButtonActivated} onCreate={this.handleCreate} onSave={this.handleSave}/>
 				</div>
 			);
 		}
@@ -329,10 +398,10 @@ var BingoBoard = React.createClass({
  * Props
  * -----
  * isSelected (boolean): true if the card should appear as selected, false otehrwise
- * index (int): the index of this card on the board (excluding wild card) from top left to bottom right 
- * answer (string): the answer to display on the card
  * completed (boolean): true if the current card has been completed (i.e. has an answer), false if it's empty
  * isWild (boolean): true if this is the wild card, false otherwise
+ * index (int): the index of this card on the board (excluding wild card) from top left to bottom right 
+ * answer (string): the answer to display on the card
  * onCardClick (function): callback that should get called when this card is selected...pass it the index of this card
  */
 var BingoCard = React.createClass({
@@ -374,6 +443,7 @@ var BingoCard = React.createClass({
  * -----
  * onSave (function): callback that should get called when the user clicks save
  * onCreate (function): callback that should get called when the user clicks create
+ * createButtonActivated (boolean): true if the create button should be activated, false otherwise
  */
 var Footer = React.createClass({
 	handleSave: function(e) {
@@ -385,11 +455,17 @@ var Footer = React.createClass({
 	    this.props.onCreate();
 	},
 	render: function() {
+		var createButtonClass = "button footerButton ";
+		if (this.props.createButtonActivated) {
+			createButtonClass += "blueButtonActive";
+		} else {
+			createButtonClass += "blueButtonInactive";
+		}
 		return (
 			<div id="footer">
 				<div id="footerButtons">
     				<input className="button footerButton greenButtonActive" id="footerSaveButton" type="submit" value="Save & Exit" onClick={this.handleSave}/>
-    				<input className="button footerButton blueButtonInactive" id="footerCreateButton" type="submit" value="Create" onClick={this.handleCreate}/>
+    				<input className={createButtonClass} id="footerCreateButton" type="submit" value="Create" onClick={this.handleCreate}/>
     			</div>
     		</div>
 		);
