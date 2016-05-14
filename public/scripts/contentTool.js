@@ -143,7 +143,7 @@ var ContentTool = React.createClass({
 	   //    }.bind(this)
 	   //  });
 		console.log("handle save");
-		this.post(this.props.url, this.state.cards, this.showSuccess);
+		this.post("custom_slides", this.state.cards, this.showSuccess);
   	},
 
 	render: function() {
