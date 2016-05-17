@@ -12,14 +12,11 @@ var NUM_CARDS = 24;
  * dataStudent (array): the cards as they will be sent to the student
  * selectedCard (int): the index of the card that is currently selected (or -1) if none
  * isCompleted (boolean): whether or not the current slide has been "created" 
+ * slideID (int): the ID of this slide, or 0 if it's new
  */
 
-	// var slideId = this.getUrlVars()["id"];
-	// var presentationId = getUrlVars()["presentation_id"];
 	var presentationId = "111327";
 	var jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJDVCIsImV4cCI6MTQ2MzUxNDc1OCwiYXVkIjoiN2RhYmFjNjQ2ODFhN2MxMmMxY2I5NzE4M2M0NGRlOTMiLCJyZWZyZXNoIjo3MjAwLCJ0a24iOiIiLCJ1aWQiOiIiLCJpYXQiOjE0NjM1MDc1NTgsImlkIjoiMTYwMTciLCJlbnYiOiJodHRwczpcL1wvY3QtZGV2Lm5lYXJwb2QuY29tXC8ifQ.bq_5ug9nv7Fmo80QABs8J5mgCh1EJ0jQIKEu6BaL_pw";
-	var slideId = 0;
-
 
 var ContentTool = React.createClass({
 
@@ -32,8 +29,6 @@ var ContentTool = React.createClass({
 	},
 
 	setHeaders: function(){
-		//TODO FIGURE OUT WHAT APP ID SHOULD BE
-		// return {"x-api-key":"7dabac64681a7c12c1cb97183c44de93", "JWT": this.getUrlVars()["jwt"]};
 		return {"x-api-key":"7dabac64681a7c12c1cb97183c44de93", "JWT": jwt};
 	},
 
@@ -46,26 +41,22 @@ var ContentTool = React.createClass({
 	},
 
 	changeCurrentId: function(json){
-		slideId = json.payload.custom_slide.id;
+		var slideId = json.payload.custom_slide.id;
 		this.showSuccess(json);
 	},
 
 	loadCardsFromServer: function() {
 		console.log("load cards from server");
-		
-		/* Pretty sure this needs to be fixed to reflect the example code more */
-		// var params = {
-		// 	"id": slideId,
-		// 	"completed": this.state.isCompleted,
-		// 	"title": this.state.title,
-		// 	"data_all": this.state.dataStudent,
-		// 	"data_teacher": this.state.cards
-		// 	};
 		var params = "";
-		console.log("slideId " + slideId);
-		if(slideId > 0) {
-			this.get("custom_slides/" + slideId, params, this.showSuccess);
+		console.log("slideId " + this.state.slideID);
+		if(this.state.slideID > 0) {
+			/* If we are editing an existing slide, GET it */
+			this.get("custom_slides/" + this.state.slideID, params, this.showSuccess);
 		} else {
+			/* If we are making a new slide, POST it */
+			var cards = this.getInitialCards();
+			this.setState({ cards: cards});	
+			this.updateCardsForStudent();
 			params = {
 				"presentation_id": presentationId,
 				"completed": this.state.isCompleted,
@@ -139,13 +130,16 @@ var ContentTool = React.createClass({
 	},
 
   	getInitialState: function() {
+  		var urlVars = this.getUrlVars();
+  		//TO DO: presentation ID will also come from here
 		return {
 			cards:[], 
 			dataStudent: [],
 			selectedCard:-1,
 			isCompleted: false,
 			title: "Bingo", 
-			numCardsCompleted: 0
+			numCardsCompleted: 0,
+			slideID: urlVars["id"]
 		};
 	},
 	/* Returns an array of 24 empty cards (teacher cards) */
