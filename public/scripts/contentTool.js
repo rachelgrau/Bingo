@@ -17,6 +17,9 @@ var NUM_CARDS = 24;
 	// var slideId = this.getUrlVars()["id"];
 	// var presentationId = getUrlVars()["presentation_id"];
 	var presentationId = "111327";
+	var jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJDVCIsImV4cCI6MTQ2MzUxNDc1OCwiYXVkIjoiN2RhYmFjNjQ2ODFhN2MxMmMxY2I5NzE4M2M0NGRlOTMiLCJyZWZyZXNoIjo3MjAwLCJ0a24iOiIiLCJ1aWQiOiIiLCJpYXQiOjE0NjM1MDc1NTgsImlkIjoiMTYwMTciLCJlbnYiOiJodHRwczpcL1wvY3QtZGV2Lm5lYXJwb2QuY29tXC8ifQ.bq_5ug9nv7Fmo80QABs8J5mgCh1EJ0jQIKEu6BaL_pw";
+	var slideId = 0;
+
 
 var ContentTool = React.createClass({
 
@@ -30,7 +33,8 @@ var ContentTool = React.createClass({
 
 	setHeaders: function(){
 		//TODO FIGURE OUT WHAT APP ID SHOULD BE
-		return {"x-api-key":"7dabac64681a7c12c1cb97183c44de93", "JWT": this.getUrlVars()["jwt"]};
+		// return {"x-api-key":"7dabac64681a7c12c1cb97183c44de93", "JWT": this.getUrlVars()["jwt"]};
+		return {"x-api-key":"7dabac64681a7c12c1cb97183c44de93", "JWT": jwt};
 	},
 
 	showError: function(json){
@@ -39,6 +43,11 @@ var ContentTool = React.createClass({
 
 	showSuccess: function(json){
 		alert("code: " + json.error_code + "\nmessage: " + json.message + "\n\nfull: " + JSON.stringify(json) );
+	},
+
+	changeCurrentId: function(json){
+		slideId = json.payload.custom_slide.id;
+		showSuccess(json);
 	},
 
 	loadCardsFromServer: function() {
@@ -53,8 +62,19 @@ var ContentTool = React.createClass({
 		// 	"data_teacher": this.state.cards
 		// 	};
 		var params = "";
-		var slideId = "0";
-		this.get("custom_slides/" + slideId, params, this.showSuccess);
+		console.log("slideId " + slideId);
+		if(slideId > 0) {
+			this.get("custom_slides/" + slideId, params, this.showSuccess);
+		} else {
+			params = {
+				"presentation_id": presentationId,
+				"completed": this.state.isCompleted,
+				"title": this.state.title,
+				"data_all": this.state.dataStudent,
+				"data_teacher": this.state.cards
+			};
+			this.post("custom_slides", params, this.changeCurrentId);
+		}
   	},
 
 	get: function(path, params, successCallback){
@@ -78,7 +98,7 @@ var ContentTool = React.createClass({
 				console.log("success in get");
 			  },
 			  error: function(jqXHR, textStatus, errorThrown){
-				  showError(jqXHR.responseJSON);
+				  this.showError(jqXHR.responseJSON);
 				  console.log("failure in get");
 			  }
 		});
@@ -96,10 +116,26 @@ var ContentTool = React.createClass({
 				  console.log("success in post");
 			  },
 			  error: function(jqXHR, textStatus, errorThrown){
-				  showError(jqXHR.responseJSON);
+				  this.showError(jqXHR.responseJSON);
 				  console.log("failure in post");
 			  }
 		});
+	},
+
+	put: function(path, params, successCallback){
+	$.ajax({
+		  url: "https://api-dev.nearpod.com/v1/ct/" + path,
+		  method: "PUT",
+		  async: false,
+		  data: JSON.stringify(params),
+		  headers: setHeaders(),
+		  success: function(data, textStatus, jqXHR){
+			  successCallback(jqXHR.responseJSON);
+		  },
+		  error: function(jqXHR, textStatus, errorThrown){
+			  showError(jqXHR.responseJSON);
+		  }
+		});	
 	},
 
   	getInitialState: function() {
@@ -179,7 +215,7 @@ var ContentTool = React.createClass({
   			this.state.isCompleted = true;
   			/* POST to API here */
   			var params = {
-				"presentationId": "123",
+				"presentationId": presentationId,
 				"completed": this.state.isCompleted,
 				"title": this.state.title,
 				"data_all": this.state.dataStudent,
@@ -195,12 +231,12 @@ var ContentTool = React.createClass({
   		
   		this.updateCardsForStudent();
 		var params = {
-			"presentationId": "123",
-			"completed": this.state.isCompleted,
-			"title": this.state.title,
-			"data_all": this.state.dataStudent,
-			"data_teacher": this.state.cards
-			};
+				"presentation_id": presentationId,
+				"completed": this.state.isCompleted,
+				"title": this.state.title,
+				"data_all": this.state.dataStudent,
+				"data_teacher": this.state.cards
+		};
 		this.post("custom_slides", params, this.showSuccess);
   	},
 
