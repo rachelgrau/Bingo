@@ -14,8 +14,9 @@ var NUM_CARDS = 24;
  * isCompleted (boolean): whether or not the current slide has been "created" 
  */
 
-var slideId = getUrlVars()["id"];
-var presentationId = getUrlVars()["presentation_id"];
+	// var slideId = this.getUrlVars()["id"];
+	// var presentationId = getUrlVars()["presentation_id"];
+	var presentationId = "111327";
 
 var ContentTool = React.createClass({
 
@@ -44,17 +45,20 @@ var ContentTool = React.createClass({
 		console.log("load cards from server");
 		
 		/* Pretty sure this needs to be fixed to reflect the example code more */
-		var params = {
-			"id": slideId,
-			"completed": this.state.isCompleted,
-			"title": this.state.title,
-			"data_all": this.state.dataStudent,
-			"data_teacher": this.state.cards
-			};
+		// var params = {
+		// 	"id": slideId,
+		// 	"completed": this.state.isCompleted,
+		// 	"title": this.state.title,
+		// 	"data_all": this.state.dataStudent,
+		// 	"data_teacher": this.state.cards
+		// 	};
+		var params = "";
+		var slideId = "0";
 		this.get("custom_slides/" + slideId, params, this.showSuccess);
   	},
 
 	get: function(path, params, successCallback){
+		//need to get json from API and convert to object json.payload
 		$.ajax({
 			  url: "https://api-dev.nearpod.com/v1/ct/" + path,
 			  method: "GET",
