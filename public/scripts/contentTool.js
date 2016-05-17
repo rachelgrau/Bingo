@@ -16,8 +16,8 @@ var NUM_CARDS = 24;
 
 	// var slideId = this.getUrlVars()["id"];
 	// var presentationId = getUrlVars()["presentation_id"];
-	var presentationId = "111327";
-	var jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJDVCIsImV4cCI6MTQ2MzUxNDc1OCwiYXVkIjoiN2RhYmFjNjQ2ODFhN2MxMmMxY2I5NzE4M2M0NGRlOTMiLCJyZWZyZXNoIjo3MjAwLCJ0a24iOiIiLCJ1aWQiOiIiLCJpYXQiOjE0NjM1MDc1NTgsImlkIjoiMTYwMTciLCJlbnYiOiJodHRwczpcL1wvY3QtZGV2Lm5lYXJwb2QuY29tXC8ifQ.bq_5ug9nv7Fmo80QABs8J5mgCh1EJ0jQIKEu6BaL_pw";
+	var presentationId = "118814";
+	var jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJDVCIsImV4cCI6MTQ2MzUyMzA3MSwiYXVkIjoiN2RhYmFjNjQ2ODFhN2MxMmMxY2I5NzE4M2M0NGRlOTMiLCJyZWZyZXNoIjo3MjAwLCJ0a24iOiIiLCJ1aWQiOiIiLCJpYXQiOjE0NjM1MTU4NzEsImlkIjoiMTYwMTciLCJlbnYiOiJodHRwczpcL1wvY3QtZGV2Lm5lYXJwb2QuY29tXC8ifQ.lDxBFlMNLzRQbrgqmARzqxeQuWQmIXyy-pI6fkR0PYo";
 	var slideId = 0;
 
 
@@ -52,15 +52,6 @@ var ContentTool = React.createClass({
 
 	loadCardsFromServer: function() {
 		console.log("load cards from server");
-		
-		/* Pretty sure this needs to be fixed to reflect the example code more */
-		// var params = {
-		// 	"id": slideId,
-		// 	"completed": this.state.isCompleted,
-		// 	"title": this.state.title,
-		// 	"data_all": this.state.dataStudent,
-		// 	"data_teacher": this.state.cards
-		// 	};
 		var params = "";
 		console.log("slideId " + slideId);
 		if(slideId > 0) {
@@ -137,7 +128,6 @@ var ContentTool = React.createClass({
 		  }
 		});	
 	},
-
   	getInitialState: function() {
 		return {
 			cards:[], 
