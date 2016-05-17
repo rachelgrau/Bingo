@@ -47,7 +47,7 @@ var ContentTool = React.createClass({
 
 	changeCurrentId: function(json){
 		slideId = json.payload.custom_slide.id;
-		showSuccess(json);
+		this.showSuccess(json);
 	},
 
 	loadCardsFromServer: function() {
