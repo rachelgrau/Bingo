@@ -63,8 +63,6 @@ var ContentTool = React.createClass({
 			  url: "https://api-dev.nearpod.com/v1/ct/" + path,
 			  method: "GET",
 			  async: false,
-			  dataType: 'json',
-	    	  cache: false,
 			  data: params,
 			  headers: this.setHeaders(),
 			  success: function(data, textStatus, jqXHR){
