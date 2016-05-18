@@ -1,5 +1,5 @@
 {
-    "nextQuestion": "questionsssssssss",
+    "nextQuestion": "questionssss",
     "gameOver": false,
     "cards": [
         {
@@ -58,12 +58,14 @@
         {
             "id": 10,
             "answer": "Dependent",
-            "teacherApproved": false
+            "teacherApproved": false,
+            "hasChip": false
         },
         {
             "id": 11,
             "answer": "Stodgy",
-            "teacherApproved": false
+            "teacherApproved": false,
+            "hasChip": false
         },
         {
             "id": 12,
@@ -80,12 +82,14 @@
         {
             "id": 14,
             "answer": "Grim",
-            "teacherApproved": false
+            "teacherApproved": false,
+            "hasChip": false
         },
         {
             "id": 15,
             "answer": "Legacy",
-            "teacherApproved": false
+            "teacherApproved": false,
+            "hasChip": false
         },
         {
             "id": 16,
@@ -95,12 +99,16 @@
         {
             "id": 17,
             "answer": "Flaw",
-            "teacherApproved": false
+            "teacherApproved": false,
+            "hasChip": false
         },
         {
             "id": 18,
             "answer": "Trivial",
-            "teacherApproved": false
+            "hasChip": false,
+            "teacherApproved": false,
+            "correctCardID": 1,
+            "questionIncorrectlyAnswered": "the incorrect question!"
         },
         {
             "id": 19,
@@ -111,7 +119,8 @@
         {
             "id": 20,
             "answer": "Nimble",
-            "teacherApproved": false
+            "teacherApproved": false,
+            "hasChip": false
         },
         {
             "id": 21,
@@ -122,7 +131,8 @@
         {
             "id": 22,
             "answer": "Sham",
-            "teacherApproved": false
+            "teacherApproved": false,
+            "hasChip": false
         },
         {
             "id": 23,
@@ -133,7 +143,8 @@
         {
             "id": 24,
             "answer": "Perjury",
-            "teacherApproved": false
+            "teacherApproved": false,
+            "hasChip": false
         }
     ]
 }

@@ -304,7 +304,7 @@ var TeacherView = React.createClass({
         studentCards[i] = currCard;
         break;
       }
-    }
+    } 
     this.state.responsesForStudents[deviceID].cards = studentCards;
   },
   /*
