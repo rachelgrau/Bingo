@@ -16,8 +16,8 @@ var debug = true;
  * slideID (int): the ID of this slide, or 0 if it's new
  */
 
-var presentationId = "1000022";
-var jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJDVCIsImV4cCI6MTQ2MzU5ODk1NCwiYXVkIjoiN2RhYmFjNjQ2ODFhN2MxMmMxY2I5NzE4M2M0NGRlOTMiLCJyZWZyZXNoIjo3MjAwLCJ0a24iOiIiLCJ1aWQiOiIiLCJpYXQiOjE0NjM1OTE3NTQsImlkIjoiMTYwMTciLCJlbnYiOiJodHRwczpcL1wvY3QtZGV2Lm5lYXJwb2QuY29tXC8ifQ.z_1VhAgdS3f5h73iNJLFuGGnVm23t0QWUFuO8SWhAtY";
+var presentationId = "118814";
+var jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJDVCIsImV4cCI6MTQ2MzYwNTQ1MiwiYXVkIjoiN2RhYmFjNjQ2ODFhN2MxMmMxY2I5NzE4M2M0NGRlOTMiLCJyZWZyZXNoIjo3MjAwLCJ0a24iOiIiLCJ1aWQiOiIiLCJpYXQiOjE0NjM1OTgyNTIsImlkIjoiMTYwMTciLCJlbnYiOiJodHRwczpcL1wvY3QtZGV2Lm5lYXJwb2QuY29tXC8ifQ.tKMgrcJpX-hPlNjdAJQ0UFsKvPX6IWvb8FWVysxQ6jQ";
 var idOfASlide = "1000021"; /* Hard coded for now */
 
 var ContentTool = React.createClass({
@@ -127,6 +127,8 @@ var ContentTool = React.createClass({
   	 */
 	post: function(path, params, successCallback){
 		if (debug) console.log("Making POST request with path: " + path);		
+		if (debug) console.log("Params: ");
+		if (debug) console.log(params);
 		$.ajax({
 			  url: "https://api-dev.nearpod.com/v1/ct/" + path,
 			  method: "POST",
