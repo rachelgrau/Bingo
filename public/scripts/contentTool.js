@@ -1,4 +1,5 @@
 var NUM_CARDS = 24;
+var debug = true;
 /*
  * POSTS to API when the user hits "create" or "save & exit" -- 
  * 		completed: this.state.isCompleted
@@ -15,9 +16,9 @@ var NUM_CARDS = 24;
  * slideID (int): the ID of this slide, or 0 if it's new
  */
 
-var presentationId = "118814";
+var presentationId = "1000022";
 var jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJDVCIsImV4cCI6MTQ2MzU5ODk1NCwiYXVkIjoiN2RhYmFjNjQ2ODFhN2MxMmMxY2I5NzE4M2M0NGRlOTMiLCJyZWZyZXNoIjo3MjAwLCJ0a24iOiIiLCJ1aWQiOiIiLCJpYXQiOjE0NjM1OTE3NTQsImlkIjoiMTYwMTciLCJlbnYiOiJodHRwczpcL1wvY3QtZGV2Lm5lYXJwb2QuY29tXC8ifQ.z_1VhAgdS3f5h73iNJLFuGGnVm23t0QWUFuO8SWhAtY";
-var idOfASlide = "1000018";
+var idOfASlide = "1000021"; /* Hard coded for now */
 
 var ContentTool = React.createClass({
 	/* Returns a dictionary of all the variables in the URL */
@@ -40,39 +41,47 @@ var ContentTool = React.createClass({
 	showSuccess: function(json){
 		alert("code: " + json.error_code + "\nmessage: " + json.message + "\n\nfull: " + JSON.stringify(json) );
 	},
-
-	/* Given a JSON response, grabs the slide ID and updates the state's slide ID*/
-	updateCurrentID: function(json){
-		var slideID = json.payload.custom_slide.id;
-		this.setState({slideID: slideID});
-		console.log("RESPONSE PAYLOAD:");
-		console.log(json);
-		this.showSuccess(json);
-	},
-	/* Call back for when GET request succeeds.
+	/* 
+	 * Callback for when GET request succeeds.
 	 * Updates the state to hold the cards returned by the GET request. 
 	 */
 	handleGetSuccess: function(data, textStatus, jqXHR) {
-		var cards = data.payload.custom_slide.data_teacher
-		;
+		if (debug) console.log("Get succeeded");
+		var cards = data.payload.custom_slide.data_teacher;
 		if (cards.length == 0) {
-		     cards = this.getInitialCards();
+			if (debug) console.log("No cards returned, so creating initial cards");
+		    cards = this.getInitialCards();
 		}	    
 		this.setState({
 		    cards: cards,
-		    isCompleted: data["completed"]
+		    isCompleted: data.completed
 		});	
-		this.showSuccess(jqXHR.responseJSON);
+	},
+	/* 
+	 * Callback for when POST request succeeds.
+	 * Grabs the slide ID from the response and updates the state's slide ID.
+	 */
+	handlePostSuccess: function(data, textStatus, jqXHR) {
+		if (debug) console.log("Post succeeded");
+		var slideID = jqXHR.responseJSON.payload.custom_slide.id;
+		if (debug) console.log("Returned slide ID: " + slideID);
+		this.setState({slideID: slideID});
+	},
+	/* 
+	 * Callback for when PUT request succeeds.
+	 */
+	handlePutSuccess: function(data, textStatus, jqXHR) {
+		if (debug) console.log("Put succeeded");
 	},
 	/* If this is an existing slide, loads the cards from the API with a GET request.
 	   Otherwise, creates a new slide by posting (blank cards) to the API, and displays blank cards. */
 	loadCardsFromServer: function() {
 		var params = "";
 		if (this.state.slideID > 0) {
-			/* If we are editing an existing slide, GET it */
+			/* GET: we are editing an existing slide. */
 			this.get("custom_slides/" + this.state.slideID, "", this.handleGetSuccess);
 		} else {
-			/* If we are making a new slide, POST a new slide w/ 24 blank cards */
+			/* POST: we need to make a new slide with 24 blank cards */
 			var newCards = this.getInitialCards();
 			this.state.cards = newCards;
 			this.updateCardsForStudent();
@@ -83,7 +92,7 @@ var ContentTool = React.createClass({
 				"data_all": this.state.dataStudent,
 				"data_teacher": this.state.cards
 			};
-			this.post("custom_slides", params, this.updateCurrentID);
+			this.post("custom_slides", params, this.handlePostSuccess);
 			this.setState({
 				cards: this.state.cards,
 				dataStudent: this.state.dataStudent
@@ -96,7 +105,7 @@ var ContentTool = React.createClass({
   	 * successCallback (function): function that gets called when the GET request succeeds. Passed the data, textStatus, and jqXHR
   	 */
 	get: function(path, params, successCallback){
-		//need to get json from API and convert to object json.payload
+		if (debug) console.log("Making GET request with path: " + path);
 		$.ajax({
 			  url: "https://api-dev.nearpod.com/v1/ct/" + path,
 			  method: "GET",
@@ -117,7 +126,7 @@ var ContentTool = React.createClass({
   	 * successCallback (function): function that gets called when the POST request succeeds. Passed the data, textStatus, and jqXHR
   	 */
 	post: function(path, params, successCallback){
-		console.log("Posting with path: " + path);		
+		if (debug) console.log("Making POST request with path: " + path);		
 		$.ajax({
 			  url: "https://api-dev.nearpod.com/v1/ct/" + path,
 			  method: "POST",
@@ -125,7 +134,7 @@ var ContentTool = React.createClass({
 			  data: JSON.stringify(params),
 			  headers: this.setHeaders(),
 			  success: function(data, textStatus, jqXHR){
-				  successCallback(jqXHR.responseJSON);
+				  successCallback(data, textStatus, jqXHR);
 			  },
 			  error: function(jqXHR, textStatus, errorThrown){
 				  this.showError(jqXHR.responseJSON);
@@ -138,14 +147,15 @@ var ContentTool = React.createClass({
   	 * successCallback (function): function that gets called when the PUT request succeeds. Passed the data, textStatus, and jqXHR
   	 */
 	put: function(path, params, successCallback){
-	$.ajax({
+		if (debug) console.log("Making PUT request with path: " + path);		
+		$.ajax({
 		  url: "https://api-dev.nearpod.com/v1/ct/" + path,
 		  method: "PUT",
 		  async: false,
 		  data: JSON.stringify(params),
 		  headers: this.setHeaders(),
 		  success: function(data, textStatus, jqXHR){
-			  successCallback(jqXHR.responseJSON);
+			  successCallback(data, textStatus, jqXHR);
 		  },
 		  error: function(jqXHR, textStatus, errorThrown){
 			  showError(jqXHR.responseJSON);
@@ -160,7 +170,7 @@ var ContentTool = React.createClass({
 			dataStudent: [],
 			selectedCard:-1,
 			isCompleted: false,
-			title: "Rachel!!", 
+			title: "Rachel test", 
 			numCardsCompleted: 0,
 			slideID: urlVars["id"]
 		};
@@ -221,14 +231,13 @@ var ContentTool = React.createClass({
   		}
   		this.state.dataStudent = studentCards;
   	},
-  	/* Called when the user clicks "create". If create button is inactive, do nothing. 
-  	   Otherwise, set completed to true, set up dataStudent, and post to API. */
+  	/* Called when the user clicks "create."" If create button is inactive, do nothing. 
+  	   Otherwise, set completed to true, set up dataStudent, and do a PUT request to API. */
   	handleCreate: function() {
   		var createButtonClass = $("#footerCreateButton").attr('class');
   		if (createButtonClass == "button footerButton blueButtonActive") {
   			this.updateCardsForStudent();
   			this.state.isCompleted = true;
-  			/* POST to API here */
   			var params = {
 				"presentationId": presentationId,
 				"completed": this.state.isCompleted,
@@ -236,12 +245,12 @@ var ContentTool = React.createClass({
 				"data_all": this.state.dataStudent,
 				"data_teacher": this.state.cards
 			};
-			this.post("custom_slides", params, this.showSuccess);
+			this.put("custom_slides/" + this.state.slideID, params, this.handlePutSuccess);
   		}
   	},
-  	/* Called when the user clicks "save and exit" – saves current state of all cards */
+  	/* Called when the user clicks "save and exit." Saves current state of all cards by doing
+  	   a PUT request. */
   	handleSave: function() {
-  		/* PUT to API here, replace all code in this method */
   		this.updateCardsForStudent();
 		var params = {
 				"presentation_id": presentationId,
@@ -250,7 +259,7 @@ var ContentTool = React.createClass({
 				"data_all": this.state.dataStudent,
 				"data_teacher": this.state.cards
 		};
-		this.put("custom_slides/" + this.state.slideID, params, this.showSuccess);
+		this.put("custom_slides/" + this.state.slideID, params, this.handlePutSuccess);
   	},
   	/* Returns true when all the cards are filled out, meaning this slide can be marked as completed. 
   	 * Returns false otherwise (if not all 24 cards are filled out). */
