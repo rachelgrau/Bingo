@@ -16,7 +16,8 @@ var NUM_CARDS = 24;
  */
 
 var presentationId = "118814";
-var jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJDVCIsImV4cCI6MTQ2MzU1NDU5MCwiYXVkIjoiN2RhYmFjNjQ2ODFhN2MxMmMxY2I5NzE4M2M0NGRlOTMiLCJyZWZyZXNoIjo3MjAwLCJ0a24iOiIiLCJ1aWQiOiIiLCJpYXQiOjE0NjM1NDczOTAsImlkIjoiMTYwMTciLCJlbnYiOiJodHRwczpcL1wvY3QtZGV2Lm5lYXJwb2QuY29tXC8ifQ.kBoSJDxK9UxY647vVjAH2KTIHIaiQqsYEJ6iDkqqL8M";
+var jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJDVCIsImV4cCI6MTQ2MzU5ODk1NCwiYXVkIjoiN2RhYmFjNjQ2ODFhN2MxMmMxY2I5NzE4M2M0NGRlOTMiLCJyZWZyZXNoIjo3MjAwLCJ0a24iOiIiLCJ1aWQiOiIiLCJpYXQiOjE0NjM1OTE3NTQsImlkIjoiMTYwMTciLCJlbnYiOiJodHRwczpcL1wvY3QtZGV2Lm5lYXJwb2QuY29tXC8ifQ.z_1VhAgdS3f5h73iNJLFuGGnVm23t0QWUFuO8SWhAtY";
+var idOfASlide = "1000018";
 
 var ContentTool = React.createClass({
 	/* Returns a dictionary of all the variables in the URL */
@@ -52,7 +53,8 @@ var ContentTool = React.createClass({
 	 * Updates the state to hold the cards returned by the GET request. 
 	 */
 	handleGetSuccess: function(data, textStatus, jqXHR) {
-		var cards = data["data_teacher"];
+		var cards = data.payload.custom_slide.data_teacher
+		;
 		if (cards.length == 0) {
 		     cards = this.getInitialCards();
 		}	    
@@ -115,6 +117,7 @@ var ContentTool = React.createClass({
   	 * successCallback (function): function that gets called when the POST request succeeds. Passed the data, textStatus, and jqXHR
   	 */
 	post: function(path, params, successCallback){
+		console.log("Posting with path: " + path);		
 		$.ajax({
 			  url: "https://api-dev.nearpod.com/v1/ct/" + path,
 			  method: "POST",
@@ -157,7 +160,7 @@ var ContentTool = React.createClass({
 			dataStudent: [],
 			selectedCard:-1,
 			isCompleted: false,
-			title: "Rachel Bingo 3", 
+			title: "Rachel!!", 
 			numCardsCompleted: 0,
 			slideID: urlVars["id"]
 		};
@@ -247,7 +250,7 @@ var ContentTool = React.createClass({
 				"data_all": this.state.dataStudent,
 				"data_teacher": this.state.cards
 		};
-		this.post("custom_slides", params, this.showSuccess);
+		this.put("custom_slides/" + this.state.slideID, params, this.showSuccess);
   	},
   	/* Returns true when all the cards are filled out, meaning this slide can be marked as completed. 
   	 * Returns false otherwise (if not all 24 cards are filled out). */
