@@ -9,8 +9,6 @@
  * readyForNextQuestion (boolean): false until the student answers the current question, then becomes true. When a new question arrives, turns to false again unitl they answer.
  * numBingoChecksLeft (int): the number of chances this student has left to check if they have bingo. Starts at 3. 
  * hasBingo (boolean): false until the student gets bingo correctly!
- * incorrectCardIds (array): if the student has at least 1 incorrect answer, this array holds the IDs of all the incorrect cards on their board. 
- * correctCardIds (array): if the student has at least 1 incorrect answer, this array holds the IDs of all the correct answers (indices match up with incorrectIds)
  * indexOfIncorrectCard (int): if there is an incorrect card to display, this variable holds the index (in state.cards) of that card
  */
 var StudentView = React.createClass({
@@ -49,12 +47,10 @@ var StudentView = React.createClass({
     		if (nextQuestion != this.state.question) {
     			readyForNext = false;
     		}
-
+    		
     		/* Update state! */
 	      	this.setState({
 	      		question: data["nextQuestion"], 
-	      		incorrectCardIds: data["incorrectCardIds"],
-	      		correctCardIds: data["correctCardIds"],
 	      		cards: cards,
 	      		readyForNextQuestion: readyForNext
 	      	});
@@ -320,7 +316,6 @@ var StudentView = React.createClass({
 			}
 			if (upDiagonalHasBingo) return -1;
 		 }
-
     	/* If you get here, then they didn't have any successful bingos. */
     	return incorrectIndex;
     },
@@ -380,7 +375,6 @@ var StudentView = React.createClass({
         		cards[correctCardIndex].correctCardID = -1;
         		cards[correctCardIndex].questionIncorrectlyAnswered = "";
         		this.setState({isModalOpen: false, cards: cards, modalType:"", selectedCardIndex: -1, indexOfIncorrectCard: -1});
-        		console.log(this.state.cards);
         		break;
     		default:
     			/* Close modal */
@@ -564,7 +558,7 @@ var BingoChecker = React.createClass ({
 		} else if (this.props.hasBingo) {
 			return (
 				<div className="bingoChecker">
-	    			<div className="button blueButtonShadow" onClick={this.props.onBingoClicked}>
+	    			<div className="button blueButton" id="checkBingoButton" onClick={this.props.onBingoClicked}>
 						I have bingo!
 					</div><br/>
 					Board checks left: <b>{this.props.numBingoChecksLeft}</b>

@@ -127,8 +127,10 @@ h1 {
 
 .graphVisual {
 	float: left;
-	width: 165px;
-	margin-right: 11px;
+	width: 129px;
+	height: 129px;
+	margin-left: 20px;
+	margin-right: 20px;
 }
 
 .graphStats {
