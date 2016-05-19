@@ -11,6 +11,8 @@ var debug = true;
  * numBingoChecksLeft (int): the number of chances this student has left to check if they have bingo. Starts at 3. 
  * hasBingo (boolean): false until the student gets bingo correctly!
  * indexOfIncorrectCard (int): if there is an incorrect card to display, this variable holds the index (in state.cards) of that card
+ * deviceID 
+ * name (string): student's nickname
  */
 var StudentView = React.createClass({
 	getInitialState: function() {
@@ -24,17 +26,45 @@ var StudentView = React.createClass({
 			readyForNextQuestion: false,
 			numBingoChecksLeft: 3,
 			hasBingo: false, 
-			indexOfIncorrectCard: -1
+			indexOfIncorrectCard: -1,
+			deviceID: 0,
+			name: "Rachel"
 		};
 	},
-	post: function() {
+	post: function(dictionaryToPost) {
     	/* TO DO!!! */
     	if (debug) console.log("POST");
+    	if (debug) console.log(dictionaryToPost);
   	},
   	get: function() {
     	/* TO DO!! */
     	if (debug) console.log("GET");
     	this.loadCardsFromServer();
+  	},
+  	/* Returns a dictionary that the student should post at the given moment. 
+   	* ----------------------------------------------------------------------
+   	* The dictionary contains:
+   	* 
+   	*        key                     value
+   	*        ----                    ------
+   	*        "deviceID"      		(deviceID): the student's device ID
+	*        "name"              	(String): the student's nickname
+	*        "cards"          		(Array): the student's cards
+   	* 		 "question"				(string): the question the student is answering
+   	* 		 "answer"				(string): the word that the student placed a chip to answer |question|, or "" if pass
+   	* 		 "didPass"				(boolean): true if the student clicked "Pass" for |question|
+   	* 		 "hasBingo" 			(boolean): true when the student has Bingo (& is on the leaderboard), false otherwise
+   	*/
+  	getDictionaryToPost: function(answer, didPass) {
+    	var toPost = {};
+    	toPost["deviceID"] = this.state.deviceID;
+    	toPost["name"] = this.state.name;
+    	toPost["cards"] = this.state.cards;
+    	toPost["question"] = this.state.question;
+    	toPost["answer"] = answer;
+    	toPost["didPass"] = didPass;
+    	toPost["hasBingo"] = this.state.hasBingo;
+    	return toPost;
   	},
 	loadCardsFromServer: function() {
     $.ajax({
@@ -348,7 +378,8 @@ var StudentView = React.createClass({
 				this.bingoButtonShouldActivate();
         		this.setState({cards: cards, isModalOpen: false, modalType:"", selectedCardIndex: -1, readyForNextQuestion: true});
         		/* TO DO: POST here. */
-        		this.post();
+        		var dictionaryToPost = this.getDictionaryToPost(cards[this.state.selectedCardIndex].answer, false);
+        		this.post(dictionaryToPost);
        			break;
     		case "checkBingo":
     			var numBoardChecksLeft = this.state.numBingoChecksLeft - 1;
@@ -358,7 +389,8 @@ var StudentView = React.createClass({
     				this.setState({hasBingo: true, numBingoChecksLeft: numBoardChecksLeft, isModalOpen: false, modalType:"", selectedCardIndex: -1, readyForNextQuestion: true});
     				this.openModal("youGotBingo");
     				/* TO DO: POST here. */  
-    				this.post();  				
+    				var dictionaryToPost = this.getDictionaryToPost("", false);
+    				this.post(dictionaryToPost);  				
     			} else {
     				/* Get the IDs of the incorrect and correct card */
     				/* TO DO: if "correctCardId" and "questionIncorrectlyAnswered" are not
@@ -378,7 +410,8 @@ var StudentView = React.createClass({
         		/* Ready for next question */
         		this.setState({isModalOpen: false, modalType:"", selectedCardIndex: -1, readyForNextQuestion: true});
         		/* TO DO: POST here. */
-        		this.post();
+        		var dictionaryToPost = this.getDictionaryToPost("", true);
+        		this.post(dictionaryToPost);
         		break;
         	case "incorrect":
         		var cards = this.state.cards;
