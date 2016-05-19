@@ -39,7 +39,8 @@ var StudentView = React.createClass({
   	get: function() {
     	/* TO DO!! */
     	if (debug) console.log("GET");
-    	this.loadCardsFromServer();
+    	/* TO DO: on Get success, do all the stuff in success method of loadCardsFromServer */
+    	// this.loadCardsFromServer();
   	},
   	/* Returns a dictionary that the student should post at the given moment. 
    	* ----------------------------------------------------------------------
