@@ -6,6 +6,8 @@ var leaderBoardPositions = {
   3: "4th"
 }
 
+var debug = true;
+
 /* State
  * -------
  * gameOver (boolean): true when the teacher has ended the game, false otherwise
@@ -82,6 +84,46 @@ var TeacherView = React.createClass({
       modalType: ""
 		};
 	},
+  post: function(dictionaryToPost) {
+    /* TO DO!!! */
+    if (debug) console.log("POST");
+    if (debug) console.log(dictionaryToPost);
+  },
+  /* Only do GET requests if the game isn't over */
+  get: function() {
+    /* TO DO!! */
+    if (!this.state.gameOver) {
+      if (debug) console.log("GET");
+      this.loadCardsFromServer();
+    }
+  },
+  /* Returns a dictionary that the teacher should post at the given moment. 
+   * ----------------------------------------------------------------------
+   * The teacher creates an individualized response for each student and 
+   * creates a dictionary mapping students' deviceIDs to their individualize
+   * response. Call this dictionary "studentResponses." The teacher posts a 
+   * dictionary with the following keys/values:
+   *        key                     value
+   *        ----                    ------
+   *        "nextQuestion"          (String): the current question being asked
+   *        "gameOver"              (Boolean): whether the game has ended
+   *        "studentResponses"      (Dictionary): the dictionary described above
+   */
+  getDictionaryToPost: function() {
+    var toPost = {};
+    /* "nextQuestion" */
+    var currentQuestion = "";
+    if (debug) console.log("In get dictionary, index of current question = " + this.state.indexOfCurrQuestion);
+    if (this.state.indexOfCurrQuestion < this.state.cards.length) {
+      currentQuestion = this.state.cards[this.state.indexOfCurrQuestion + 1].question;
+    }
+    toPost["nextQuestion"] = currentQuestion;
+    /* "gameOver" */
+    toPost["gameOver"] = this.state.gameOver;
+    /* "studentResponses" */
+    toPost["studentResponses"] = this.state.responsesForStudents;
+    return toPost;
+  },
 	shuffleCards: function(cards) {
 		if (!cards) return [];
 		var currentIndex = cards.length, temporaryValue, randomIndex;
@@ -138,7 +180,7 @@ var TeacherView = React.createClass({
     	this.loadCardsFromServer();
       /* TO DO: change this.loadCardsFromServer to a GET request. Call loadCardsFromServer 
        * on a GET request success. */
-    	setInterval(this.loadCardsFromServer, this.props.pollInterval);
+    	setInterval(this.get, this.props.pollInterval);
   	},
   	/* Goes through all of the student responses for the current question and 
   	   moves them to the repositories of "past" questions (e.g. this.state.allQuestionsByStudent and this.state.allQuestionsByQuestion) 
@@ -231,6 +273,8 @@ var TeacherView = React.createClass({
             buttonsEnabled: false
          });
         /* TO DO: POST here */
+        var dictionaryToPost = this.getDictionaryToPost();
+        this.post(dictionaryToPost);
       }
   	},
   	/* Looks at the current student responses and sees if there are any students 
@@ -444,6 +488,8 @@ var TeacherView = React.createClass({
             isModalOpen: false
           });
           /* TO DO: POST here. */
+          var dictionaryToPost = this.getDictionaryToPost();
+          this.post(dictionaryToPost);
           break;
         default:
           /* Close modal */

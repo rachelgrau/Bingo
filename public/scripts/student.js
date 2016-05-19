@@ -1,3 +1,4 @@
+var debug = true;
 /* State
  * -------
  * cards (array): an array of this students bingo cards, in the order that they appear on his/her board.
@@ -26,6 +27,15 @@ var StudentView = React.createClass({
 			indexOfIncorrectCard: -1
 		};
 	},
+	post: function() {
+    	/* TO DO!!! */
+    	if (debug) console.log("POST");
+  	},
+  	get: function() {
+    	/* TO DO!! */
+    	if (debug) console.log("GET");
+    	this.loadCardsFromServer();
+  	},
 	loadCardsFromServer: function() {
     $.ajax({
 	      url: this.props.url,
@@ -203,7 +213,7 @@ var StudentView = React.createClass({
     	this.loadCardsFromServer();
     	/* TO DO: change this.loadCardsFromServer to a GET request. Call loadCardsFromServer 
     	 * on a GET request success. */
-    	setInterval(this.loadCardsFromServer, this.props.pollInterval);
+    	setInterval(this.get, this.props.pollInterval);
   	},
   	/* The app uses one shared modal, so we open & close it as needed and just change its inner content.
   	 * modalType (string): the type of modal you want to open
@@ -338,6 +348,7 @@ var StudentView = React.createClass({
 				this.bingoButtonShouldActivate();
         		this.setState({cards: cards, isModalOpen: false, modalType:"", selectedCardIndex: -1, readyForNextQuestion: true});
         		/* TO DO: POST here. */
+        		this.post();
        			break;
     		case "checkBingo":
     			var numBoardChecksLeft = this.state.numBingoChecksLeft - 1;
@@ -346,7 +357,8 @@ var StudentView = React.createClass({
     			if (incorrectCardIndex == -1) {
     				this.setState({hasBingo: true, numBingoChecksLeft: numBoardChecksLeft, isModalOpen: false, modalType:"", selectedCardIndex: -1, readyForNextQuestion: true});
     				this.openModal("youGotBingo");
-    				/* TO DO: POST here. */    				
+    				/* TO DO: POST here. */  
+    				this.post();  				
     			} else {
     				/* Get the IDs of the incorrect and correct card */
     				/* TO DO: if "correctCardId" and "questionIncorrectlyAnswered" are not
@@ -366,6 +378,7 @@ var StudentView = React.createClass({
         		/* Ready for next question */
         		this.setState({isModalOpen: false, modalType:"", selectedCardIndex: -1, readyForNextQuestion: true});
         		/* TO DO: POST here. */
+        		this.post();
         		break;
         	case "incorrect":
         		var cards = this.state.cards;
