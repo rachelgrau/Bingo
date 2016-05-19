@@ -136,6 +136,8 @@ var TeacherView = React.createClass({
     },
   	componentDidMount: function() {
     	this.loadCardsFromServer();
+      /* TO DO: change this.loadCardsFromServer to a GET request. Call loadCardsFromServer 
+       * on a GET request success. */
     	setInterval(this.loadCardsFromServer, this.props.pollInterval);
   	},
   	/* Goes through all of the student responses for the current question and 
@@ -228,6 +230,7 @@ var TeacherView = React.createClass({
             responsesForStudents: responsesForStudents,
             buttonsEnabled: false
          });
+        /* TO DO: POST here */
       }
   	},
   	/* Looks at the current student responses and sees if there are any students 
@@ -440,6 +443,7 @@ var TeacherView = React.createClass({
             modalType: "",
             isModalOpen: false
           });
+          /* TO DO: POST here. */
           break;
         default:
           /* Close modal */

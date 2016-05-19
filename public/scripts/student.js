@@ -201,6 +201,8 @@ var StudentView = React.createClass({
 	},
   	componentDidMount: function() {
     	this.loadCardsFromServer();
+    	/* TO DO: change this.loadCardsFromServer to a GET request. Call loadCardsFromServer 
+    	 * on a GET request success. */
     	setInterval(this.loadCardsFromServer, this.props.pollInterval);
   	},
   	/* The app uses one shared modal, so we open & close it as needed and just change its inner content.
@@ -335,6 +337,7 @@ var StudentView = React.createClass({
 				this.state.myAnswers[this.state.question] = cards[this.state.selectedCardIndex].id;
 				this.bingoButtonShouldActivate();
         		this.setState({cards: cards, isModalOpen: false, modalType:"", selectedCardIndex: -1, readyForNextQuestion: true});
+        		/* TO DO: POST here. */
        			break;
     		case "checkBingo":
     			var numBoardChecksLeft = this.state.numBingoChecksLeft - 1;
@@ -342,7 +345,8 @@ var StudentView = React.createClass({
     			var incorrectCardIndex = this.hasIncorrectAnswer();
     			if (incorrectCardIndex == -1) {
     				this.setState({hasBingo: true, numBingoChecksLeft: numBoardChecksLeft, isModalOpen: false, modalType:"", selectedCardIndex: -1, readyForNextQuestion: true});
-    				this.openModal("youGotBingo");    				
+    				this.openModal("youGotBingo");
+    				/* TO DO: POST here. */    				
     			} else {
     				/* Get the IDs of the incorrect and correct card */
     				/* TO DO: if "correctCardId" and "questionIncorrectlyAnswered" are not
@@ -361,6 +365,7 @@ var StudentView = React.createClass({
         	case "skip":
         		/* Ready for next question */
         		this.setState({isModalOpen: false, modalType:"", selectedCardIndex: -1, readyForNextQuestion: true});
+        		/* TO DO: POST here. */
         		break;
         	case "incorrect":
         		var cards = this.state.cards;
