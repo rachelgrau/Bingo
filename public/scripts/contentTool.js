@@ -14,10 +14,12 @@ var debug = true;
  * selectedCard (int): the index of the card that is currently selected (or -1) if none
  * isCompleted (boolean): whether or not the current slide has been "created" 
  * slideID (int): the ID of this slide, or 0 if it's new
+ * jwt (string): taken from URL
+ * presentationID (int): taken from URL 
  */
 
 var presentationId = "118814";
-var jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJDVCIsImV4cCI6MTQ2MzY4NTk0MiwiYXVkIjoiN2RhYmFjNjQ2ODFhN2MxMmMxY2I5NzE4M2M0NGRlOTMiLCJyZWZyZXNoIjo3MjAwLCJ0a24iOiIiLCJ1aWQiOiIiLCJpYXQiOjE0NjM2Nzg3NDIsImlkIjoiMTYwMTciLCJlbnYiOiJodHRwczpcL1wvY3QtZGV2Lm5lYXJwb2QuY29tXC8ifQ.lJOA4cwX8ogQwm_R4WvlOO-QtlP0dlaqI_tupyZYGaE";
+// var jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJDVCIsImV4cCI6MTQ2MzY4NTk0MiwiYXVkIjoiN2RhYmFjNjQ2ODFhN2MxMmMxY2I5NzE4M2M0NGRlOTMiLCJyZWZyZXNoIjo3MjAwLCJ0a24iOiIiLCJ1aWQiOiIiLCJpYXQiOjE0NjM2Nzg3NDIsImlkIjoiMTYwMTciLCJlbnYiOiJodHRwczpcL1wvY3QtZGV2Lm5lYXJwb2QuY29tXC8ifQ.lJOA4cwX8ogQwm_R4WvlOO-QtlP0dlaqI_tupyZYGaE";
 
 var ContentTool = React.createClass({
 	/* Returns a dictionary of all the variables in the URL */
@@ -30,7 +32,8 @@ var ContentTool = React.createClass({
 	},
 	/* Returns a header dictionary with the App ID and JWT in the header */
 	setHeaders: function(){
-		return {"x-api-key":"7dabac64681a7c12c1cb97183c44de93", "JWT": jwt};
+		if (debug) console.log("Setting JWT: " + this.state.jwt);
+		return {"x-api-key":"7dabac64681a7c12c1cb97183c44de93", "JWT": this.state.jwt};
 	},
 
 	showError: function(json){
@@ -85,7 +88,7 @@ var ContentTool = React.createClass({
 			this.state.cards = newCards;
 			this.updateCardsForStudent();
 			params = {
-				"presentation_id": presentationId,
+				"presentation_id": this.state.presentationID,
 				"completed": this.state.isCompleted,
 				"title": this.state.title,
 				"data_all": this.state.dataStudent,
@@ -173,7 +176,9 @@ var ContentTool = React.createClass({
 			isCompleted: false,
 			title: "Rachel test", 
 			numCardsCompleted: 0,
-			slideID: urlVars["id"]
+			slideID: urlVars["id"],
+			jwt: urlVars["jwt"],
+			presentationID: urlVars["presentation_id"]
 		};
 	},
 	/* Returns an array of 24 empty cards (teacher cards) */
@@ -279,7 +284,7 @@ var ContentTool = React.createClass({
 		var createButtonActivated = this.createButtonShouldActivate();
 		if (this.state.selectedCard == -1) {	
 			return (
-				<div className="contentTool">
+				<div className="container">
 					<Editor onCardSubmit={this.handleCardSubmit} isSelected={false}/>
 					<BingoBoard cards={this.state.cards} onSelectCard={this.handleSelectCard}/>
 					<Footer createButtonActivated={createButtonActivated} onCreate={this.handleCreate} onSave={this.handleSave} />
@@ -287,7 +292,7 @@ var ContentTool = React.createClass({
 			);
 		} else {
 			return (
-				<div className="contentTool">
+				<div className="container">
 					<Editor ref="myEditor" onCardSubmit={this.handleCardSubmit} isSelected={true} card={this.state.cards[this.state.selectedCard]}/>
 					<BingoBoard cards={this.state.cards} onSelectCard={this.handleSelectCard} selectedCard={this.state.selectedCard}/>
 					<Footer createButtonActivated={createButtonActivated} onCreate={this.handleCreate} onSave={this.handleSave}/>
@@ -474,7 +479,7 @@ var BingoCard = React.createClass({
 			/* Wild card */
 			return (
 				<div className="bingoCard bingoWildCard">
-					<img src="../assets/nearpodIcon.png" className="wildCardImage"/>
+					<img src="assets/nearpodIcon.png" className="wildCardImage"/>
 				</div>
 			);
 		} else if (this.props.isSelected) {
@@ -552,8 +557,10 @@ var DoneButton = React.createClass({
 	}
 });
 
+var height = $(document).height();
+parent.postMessage({"type":"change_iframe_height", "height":"674px"}, '*');
+	
 ReactDOM.render(
-	// <ContentTool cards={cards} />,
 	<ContentTool url="/api/contentTool" pollInterval={2000}/>,
 	document.getElementById('content')
 );

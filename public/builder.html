@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
   <head>
-    <meta charset="utf-8">
-    <title>Content Tool</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Bingo Content Tool</title>
     <!-- Not present in the tutorial. Just for basic styling. -->
-    <link rel="stylesheet" href="../css/contentTool.css" />
+    <link rel="stylesheet" href="css/contentTool.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.0.1/react.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.0.1/react-dom.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.6.16/browser.js"></script>
@@ -12,12 +12,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.3.5/marked.min.js"></script>
   </head>
   <body>
-    <div id="header">
-      <img src="assets/bingoIcon.png">
-      Bingo
+    <div id="bingoContentTool">
+      <div id="header">
+        <img src="assets/bingoIcon.png">
+        Bingo
+      </div>
+      <div id="content"></div>
     </div>
-    <div id="content"></div>
-    <script type="text/babel" src="../scripts/contentTool.js"></script>
+    <script type="text/babel" src="scripts/contentTool.js"></script>
     <script type="text/babel">
       // To get started with this tutorial running your own code, simply remove
       // the script tag loading scripts/example.js and start writing code here.

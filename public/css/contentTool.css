@@ -2,6 +2,15 @@ body {
 	min-width: 800px;
 }
 
+#bingoContentTool {
+	/* Fixed width/height of content tool
+	   If height changes, change line in contentTool.js
+	   parent.postMessage(.......) */
+	width: 800px;
+	height: 674px;
+	margin: auto;
+}
+
 input[type="text"] {
 	color: #787e83;
 	font-family: "Avenir LT Std";
@@ -39,7 +48,7 @@ textArea {
 	height: 130px;
 }
 
-.contentTool {
+.container {
 	background-color: white;
 }
 
