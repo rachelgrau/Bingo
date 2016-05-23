@@ -67,36 +67,135 @@ var debug = true;
 			}
  		}
  */
+var jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJDVCIsImV4cCI6MTQ2Mzk4Mjc5MSwiYXVkIjoiN2RhYmFjNjQ2ODFhN2MxMmMxY2I5NzE4M2M0NGRlOTMiLCJyZWZyZXNoIjo3MjAwLCJ0a24iOiIiLCJ1aWQiOiIiLCJpYXQiOjE0NjM5NzU1OTEsImlkIjoiMTYwMTciLCJlbnYiOiJodHRwczpcL1wvY3QtZGV2Lm5lYXJwb2QuY29tXC8ifQ.vC3-5x9pT2ZElfzQxc0N5xI-jWkSm35NHm0YpMeequE";
+var presentationId = "118814";
 var TeacherView = React.createClass({
-	getInitialState: function() {
-		return {
-			gameOver: false,
-			cards:[], 
-			indexOfCurrQuestion: 0,
-			currentQuestionAnswers: [],
-			currentQuestionStats: [],
-			responsesForStudents: {},
-			allQuestionsByQuestion: [],
-			allQuestionsByStudent: [],
-      leaderBoard: [],
-      buttonsEnabled: false,
-      isModalOpen: false,
-      modalType: ""
-		};
-	},
-  post: function(dictionaryToPost) {
-    /* TO DO!!! */
-    if (debug) console.log("POST");
-    if (debug) console.log(dictionaryToPost);
-  },
+      /* Returns a dictionary of all the variables in the URL */
+    getUrlVars: function() {
+        var vars = {};
+        var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+            vars[key] = value;
+        });
+        return vars;
+    },
+    /* Returns a header dictionary with the App ID and JWT in the header */
+    setHeaders: function(){
+      if (debug) console.log("Setting JWT: " + this.state.jwt);
+      return {"x-api-key":"7dabac64681a7c12c1cb97183c44de93", "JWT": this.state.jwt};
+    },
+
+    showError: function(json){
+      alert("error: " + json.error_code + "\nmessage: " + json.message + "\n\nfull: " + JSON.stringify(json) );
+    },
+
+    showSuccess: function(json){
+      alert("code: " + json.error_code + "\nmessage: " + json.message + "\n\nfull: " + JSON.stringify(json) );
+    },
+    /* 
+     * Callback for when GET request succeeds.
+     * Updates the state to hold the cards returned by the GET request. 
+     */
+    handleGetSuccess: function(data, textStatus, jqXHR) {
+      if (debug) console.log("Get succeeded");
+      // var cards = data.payload.custom_slide.data_teacher;
+      // if (cards.length == 0) {
+      //  if (debug) console.log("No cards returned, so creating initial cards");
+      //     cards = this.getInitialCards();
+      // }      
+      // this.setState({
+      //     cards: cards,
+      //     isCompleted: data.completed
+      // });  
+    },
+    /* 
+     * Callback for when POST request succeeds.
+     * Grabs the slide ID from the response and updates the state's slide ID.
+     */
+    handlePostSuccess: function(data, textStatus, jqXHR) {
+      if (debug) console.log("Post succeeded");
+      // var slideID = jqXHR.responseJSON.payload.custom_slide.id;
+      // if (debug) console.log("Returned slide ID: " + slideID);
+      // this.setState({slideID: slideID});
+    },
+  	getInitialState: function() {
+  		return {
+  			gameOver: false,
+  			cards:[], 
+  			indexOfCurrQuestion: 0,
+  			currentQuestionAnswers: [],
+  			currentQuestionStats: [],
+  			responsesForStudents: {},
+  			allQuestionsByQuestion: [],
+  			allQuestionsByStudent: [],
+        leaderBoard: [],
+        buttonsEnabled: false,
+        isModalOpen: false,
+        modalType: "",
+        jwt: jwt, //should be urlVars["jwt"] 
+        presentationID: presentationId//should be urlVars["presentation_id"]
+      };
+  	},
   /* Only do GET requests if the game isn't over */
-  get: function() {
-    /* TO DO!! */
+  // get: function() {
+  //   /* TO DO!! */
+  //   if (!this.state.gameOver) {
+  //     if (debug) console.log("GET");
+  //      TO DO: on Get success, do all the stuff in success method of loadCardsFromServer 
+  //     // this.loadCardsFromServer();
+  //   }
+  // },
+          /* Performs a GET request. 
+     * path (string): the URL path (e.g. "custom_slides/3") 
+     * params: (probably empty string for GET request)
+     * successCallback (function): function that gets called when the GET request succeeds. Passed the data, textStatus, and jqXHR
+     */
+  get: function(path, params, successCallback){
+    if (debug) console.log("Making GET request with path: " + path);
     if (!this.state.gameOver) {
-      if (debug) console.log("GET");
-      /* TO DO: on Get success, do all the stuff in success method of loadCardsFromServer */
-      // this.loadCardsFromServer();
+      $.ajax({
+        url: "https://api-dev.nearpod.com/v1/hub/teacher" + path,
+        method: "GET",
+        async: false,
+        data: params,
+        headers: this.setHeaders(),
+        success: function(data, textStatus, jqXHR){                 
+        successCallback(data, textStatus, jqXHR);
+        },
+        error: function(jqXHR, textStatus, errorThrown){
+          this.showError(jqXHR.responseJSON);
+        }
+      });
     }
+  },
+  //   post: function(dictionaryToPost) {
+  //   /* TO DO!!! */
+  //   if (debug) console.log("POST");
+  //   if (debug) console.log(dictionaryToPost);
+  // },
+      /* Performs a POST request. 
+     * path (string): the URL path (e.g. "custom_slides") 
+     * params (dictionary): dictionary of params, including "presentation_id," "completed," "title," "data_all," "data_teacher"
+     * successCallback (function): function that gets called when the POST request succeeds. Passed the data, textStatus, and jqXHR
+     */
+  post: function(path, params, successCallback){
+    if (debug) console.log("Making POST request with path: " + path);   
+    if (debug) console.log("Params: ");
+    if (debug) console.log(params);
+    $.ajax({
+      url: "https://api-dev.nearpod.com/v1/hub/teacher" + path,
+      method: "POST",
+      async: false,
+      data: JSON.stringify(params),
+      headers: this.setHeaders(),
+      success: function(data, textStatus, jqXHR){
+        successCallback(data, textStatus, jqXHR);
+      },
+      error: function(jqXHR, textStatus, errorThrown){
+        // alert("error: " + jqXHR.responseJSON.error_code + "\nmessage: " + jqXHR.responseJSON.message + "\n\nfull: " + JSON.stringify(jqXHR.responseJSON) );
+
+      this.showError(jqXHR.responseJSON);
+      }
+    });
   },
   /* Returns a dictionary that the teacher should post at the given moment. 
    * ----------------------------------------------------------------------
@@ -141,25 +240,37 @@ var TeacherView = React.createClass({
 		return cards;
 	},
 	loadCardsFromServer: function() {
-    $.ajax({
-	      url: this.props.url,
-	      dataType: 'json',
-	      cache: false,
-	      success: function(data) {	      
-    		/* If we don't have any cards yet, store them */
-    		if (this.state.cards.length == 0) {
-    			var cards = this.shuffleCards(data["cards"]); 
-    			this.state.cards = cards;   		
-    		}
-    		/* Read in the student responses for current question */
-    		this.addNewStudents(data["studentResponses"]);
-        this.update(data["studentResponses"]);
-	      }.bind(this),
-	      error: function(xhr, status, err) {
-	        console.error(this.props.url, status, err.toString());
-	      }.bind(this)
-	    });
+    var params = "";
+    this.get("responses", params, this.loadCardsSuccess);
+    // $.ajax({
+	   //    url: this.props.url,
+	   //    dataType: 'json',
+	   //    cache: false,
+	   //    success: function(data) {	      
+    // 		/* If we don't have any cards yet, store them */
+    // 		if (this.state.cards.length == 0) {
+    // 			var cards = this.shuffleCards(data["cards"]); 
+    // 			this.state.cards = cards;   		
+    // 		}
+    // 		/* Read in the student responses for current question */
+    // 		this.addNewStudents(data["studentResponses"]);
+    //     this.update(data["studentResponses"]);
+	   //    }.bind(this),
+	   //    error: function(xhr, status, err) {
+	   //      console.error(this.props.url, status, err.toString());
+	   //    }.bind(this)
+	   //  });
   	},
+    loadCardsSuccess: function(data, textStatus, jqXHR) {
+      /* If we don't have any cards yet, store them */
+        if (this.state.cards.length == 0) {
+          var cards = this.shuffleCards(data["cards"]); 
+          this.state.cards = cards;       
+        }
+        /* Read in the student responses for current question */
+        this.addNewStudents(data["studentResponses"]);
+        this.update(data["studentResponses"]);
+    },
     /*
      * Update (very important)
      * ------------------------
@@ -181,7 +292,7 @@ var TeacherView = React.createClass({
     	this.loadCardsFromServer();
       /* TO DO: change this.loadCardsFromServer to a GET request. Call loadCardsFromServer 
        * on a GET request success. */
-    	setInterval(this.get, this.props.pollInterval);
+    	// setInterval(this.get, this.props.pollInterval);
   	},
   	/* Goes through all of the student responses for the current question and 
   	   moves them to the repositories of "past" questions (e.g. this.state.allQuestionsByStudent and this.state.allQuestionsByQuestion) 
@@ -275,7 +386,11 @@ var TeacherView = React.createClass({
          });
         /* TO DO: POST here */
         var dictionaryToPost = this.getDictionaryToPost();
-        this.post(dictionaryToPost);
+        var params = {
+          "status": dictionaryToPost
+        };
+        this.post("responses", params, this.handlePostSuccess);
+        //this.post(dictionaryToPost);
       }
   	},
   	/* Looks at the current student responses and sees if there are any students 
@@ -490,7 +605,10 @@ var TeacherView = React.createClass({
           });
           /* TO DO: POST here. */
           var dictionaryToPost = this.getDictionaryToPost();
-          this.post(dictionaryToPost);
+          var params = {
+              "status": dictionaryToPost
+          };
+          this.post("responses", params, this.handlePostSuccess);
           break;
         default:
           /* Close modal */

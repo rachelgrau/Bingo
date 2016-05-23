@@ -162,7 +162,7 @@ var ContentTool = React.createClass({
 			  successCallback(data, textStatus, jqXHR);
 		  },
 		  error: function(jqXHR, textStatus, errorThrown){
-			  showError(jqXHR.responseJSON);
+			  this.showError(jqXHR.responseJSON);
 		  }
 		});	
 	},

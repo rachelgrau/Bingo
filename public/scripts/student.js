@@ -14,7 +14,59 @@ var debug = true;
  * deviceID 
  * name (string): student's nickname
  */
+
+var jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJDVCIsImV4cCI6MTQ2Mzk4Mjc5MSwiYXVkIjoiN2RhYmFjNjQ2ODFhN2MxMmMxY2I5NzE4M2M0NGRlOTMiLCJyZWZyZXNoIjo3MjAwLCJ0a24iOiIiLCJ1aWQiOiIiLCJpYXQiOjE0NjM5NzU1OTEsImlkIjoiMTYwMTciLCJlbnYiOiJodHRwczpcL1wvY3QtZGV2Lm5lYXJwb2QuY29tXC8ifQ.vC3-5x9pT2ZElfzQxc0N5xI-jWkSm35NHm0YpMeequE";
+var presentationId = "118814";
+
 var StudentView = React.createClass({
+		/* Returns a dictionary of all the variables in the URL */
+	getUrlVars: function() {
+	    var vars = {};
+	    var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+	        vars[key] = value;
+	    });
+	    return vars;
+	},
+	/* Returns a header dictionary with the App ID and JWT in the header */
+	setHeaders: function(){
+		if (debug) console.log("Setting JWT: " + this.state.jwt);
+		return {"x-api-key":"7dabac64681a7c12c1cb97183c44de93", "JWT": this.state.jwt};
+	},
+
+	showError: function(json){
+		alert("error: " + json.error_code + "\nmessage: " + json.message + "\n\nfull: " + JSON.stringify(json) );
+	},
+
+	showSuccess: function(json){
+		alert("code: " + json.error_code + "\nmessage: " + json.message + "\n\nfull: " + JSON.stringify(json) );
+	},
+	/* 
+	 * Callback for when GET request succeeds.
+	 * Updates the state to hold the cards returned by the GET request. 
+	 */
+	handleGetSuccess: function(data, textStatus, jqXHR) {
+		if (debug) console.log("Get succeeded");
+		// var cards = data.payload.custom_slide.data_teacher;
+		// if (cards.length == 0) {
+		// 	if (debug) console.log("No cards returned, so creating initial cards");
+		//     cards = this.getInitialCards();
+		// }	    
+		// this.setState({
+		//     cards: cards,
+		//     isCompleted: data.completed
+		// });	
+	},
+	/* 
+	 * Callback for when POST request succeeds.
+	 * Grabs the slide ID from the response and updates the state's slide ID.
+	 */
+	handlePostSuccess: function(data, textStatus, jqXHR) {
+		if (debug) console.log("Post succeeded");
+		// var slideID = jqXHR.responseJSON.payload.custom_slide.id;
+		// if (debug) console.log("Returned slide ID: " + slideID);
+		// this.setState({slideID: slideID});
+	},
+
 	getInitialState: function() {
 		return {
 			cards:[], 
@@ -28,20 +80,68 @@ var StudentView = React.createClass({
 			hasBingo: false, 
 			indexOfIncorrectCard: -1,
 			deviceID: 0,
-			name: "Rachel"
+			name: "Rachel",
+			jwt: jwt, //should be urlVars["jwt"] 
+			presentationID: presentationId//should be urlVars["presentation_id"]
 		};
 	},
-	post: function(dictionaryToPost) {
-    	/* TO DO!!! */
-    	if (debug) console.log("POST");
-    	if (debug) console.log(dictionaryToPost);
-  	},
-  	get: function() {
-    	/* TO DO!! */
-    	if (debug) console.log("GET");
-    	/* TO DO: on Get success, do all the stuff in success method of loadCardsFromServer */
-    	// this.loadCardsFromServer();
-  	},
+	// post: function(dictionaryToPost) {
+ //    	/* TO DO!!! */
+ //    	if (debug) console.log("POST");
+ //    	if (debug) console.log(dictionaryToPost);
+ //  	},
+  	/* Performs a POST request. 
+  	 * path (string): the URL path (e.g. "custom_slides") 
+  	 * params (dictionary): dictionary of params, including "presentation_id," "completed," "title," "data_all," "data_teacher"
+  	 * successCallback (function): function that gets called when the POST request succeeds. Passed the data, textStatus, and jqXHR
+  	 */
+	post: function(path, params, successCallback){
+		if (debug) console.log("Making POST request with path: " + path);		
+		if (debug) console.log("Params: ");
+		if (debug) console.log(params);
+		$.ajax({
+		  url: "https://api-dev.nearpod.com/v1/hub/student/" + path,
+		  method: "POST",
+		  async: false,
+		  data: JSON.stringify(params),
+		  headers: this.setHeaders(),
+		  success: function(data, textStatus, jqXHR){
+			  successCallback(data, textStatus, jqXHR);
+		  },
+		  error: function(jqXHR, textStatus, errorThrown){
+		  	// alert("error: " + jqXHR.responseJSON.error_code + "\nmessage: " + jqXHR.responseJSON.message + "\n\nfull: " + JSON.stringify(jqXHR.responseJSON) );
+
+			this.showError(jqXHR.responseJSON);
+		  }
+		});
+	},
+  	// get: function() {
+   //  	/* TO DO!! */
+   //  	if (debug) console.log("GET");
+   //  	 TO DO: on Get success, do all the stuff in success method of loadCardsFromServer 
+   //  	// this.loadCardsFromServer();
+  	// },
+  	  	/* Performs a GET request. 
+  	 * path (string): the URL path (e.g. "custom_slides/3") 
+  	 * params: (probably empty string for GET request)
+  	 * successCallback (function): function that gets called when the GET request succeeds. Passed the data, textStatus, and jqXHR
+  	 */
+	get: function(path, params, successCallback){
+		if (debug) console.log("Making GET request with path: " + path);
+		$.ajax({
+		  url: "https://api-dev.nearpod.com/v1/hub/student/" + path,
+		  method: "GET",
+		  async: false,
+		  data: params,
+		  headers: this.setHeaders(),
+		  success: function(data, textStatus, jqXHR){		      			  
+			successCallback(data, textStatus, jqXHR);
+		  },
+		  error: function(jqXHR, textStatus, errorThrown){
+			  this.showError(jqXHR.responseJSON);
+		  }
+		});
+	},
   	/* Returns a dictionary that the student should post at the given moment. 
    	* ----------------------------------------------------------------------
    	* The dictionary contains:
@@ -68,39 +168,66 @@ var StudentView = React.createClass({
     	return toPost;
   	},
 	loadCardsFromServer: function() {
-    $.ajax({
-	      url: this.props.url,
-	      dataType: 'json',
-	      cache: false,
-	      success: function(data) {
-	      	/* If we dont' have any cards, do initial board setup 
-	      	 * Otherwise ignore cards 
-	      	 */
-	      	var cards = this.state.cards;
-	      	if (cards.length == 0) {
-    			cards = this.shuffleCards(data["cards"]);
-    			cards = data["cards"];
-    		}
+		var params = "";
+		this.get("custom_status", params, this.loadCardsSuccess);
+    // $.ajax({
+	   //    url: this.props.url,
+	   //    dataType: 'json',
+	   //    cache: false,
+	   //    success: function(data) {
+	   //    	/* If we dont' have any cards, do initial board setup 
+	   //    	 * Otherwise ignore cards 
+	   //    	 */
+	   //    	var cards = this.state.cards;
+	   //    	if (cards.length == 0) {
+    // 			cards = this.shuffleCards(data["cards"]);
+    // 			cards = data["cards"];
+    // 		}
 
-    		/* See if it's time for next question */
-    		var readyForNext = this.state.readyForNextQuestion;
-    		var nextQuestion = data["nextQuestion"];
-    		if (nextQuestion != this.state.question) {
-    			readyForNext = false;
-    		}
+    // 		/* See if it's time for next question */
+    // 		var readyForNext = this.state.readyForNextQuestion;
+    // 		var nextQuestion = data["nextQuestion"];
+    // 		if (nextQuestion != this.state.question) {
+    // 			readyForNext = false;
+    // 		}
     		
-    		/* Update state! */
-	      	this.setState({
-	      		question: data["nextQuestion"], 
-	      		cards: cards,
-	      		readyForNextQuestion: readyForNext
-	      	});
-	      }.bind(this),
-	      error: function(xhr, status, err) {
-	        console.error(this.props.url, status, err.toString());
-	      }.bind(this)
-	    });
+    // 		/* Update state! */
+	   //    	this.setState({
+	   //    		question: data["nextQuestion"], 
+	   //    		cards: cards,
+	   //    		readyForNextQuestion: readyForNext
+	   //    	});
+	   //    }.bind(this),
+	   //    error: function(xhr, status, err) {
+	   //      console.error(this.props.url, status, err.toString());
+	   //    }.bind(this)
+	   //  });
   	},
+  	loadCardsSuccess: function(data, textStatus, jqXHR) {
+		/* If we dont' have any cards, do initial board setup 
+      	 * Otherwise ignore cards 
+      	 */
+      	var cards = this.state.cards;
+      	if (cards.length == 0) {
+			cards = this.shuffleCards(data["cards"]);
+			cards = data["cards"];
+		}
+
+		/* See if it's time for next question */
+		var readyForNext = this.state.readyForNextQuestion;
+		var nextQuestion = data["nextQuestion"];
+		if (nextQuestion != this.state.question) {
+			readyForNext = false;
+		}
+		
+		/* Update state! */
+      	this.setState({
+      		question: data["nextQuestion"], 
+      		cards: cards,
+      		readyForNextQuestion: readyForNext
+      	});
+  	},
+
 	shuffleCards: function(cards) {
 		if (!cards) return [];
 		var currentIndex = cards.length, temporaryValue, randomIndex;
@@ -244,7 +371,7 @@ var StudentView = React.createClass({
     	this.loadCardsFromServer();
     	/* TO DO: change this.loadCardsFromServer to a GET request. Call loadCardsFromServer 
     	 * on a GET request success. */
-    	setInterval(this.get, this.props.pollInterval);
+    	// setInterval(this.get, this.props.pollInterval);
   	},
   	/* The app uses one shared modal, so we open & close it as needed and just change its inner content.
   	 * modalType (string): the type of modal you want to open
@@ -369,6 +496,7 @@ var StudentView = React.createClass({
      * "incorrect": place a chip on the correct answer, and set incorrectCardIndex to -1
      */
     closeModalAccept: function() {
+    	var params = "";
     	switch(this.state.modalType) {
     		case "confirmChipPlacement":
         		/* Place the chip */
@@ -378,9 +506,13 @@ var StudentView = React.createClass({
 				this.state.myAnswers[this.state.question] = cards[this.state.selectedCardIndex].id;
 				this.bingoButtonShouldActivate();
         		this.setState({cards: cards, isModalOpen: false, modalType:"", selectedCardIndex: -1, readyForNextQuestion: true});
-        		/* TO DO: POST here. */
         		var dictionaryToPost = this.getDictionaryToPost(cards[this.state.selectedCardIndex].answer, false);
-        		this.post(dictionaryToPost);
+        		params = {
+					"response_text": "",
+					"response": dictionaryToPost
+				};
+				this.post("responses", params, this.handlePostSuccess);
+        		// this.post(dictionaryToPost);
        			break;
     		case "checkBingo":
     			var numBoardChecksLeft = this.state.numBingoChecksLeft - 1;
@@ -391,8 +523,12 @@ var StudentView = React.createClass({
     				this.openModal("youGotBingo");
     				/* TO DO: POST here. */  
     				var dictionaryToPost = this.getDictionaryToPost("", false);
-    				this.post(dictionaryToPost);  				
-    			} else {
+    				params = {
+						"response_text": "",
+						"response": dictionaryToPost
+					};
+					this.post("responses", params, this.handlePostSuccess);
+        			// this.post(dictionaryToPost);    			} else {
     				/* Get the IDs of the incorrect and correct card */
     				/* TO DO: if "correctCardId" and "questionIncorrectlyAnswered" are not
     				   yet filled out for the unapproved card, then keep waiting for a teacher
@@ -412,7 +548,12 @@ var StudentView = React.createClass({
         		this.setState({isModalOpen: false, modalType:"", selectedCardIndex: -1, readyForNextQuestion: true});
         		/* TO DO: POST here. */
         		var dictionaryToPost = this.getDictionaryToPost("", true);
-        		this.post(dictionaryToPost);
+                params = {
+        			"response_text": "",
+					"response": dictionaryToPost
+				};
+				this.post("responses", params, this.handlePostSuccess);
+        		// this.post(dictionaryToPost);
         		break;
         	case "incorrect":
         		var cards = this.state.cards;
