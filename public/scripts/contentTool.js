@@ -16,6 +16,7 @@ var debug = true;
  * slideID (int): the ID of this slide, or 0 if it's new
  * jwt (string): taken from URL
  * presentationID (int): taken from URL 
+ * isExiting (boolean): true as soon as the user hits "Save & Exit" or "Create"; false otherwise
  */
 
 var presentationId = "118814";
@@ -174,11 +175,12 @@ var ContentTool = React.createClass({
 			dataStudent: [],
 			selectedCard:-1,
 			isCompleted: false,
-			title: "Rachel test", 
+			title: "", 
 			numCardsCompleted: 0,
 			slideID: urlVars["id"],
 			jwt: urlVars["jwt"],
-			presentationID: urlVars["presentation_id"]
+			presentationID: urlVars["presentation_id"],
+			isExiting: false
 		};
 	},
 	/* Returns an array of 24 empty cards (teacher cards) */
@@ -244,6 +246,7 @@ var ContentTool = React.createClass({
   		if (createButtonClass == "button footerButton blueButtonActive") {
   			this.updateCardsForStudent();
   			this.state.isCompleted = true;
+  			this.state.isExiting = true;
   			var params = {
 				"presentationId": presentationId,
 				"completed": this.state.isCompleted,
@@ -252,12 +255,15 @@ var ContentTool = React.createClass({
 				"data_teacher": this.state.cards
 			};
 			this.put("custom_slides/" + this.state.slideID, params, this.handlePutSuccess);
+			if (debug) console.log("going back");
+			window.history.back();
   		}
   	},
   	/* Called when the user clicks "save and exit." Saves current state of all cards by doing
   	   a PUT request. */
   	handleSave: function() {
   		this.updateCardsForStudent();
+  		this.state.isExiting = true;
 		var params = {
 				"presentation_id": presentationId,
 				"completed": this.state.isCompleted,
@@ -266,6 +272,8 @@ var ContentTool = React.createClass({
 				"data_teacher": this.state.cards
 		};
 		this.put("custom_slides/" + this.state.slideID, params, this.handlePutSuccess);
+		if (debug) console.log("going back");
+		window.history.back();
   	},
   	handleOpenSettings: function() {
   		console.log("settings opened");
@@ -274,6 +282,7 @@ var ContentTool = React.createClass({
   	 * Returns false otherwise (if not all 24 cards are filled out). */
   	createButtonShouldActivate: function() {
   		/* Count up any completed cards */
+  		if (this.state.isExiting) return false;
 	    var numCardsCompleted = 0;
 	    for (var i=0; i < this.state.cards.length; i++) {
 	      	if (this.state.cards[i].completed) {
@@ -285,6 +294,7 @@ var ContentTool = React.createClass({
   	},
 	render: function() {
 		var createButtonActivated = this.createButtonShouldActivate();
+		var saveButtonActivated = !this.state.isExiting;
 		if (this.state.selectedCard == -1) {	
 			return (
 				<div>
@@ -292,7 +302,7 @@ var ContentTool = React.createClass({
 					<div className="content">
 						<Editor onCardSubmit={this.handleCardSubmit} isSelected={false}/>
 						<BingoBoard cards={this.state.cards} onSelectCard={this.handleSelectCard}/>
-						<Footer createButtonActivated={createButtonActivated} onCreate={this.handleCreate} onSave={this.handleSave} />
+						<Footer createButtonActivated={createButtonActivated} saveButtonActivated={saveButtonActivated} onCreate={this.handleCreate} onSave={this.handleSave} />
 					</div>
 				</div>
 			);
@@ -538,6 +548,7 @@ var BingoCard = React.createClass({
  * onSave (function): callback that should get called when the user clicks save
  * onCreate (function): callback that should get called when the user clicks create
  * createButtonActivated (boolean): true if the create button should be activated, false otherwise
+ * saveButtonActivated (boolean): true if the save button should be activated, false otherwise
  */
 var Footer = React.createClass({
 	handleSave: function(e) {
@@ -550,15 +561,22 @@ var Footer = React.createClass({
 	},
 	render: function() {
 		var createButtonClass = "button footerButton ";
+		var saveButtonClass = "button footerButton ";
 		if (this.props.createButtonActivated) {
 			createButtonClass += "blueButtonActive";
 		} else {
 			createButtonClass += "blueButtonInactive";
 		}
+		if (this.props.saveButtonActivated) {
+			saveButtonClass += "greenButtonActive";
+		} else {
+			saveButtonClass += "greenButtonInactive";
+		}
+
 		return (
 			<div id="footer">
 				<div id="footerButtons">
-    				<input className="button footerButton greenButtonActive" id="footerSaveButton" type="submit" value="Save & Exit" onClick={this.handleSave}/>
+    				<input className={saveButtonClass} id="footerSaveButton" type="submit" value="Save & Exit" onClick={this.handleSave}/>
     				<input className={createButtonClass} id="footerCreateButton" type="submit" value="Create" onClick={this.handleCreate}/>
     			</div>
     		</div>
