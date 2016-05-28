@@ -7,6 +7,8 @@ var leaderBoardPositions = {
 }
 
 var debug = true;
+var CONTENT_TOOL_URL = "https://api-dev.nearpod.com/v1/ct/";
+var LIVE_PRES_URL = "https://api-dev.nearpod.com/v1/";
 
 /* State
  * -------
@@ -102,38 +104,41 @@ var TeacherView = React.createClass({
       modalType: ""
 		};
 	},
-  /* Callback for when the card are loaded successfully from CT */
+  /* Callback for when the card are loaded successfully from content tool. 
+   * Shuffles & stores the cards correctly in the this.state.cards 
+   */
   loadGameSuccess: function (data, textStatus, jqXHR) {
     if (debug) console.log("GET success, returning data: ");
     if (debug) console.log(data);
-    /* If we don't have any cards yet, store them */
     var cards = this.shuffleCards(data.payload.custom_slide.data_teacher); 
     this.setState({cards: cards})
     if (debug) console.log("Cards:");
     if (debug) console.log(cards);     
     /* Read in the student responses for current question */
   },
+  /* POST request
+   * --------------------------------------------------
+   * urlStr (string): the entire URL string (e.g. "https://api-dev.nearpod.com/v1/ct/custom_slides/1") 
+   * params: dictionary of parameters to post 
+   * successCallback (function): function that gets called when the POST request succeeds. Passed the data, textStatus, and jqXHR
+   */
   post: function(path, params, successCallback, dictionaryToPost) {
     /* TO DO!!! */
     if (debug) console.log("POST");
     if (debug) console.log(dictionaryToPost);
   },
   /* GET request (only performed if game is not over)
+   * --------------------------------------------------
    * isContentTool (boolean): true if you are making a GET request to content tool, false otherwise
-   * path (string): the URL path (e.g. "custom_slides/3") 
+   * urlStr (string): the entire URL string (e.g. "https://api-dev.nearpod.com/v1/ct/custom_slides/1") 
    * params: (probably empty string for GET request)
    * successCallback (function): function that gets called when the GET request succeeds. Passed the data, textStatus, and jqXHR
    */
-  get: function(isContentTool, path, params, successCallback) {
-    /* TO DO!! */
-    var urlStr = "https://api-dev.nearpod.com/v1/";
-    if (isContentTool) {
-      urlStr = "https://api-dev.nearpod.com/v1/ct/";
-    }
+  get: function(urlStr, params, successCallback) {
     if (!this.state.gameOver) {
-      if (debug) console.log("GET request with url: " + urlStr + path);
+      if (debug) console.log("GET request with url: " + urlStr);
       $.ajax({
-        url: urlStr + path,
+        url: urlStr,
         method: "GET",
         async: false,
         data: params,
@@ -208,7 +213,8 @@ var TeacherView = React.createClass({
     },
   	componentDidMount: function() {
       /* Load initial data from content tool */
-      this.get(true, "custom_slides/" + this.state.slideID, "", this.loadGameSuccess);
+      var urlStr = CONTENT_TOOL_URL + "custom_slides/" + this.state.slideID;
+      this.get(urlStr, "", this.loadGameSuccess);
       
       /* TO DO: on an interval, make GET request to get student responses
          on success, do following something like following two lines:
@@ -674,15 +680,15 @@ var Graph = React.createClass({
 					<table className="statsTable">
 						<tbody>
 							<tr>
-								<td><img src="../assets/greenCircle.png"/></td>
+								<td><img src="assets/greenCircle.png"/></td>
 								<td>{this.props.stats.numCorrect}/{numStudents} correct</td>
 							</tr>
 							<tr >
-								<td><img src="../assets/redCircle.png"/></td>
+								<td><img src="assets/redCircle.png"/></td>
 								<td>{this.props.stats.numIncorrect}/{numStudents} incorrect</td>
 							</tr>
 							<tr>
-								<td><img src="../assets/grayCircle.png"/></td>
+								<td><img src="assets/grayCircle.png"/></td>
 								<td>{this.props.stats.numUnanswered}/{numStudents} unanswered</td>
 							</tr>
 						</tbody>
