@@ -82,7 +82,7 @@ var ContentTool = React.createClass({
 		var params = "";
 		if (this.state.slideID > 0) {
 			/* GET: we are editing an existing slide. */
-			// this.get("custom_slides/" + this.state.slideID, "", this.handleGetSuccess);
+			this.get("custom_slides/" + this.state.slideID, "", this.handleGetSuccess);
 		} else {
 			/* POST: we need to make a new slide with 24 blank cards */
 			var newCards = this.getInitialCards();
@@ -95,7 +95,7 @@ var ContentTool = React.createClass({
 				"data_all": this.state.dataStudent,
 				"data_teacher": this.state.cards
 			};
-			// this.post("custom_slides", params, this.handlePostSuccess);
+			this.post("custom_slides", params, this.handlePostSuccess);
 			this.setState({
 				cards: this.state.cards,
 				dataStudent: this.state.dataStudent
@@ -275,9 +275,6 @@ var ContentTool = React.createClass({
 		if (debug) console.log("going back");
 		window.history.back();
   	},
-  	handleOpenSettings: function() {
-  		console.log("settings opened");
-  	},
   	/* Returns true when all the cards are filled out, meaning this slide can be marked as completed. 
   	 * Returns false otherwise (if not all 24 cards are filled out). */
   	createButtonShouldActivate: function() {
@@ -297,46 +294,21 @@ var ContentTool = React.createClass({
 		var saveButtonActivated = !this.state.isExiting;
 		if (this.state.selectedCard == -1) {	
 			return (
-				<div>
-					<Header onSettingsClicked={this.handleOpenSettings}/>
-					<div className="content">
-						<Editor onCardSubmit={this.handleCardSubmit} isSelected={false}/>
-						<BingoBoard cards={this.state.cards} onSelectCard={this.handleSelectCard}/>
-						<Footer createButtonActivated={createButtonActivated} saveButtonActivated={saveButtonActivated} onCreate={this.handleCreate} onSave={this.handleSave} />
-					</div>
+				<div className="container">
+					<Editor onCardSubmit={this.handleCardSubmit} isSelected={false}/>
+					<BingoBoard cards={this.state.cards} onSelectCard={this.handleSelectCard}/>
+					<Footer createButtonActivated={createButtonActivated} saveButtonActivated={saveButtonActivated} onCreate={this.handleCreate} onSave={this.handleSave} />
 				</div>
 			);
 		} else {
 			return (
-				<div>
-					<Header />
-					<div className="content">
-						<Editor ref="myEditor" onCardSubmit={this.handleCardSubmit} isSelected={true} card={this.state.cards[this.state.selectedCard]}/>
-						<BingoBoard cards={this.state.cards} onSelectCard={this.handleSelectCard} selectedCard={this.state.selectedCard}/>
-						<Footer createButtonActivated={createButtonActivated} onCreate={this.handleCreate} onSave={this.handleSave}/>
-					</div>
+				<div className="container">
+					<Editor ref="myEditor" onCardSubmit={this.handleCardSubmit} isSelected={true} card={this.state.cards[this.state.selectedCard]}/>
+					<BingoBoard cards={this.state.cards} onSelectCard={this.handleSelectCard} selectedCard={this.state.selectedCard}/>
+					<Footer createButtonActivated={createButtonActivated} onCreate={this.handleCreate} onSave={this.handleSave}/>
 				</div>
 			);
 		}
-	}
-});
-
-/*
- * Props
- * -----
- * onSettingsClicked (function): callback that will get called when the user clicks the settings button
- */
-var Header = React.createClass({
-	render: function() {
-		return(
-			<div id="header">
-        		<img id="headerImage" src="assets/bingoIcon.png"/>
-       			<span className="headerText">Bingo</span>
-       			<div id="settingsButton" onClick={this.props.onSettingsClicked}>
-       				<img id="settingImg" src="assets/settings_dark_gray.png"/>
-       			</div>
-      		</div>
-		);
 	}
 });
 
@@ -608,5 +580,5 @@ parent.postMessage({"type":"change_iframe_height", "height":"674px"}, '*');
 	
 ReactDOM.render(
 	<ContentTool url="/api/contentTool" pollInterval={2000}/>,
-	document.getElementById('bingoContentTool')
+	document.getElementById('content')
 );
