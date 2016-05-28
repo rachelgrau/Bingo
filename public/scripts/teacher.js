@@ -10,6 +10,9 @@ var debug = true;
 
 /* State
  * -------
+ * slideID (int): the ID of this slide in the presentation (from URL)
+ * jwt (string): JWT token from URL (from URL)
+ * presentaitonID (int): the ID of this particular presentation (from URL)
  * gameOver (boolean): true when the teacher has ended the game, false otherwise
  * cards (array): an array of all the questions/answers. Gets shuffled at beginning, then doesn't change
  * indexOfCurrQuestion (int): the index of the current question in the cards array 
@@ -68,8 +71,23 @@ var debug = true;
  		}
  */
 var TeacherView = React.createClass({
+  getUrlVars: function() {
+      var vars = {};
+      var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+          vars[key] = value;
+      });
+      return vars;
+  },
+  setHeaders: function(){
+    if (debug) console.log("Setting JWT: " + this.state.jwt);
+    return {"x-api-key":"7dabac64681a7c12c1cb97183c44de93", "JWT": this.state.jwt};
+  },
 	getInitialState: function() {
+    var urlVars = this.getUrlVars();
 		return {
+      slideID: urlVars["id"],
+      jwt: urlVars["jwt"],
+      presentationID: urlVars["presentation_id"],
 			gameOver: false,
 			cards:[], 
 			indexOfCurrQuestion: 0,
@@ -84,18 +102,52 @@ var TeacherView = React.createClass({
       modalType: ""
 		};
 	},
-  post: function(dictionaryToPost) {
+  /* Callback for when the card are loaded successfully from CT */
+  loadGameSuccess: function (data, textStatus, jqXHR) {
+    if (debug) console.log("GET success, returning data: ");
+    if (debug) console.log(data);
+    /* If we don't have any cards yet, store them */
+    var cards = this.shuffleCards(data.payload.custom_slide.data_teacher); 
+    this.setState({cards: cards})
+    if (debug) console.log("Cards:");
+    if (debug) console.log(cards);     
+    /* Read in the student responses for current question */
+    /* TO DO: next 2 lines will be separate GET request */
+    this.addNewStudents(data["studentResponses"]);
+    this.update(data["studentResponses"]);
+  },
+  post: function(path, params, successCallback, dictionaryToPost) {
     /* TO DO!!! */
     if (debug) console.log("POST");
     if (debug) console.log(dictionaryToPost);
   },
-  /* Only do GET requests if the game isn't over */
-  get: function() {
+  /* GET request (only performed if game is not over)
+   * isContentTool (boolean): true if you are making a GET request to content tool, false otherwise
+   * path (string): the URL path (e.g. "custom_slides/3") 
+   * params: (probably empty string for GET request)
+   * successCallback (function): function that gets called when the GET request succeeds. Passed the data, textStatus, and jqXHR
+   */
+  get: function(isContentTool, path, params, successCallback) {
     /* TO DO!! */
+    var urlStr = "https://api-dev.nearpod.com/v1/";
+    if (isContentTool) {
+      urlStr = "https://api-dev.nearpod.com/v1/ct/";
+    }
     if (!this.state.gameOver) {
-      if (debug) console.log("GET");
-      /* TO DO: on Get success, do all the stuff in success method of loadCardsFromServer */
-      // this.loadCardsFromServer();
+      if (debug) console.log("GET request with url: " + urlStr + path);
+      $.ajax({
+        url: urlStr + path,
+        method: "GET",
+        async: false,
+        data: params,
+        headers: this.setHeaders(),
+        success: function(data, textStatus, jqXHR){                 
+          successCallback(data, textStatus, jqXHR);
+        },
+        error: function(jqXHR, textStatus, errorThrown){
+          this.showError(jqXHR.responseJSON);
+        }
+    });
     }
   },
   /* Returns a dictionary that the teacher should post at the given moment. 
@@ -141,24 +193,26 @@ var TeacherView = React.createClass({
 		return cards;
 	},
 	loadCardsFromServer: function() {
-    $.ajax({
-	      url: this.props.url,
-	      dataType: 'json',
-	      cache: false,
-	      success: function(data) {	      
-    		/* If we don't have any cards yet, store them */
-    		if (this.state.cards.length == 0) {
-    			var cards = this.shuffleCards(data["cards"]); 
-    			this.state.cards = cards;   		
-    		}
-    		/* Read in the student responses for current question */
-    		this.addNewStudents(data["studentResponses"]);
-        this.update(data["studentResponses"]);
-	      }.bind(this),
-	      error: function(xhr, status, err) {
-	        console.error(this.props.url, status, err.toString());
-	      }.bind(this)
-	    });
+    /* Load slide data from content tool */
+    this.get(true, "custom_slides/" + this.state.slideID, "", this.loadGameSuccess);
+    // $.ajax({
+	   //    url: this.props.url,
+	   //    dataType: 'json',
+	   //    cache: false,
+	   //    success: function(data) {	      
+    // 		/* If we don't have any cards yet, store them */
+    // 		if (this.state.cards.length == 0) {
+    // 			var cards = this.shuffleCards(data["cards"]); 
+    // 			this.state.cards = cards;   		
+    // 		}
+    // 		/* Read in the student responses for current question */
+    // 		this.addNewStudents(data["studentResponses"]);
+    //     this.update(data["studentResponses"]);
+	   //    }.bind(this),
+	   //    error: function(xhr, status, err) {
+	   //      console.error(this.props.url, status, err.toString());
+	   //    }.bind(this)
+	   //  });
   	},
     /*
      * Update (very important)
@@ -181,7 +235,7 @@ var TeacherView = React.createClass({
     	this.loadCardsFromServer();
       /* TO DO: change this.loadCardsFromServer to a GET request. Call loadCardsFromServer 
        * on a GET request success. */
-    	setInterval(this.get, this.props.pollInterval);
+    	// setInterval(this.get, this.props.pollInterval);
   	},
   	/* Goes through all of the student responses for the current question and 
   	   moves them to the repositories of "past" questions (e.g. this.state.allQuestionsByStudent and this.state.allQuestionsByQuestion) 
@@ -1158,7 +1212,7 @@ var PieChart = React.createClass({
 });
 
 ReactDOM.render(
-	<TeacherView url="/api/teacher" pollInterval={2000}/>,
+	<TeacherView url="/api/teacher"/>,
 	document.getElementById('content')
 );
 
