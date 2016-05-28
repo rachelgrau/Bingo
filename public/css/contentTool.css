@@ -219,6 +219,10 @@ textArea {
 	background-color: #9DEBC3;
 }
 
+.greenButtonInactive {
+	background-color: #9DEBC3;
+}
+
 .footerButton {
 	margin-left: 10px;
 	margin-right: 10px;
