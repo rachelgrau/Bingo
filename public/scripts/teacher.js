@@ -112,9 +112,6 @@ var TeacherView = React.createClass({
     if (debug) console.log("Cards:");
     if (debug) console.log(cards);     
     /* Read in the student responses for current question */
-    /* TO DO: next 2 lines will be separate GET request */
-    this.addNewStudents(data["studentResponses"]);
-    this.update(data["studentResponses"]);
   },
   post: function(path, params, successCallback, dictionaryToPost) {
     /* TO DO!!! */
@@ -192,28 +189,6 @@ var TeacherView = React.createClass({
   		}
 		return cards;
 	},
-	loadCardsFromServer: function() {
-    /* Load slide data from content tool */
-    this.get(true, "custom_slides/" + this.state.slideID, "", this.loadGameSuccess);
-    // $.ajax({
-	   //    url: this.props.url,
-	   //    dataType: 'json',
-	   //    cache: false,
-	   //    success: function(data) {	      
-    // 		/* If we don't have any cards yet, store them */
-    // 		if (this.state.cards.length == 0) {
-    // 			var cards = this.shuffleCards(data["cards"]); 
-    // 			this.state.cards = cards;   		
-    // 		}
-    // 		/* Read in the student responses for current question */
-    // 		this.addNewStudents(data["studentResponses"]);
-    //     this.update(data["studentResponses"]);
-	   //    }.bind(this),
-	   //    error: function(xhr, status, err) {
-	   //      console.error(this.props.url, status, err.toString());
-	   //    }.bind(this)
-	   //  });
-  	},
     /*
      * Update (very important)
      * ------------------------
@@ -232,9 +207,13 @@ var TeacherView = React.createClass({
       });
     },
   	componentDidMount: function() {
-    	this.loadCardsFromServer();
-      /* TO DO: change this.loadCardsFromServer to a GET request. Call loadCardsFromServer 
-       * on a GET request success. */
+      /* Load initial data from content tool */
+      this.get(true, "custom_slides/" + this.state.slideID, "", this.loadGameSuccess);
+      
+      /* TO DO: on an interval, make GET request to get student responses
+         on success, do following something like following two lines:
+          this.addNewStudents(data["studentResponses"]);
+          this.update(data["studentResponses"]); */
     	// setInterval(this.get, this.props.pollInterval);
   	},
   	/* Goes through all of the student responses for the current question and 
