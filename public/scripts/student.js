@@ -1,4 +1,5 @@
 var debug = true;
+var STUDENT_URL = "https://api-dev.nearpod.com/v1/";
 /* State
  * -------
  * cards (array): an array of this students bingo cards, in the order that they appear on his/her board.
@@ -15,8 +16,22 @@ var debug = true;
  * name (string): student's nickname
  */
 var StudentView = React.createClass({
+	getUrlVars: function() {
+      var vars = {};
+      var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+          vars[key] = value;
+      });
+      return vars;
+  	},
+  	setHeaders: function(){
+    	return {"x-api-key":"7dabac64681a7c12c1cb97183c44de93", "JWT": this.state.jwt};
+  	},
 	getInitialState: function() {
+		var urlVars = this.getUrlVars();
 		return {
+			slideID: urlVars["id"],
+      		jwt: urlVars["jwt"],
+      		presentationID: urlVars["presentation_id"],
 			cards:[], 
 			question:"", 
 			myAnswers: {},
@@ -32,15 +47,71 @@ var StudentView = React.createClass({
 		};
 	},
 	post: function(dictionaryToPost) {
-    	/* TO DO!!! */
-    	if (debug) console.log("POST");
-    	if (debug) console.log(dictionaryToPost);
+    	if (debug) console.log("Making POST request with path: " + path);		
+		if (debug) console.log("Params: ");
+		if (debug) console.log(params);
+		$.ajax({
+		  url: "https://api-dev.nearpod.com/v1/hub/student/" + path,
+		  method: "POST",
+		  async: false,
+		  data: JSON.stringify(params),
+		  headers: this.setHeaders(),
+		  success: function(data, textStatus, jqXHR){
+			  successCallback(data, textStatus, jqXHR);
+		  },
+		  error: function(jqXHR, textStatus, errorThrown){
+		  	// alert("error: " + jqXHR.responseJSON.error_code + "\nmessage: " + jqXHR.responseJSON.message + "\n\nfull: " + JSON.stringify(jqXHR.responseJSON) );
+		  }
+		});
   	},
-  	get: function() {
-    	/* TO DO!! */
-    	if (debug) console.log("GET");
-    	/* TO DO: on Get success, do all the stuff in success method of loadCardsFromServer */
-    	// this.loadCardsFromServer();
+  	loadTeacherResponsesSuccess: function(data, textStatus, jqXHR) {
+  		if (debug) console.log("GET student custom status succeeded");
+  		if (debug) console.log(data);
+		/* TO DO: left off here. Once you get the device uid of yourself, 
+		 * you can load the initial cards :) 
+		 */
+		var my_device_uid = ""; // here !
+		/* If we dont' have any cards, do initial board setup 
+	     * Otherwise ignore cards */
+	    var cards;
+	    if (cards.length == 0) {
+    		cards = this.data.payload.status.studentResponses[my_device_uid].cards;
+    	}
+    	// /* See if it's time for next question */
+    	// var readyForNext = this.state.readyForNextQuestion;
+    	// var nextQuestion = data["nextQuestion"];
+    	// if (nextQuestion != this.state.question) {
+    	// 	readyForNext = false;
+    	// }
+    	// /* Update state! */
+	    // this.setState({
+	    //   	question: data["nextQuestion"], 
+	    //   	cards: cards,
+	    //   	readyForNextQuestion: readyForNext
+	    // });
+  	},
+  	/* GET request (only performed if game is not over)
+   	 * --------------------------------------------------
+   	 * isContentTool (boolean): true if you are making a GET request to content tool, false otherwise
+   	 * urlStr (string): the entire URL string (e.g. "https://api-dev.nearpod.com/v1/ct/custom_slides/1") 
+     * params: (probably empty string for GET request)
+     * successCallback (function): function that gets called when the GET request succeeds. Passed the data, textStatus, and jqXHR
+     */
+  	get: function(path, params, successCallback) {
+      	if (debug) console.log("Making GET request with path: " + path);
+		$.ajax({
+		    url: path,
+		    method: "GET",
+		    async: false,
+		    data: params,
+		    headers: this.setHeaders(),
+		    success: function(data, textStatus, jqXHR){                 
+		    	successCallback(data, textStatus, jqXHR);
+		    },
+		    error: function(jqXHR, textStatus, errorThrown){
+		    	this.showError(jqXHR.responseJSON);
+		    }
+		});
   	},
   	/* Returns a dictionary that the student should post at the given moment. 
    	* ----------------------------------------------------------------------
@@ -66,40 +137,6 @@ var StudentView = React.createClass({
     	toPost["didPass"] = didPass;
     	toPost["hasBingo"] = this.state.hasBingo;
     	return toPost;
-  	},
-	loadCardsFromServer: function() {
-    $.ajax({
-	      url: this.props.url,
-	      dataType: 'json',
-	      cache: false,
-	      success: function(data) {
-	      	/* If we dont' have any cards, do initial board setup 
-	      	 * Otherwise ignore cards 
-	      	 */
-	      	var cards = this.state.cards;
-	      	if (cards.length == 0) {
-    			cards = this.shuffleCards(data["cards"]);
-    			cards = data["cards"];
-    		}
-
-    		/* See if it's time for next question */
-    		var readyForNext = this.state.readyForNextQuestion;
-    		var nextQuestion = data["nextQuestion"];
-    		if (nextQuestion != this.state.question) {
-    			readyForNext = false;
-    		}
-    		
-    		/* Update state! */
-	      	this.setState({
-	      		question: data["nextQuestion"], 
-	      		cards: cards,
-	      		readyForNextQuestion: readyForNext
-	      	});
-	      }.bind(this),
-	      error: function(xhr, status, err) {
-	        console.error(this.props.url, status, err.toString());
-	      }.bind(this)
-	    });
   	},
 	shuffleCards: function(cards) {
 		if (!cards) return [];
@@ -240,11 +277,17 @@ var StudentView = React.createClass({
 		this.state.selectedCardIndex = cardIndex;
 		this.openModal("confirmChipPlacement");
 	},
+	/*
+   	 * Makes a GET request to the API to get the teacher's response. 
+   	 */
+	loadTeacherResponses: function() {
+		this.get(STUDENT_URL + "hub/student/custom_status", "", this.loadTeacherResponsesSuccess);
+	},
   	componentDidMount: function() {
-    	this.loadCardsFromServer();
-    	/* TO DO: change this.loadCardsFromServer to a GET request. Call loadCardsFromServer 
-    	 * on a GET request success. */
-    	setInterval(this.get, this.props.pollInterval);
+    	/* Poll for teacher response every X seconds */
+    	setInterval(this.loadTeacherResponses, this.props.pollInterval);
+    	/* Trying to get device_uid (not working) */
+    	this.get(STUDENT_URL + "hub/student", "", this.didGetDeviceUID);
   	},
   	/* The app uses one shared modal, so we open & close it as needed and just change its inner content.
   	 * modalType (string): the type of modal you want to open

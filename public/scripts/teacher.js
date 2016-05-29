@@ -9,6 +9,7 @@ var leaderBoardPositions = {
 var debug = true;
 var CONTENT_TOOL_URL = "https://api-dev.nearpod.com/v1/ct/";
 var LIVE_PRES_URL = "https://api-dev.nearpod.com/v1/";
+var TEACHER_URL = "https://api-dev.nearpod.com/v1/hub/teacher/";
 
 /* State
  * -------
@@ -18,15 +19,15 @@ var LIVE_PRES_URL = "https://api-dev.nearpod.com/v1/";
  * gameOver (boolean): true when the teacher has ended the game, false otherwise
  * cards (array): an array of all the questions/answers. Gets shuffled at beginning, then doesn't change
  * indexOfCurrQuestion (int): the index of the current question in the cards array 
- * responsesForStudents (dictionary): dictionary mapping student deviceIDs to their individualized responses
+ * responsesForStudents (dictionary): dictionary mapping student device IDs to their individualized responses
  * 		- each response has:
  * 				- nextQuestion (string): the current question
  *        - cards (array): the student's board
  *        - gameOver (boolean): whether the game is over
  * currentQuestionAnswers (array): abbreviated version of student responses. An array of the students' answers to the current question. Each dictionary in the array contains:
- * 		- "deviceID": student's deviceID
+ * 		- "device_uid": student's device ID
  *    - "hasBingo" (boolean): whether the student has bingo 
- *    - "name" (string): student's name
+ *    - "nickname" (string): student's name
  * 		- "answer" (string): the student's answer, or "" if no answer yet
  *		- "isCorrect" (boolean): whether the student's answer was correct, or false if still hasn't answered
  * currentQuestionStats (dictionary): the stats for the current question overall
@@ -48,8 +49,8 @@ var LIVE_PRES_URL = "https://api-dev.nearpod.com/v1/";
  		}
  * allQuestionsByStudent (array): array of dictionaries that look like:
  * 		 {
- 			"name": "Ricky",
-      "deviceID": 1,
+ 			"nickname": "Ricky",
+      "device_uid": 1,
 			"answers": [
 				{ 
 					"question": "Brazenly obvious; flagrant; offensively noisy or loud",
@@ -72,6 +73,9 @@ var LIVE_PRES_URL = "https://api-dev.nearpod.com/v1/";
 			}
  		}
  */
+var jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJDVCIsImV4cCI6MTQ2NDQ5ODA4MSwicmVmcmVzaCI6NzIwMCwiYXVkIjoiN2RhYmFjNjQ2ODFhN2MxMmMxY2I5NzE4M2M0NGRlOTMiLCJpYXQiOjE0NjQ0OTA4ODEsInVpZCI6InQ5cHZ4azhtbG91NzlwaHRiZXRyZzhmd2dod3U2bGlucHlmb2NzeCIsInRrbiI6IiIsImlzVGVhY2hlciI6IjEiLCJwZXJtcyI6WyJ0ZWFjaGVyXC9jdXN0b21fc3RhdHVzIiwidGVhY2hlclwvcmVzcG9uc2VzIl0sImV4dHJhIjp7ImN1c3RvbV9zbGlkZV9pZCI6IjEwMDAwNDgiLCJzbGlkZSI6IjEiLCJzZXNzaW9uX3VpZCI6IiJ9fQ.iugrpDK8KaAl_mhiK0Y7SwZUdU0nXMXCVbJewL621Ik";
+var presentationId = "118814";
+var slideID = "1000048";
 var TeacherView = React.createClass({
   getUrlVars: function() {
       var vars = {};
@@ -81,7 +85,7 @@ var TeacherView = React.createClass({
       return vars;
   },
   setHeaders: function(){
-    if (debug) console.log("Setting JWT: " + this.state.jwt);
+    // if (debug) console.log("Setting JWT: " + this.state.jwt);
     return {"x-api-key":"7dabac64681a7c12c1cb97183c44de93", "JWT": this.state.jwt};
   },
 	getInitialState: function() {
@@ -108,24 +112,51 @@ var TeacherView = React.createClass({
    * Shuffles & stores the cards correctly in the this.state.cards 
    */
   loadGameSuccess: function (data, textStatus, jqXHR) {
-    if (debug) console.log("GET success, returning data: ");
+    if (debug) console.log("GET initial cards succeeded, returned data: ");
     if (debug) console.log(data);
     var cards = this.shuffleCards(data.payload.custom_slide.data_teacher); 
+    this.state.cards = cards;
     this.setState({cards: cards})
     if (debug) console.log("Cards:");
-    if (debug) console.log(cards);     
-    /* Read in the student responses for current question */
+    if (debug) console.log(this.state.cards);     
+  },
+  /* Callback for when the student responses are loaded successfully. 
+   * Updates the state to reflect the most current student resopnses. 
+   */
+  loadStudentResponsesSuccess: function (data, textStatus, jqXHR) {
+    if (debug) console.log("GET student responses succeeded");
+    if (debug) console.log(data);
+    /* Check if new students have joined */
+    this.addNewStudents(data.payload); // data.payload.studentResponses?
+    this.update(data.payload); // data.payload.studentResponses?
   },
   /* POST request
    * --------------------------------------------------
    * urlStr (string): the entire URL string (e.g. "https://api-dev.nearpod.com/v1/ct/custom_slides/1") 
-   * params: dictionary of parameters to post 
+   * params: dictionary of parameters to post ("response" = main response data) 
    * successCallback (function): function that gets called when the POST request succeeds. Passed the data, textStatus, and jqXHR
    */
-  post: function(path, params, successCallback, dictionaryToPost) {
-    /* TO DO!!! */
-    if (debug) console.log("POST");
-    if (debug) console.log(dictionaryToPost);
+  post: function(path, params) {
+    if (debug) console.log("Making POST request with path: " + path);
+    if (debug) console.log("Params: ");
+    if (debug) console.log(params);
+    $.ajax({
+        url: TEACHER_URL + path,
+        method: "POST",
+        async: false,
+        data: JSON.stringify(params),
+        headers: this.setHeaders(),
+        success: function(data, textStatus, jqXHR){
+          if (debug) console.log("Successful post!");
+        },
+        error: function(jqXHR, textStatus, errorThrown){
+          if (debug) console.log("Error posting");
+        }
+    });
+  },
+  startGameSuccess: function(data, textStatus, jqXHR) {
+    if(debug) console.log("Post success");
+    if(debug) console.log(data);
   },
   /* GET request (only performed if game is not over)
    * --------------------------------------------------
@@ -152,10 +183,17 @@ var TeacherView = React.createClass({
     });
     }
   },
+  /*
+   * Makes a GET request to the API to get the student responses. On success,
+   * update the state's student responses and add any new students. 
+   */
+  loadStudentResponses: function() {
+      this.get(TEACHER_URL + "responses", "", this.loadStudentResponsesSuccess);
+  },
   /* Returns a dictionary that the teacher should post at the given moment. 
    * ----------------------------------------------------------------------
    * The teacher creates an individualized response for each student and 
-   * creates a dictionary mapping students' deviceIDs to their individualize
+   * creates a dictionary mapping students' device IDs to their individualize
    * response. Call this dictionary "studentResponses." The teacher posts a 
    * dictionary with the following keys/values:
    *        key                     value
@@ -166,13 +204,6 @@ var TeacherView = React.createClass({
    */
   getDictionaryToPost: function() {
     var toPost = {};
-    /* "nextQuestion" */
-    var currentQuestion = "";
-    if (debug) console.log("In get dictionary, index of current question = " + this.state.indexOfCurrQuestion);
-    if (this.state.indexOfCurrQuestion < this.state.cards.length) {
-      currentQuestion = this.state.cards[this.state.indexOfCurrQuestion + 1].question;
-    }
-    toPost["nextQuestion"] = currentQuestion;
     /* "gameOver" */
     toPost["gameOver"] = this.state.gameOver;
     /* "studentResponses" */
@@ -211,16 +242,15 @@ var TeacherView = React.createClass({
           buttonsEnabled: true
       });
     },
+    /*
+     * Load initial cards and start polling for student responses.  
+     */
   	componentDidMount: function() {
       /* Load initial data from content tool */
       var urlStr = CONTENT_TOOL_URL + "custom_slides/" + this.state.slideID;
       this.get(urlStr, "", this.loadGameSuccess);
-      
-      /* TO DO: on an interval, make GET request to get student responses
-         on success, do following something like following two lines:
-          this.addNewStudents(data["studentResponses"]);
-          this.update(data["studentResponses"]); */
-    	// setInterval(this.get, this.props.pollInterval);
+      /* Every X seconds, poll for student responses */
+      setInterval(this.loadStudentResponses, 2000);  
   	},
   	/* Goes through all of the student responses for the current question and 
   	   moves them to the repositories of "past" questions (e.g. this.state.allQuestionsByStudent and this.state.allQuestionsByQuestion) 
@@ -237,7 +267,7 @@ var TeacherView = React.createClass({
   		};
   		/* Loop over all the students' answers to the question we are about to leave */
   		for (var i=0; i < this.state.currentQuestionAnswers.length; i++) {
-        var currStudentDeviceID = this.state.currentQuestionAnswers[i].deviceID;
+        var currStudentDeviceID = this.state.currentQuestionAnswers[i].device_uid;
   			var currAnswer = this.state.currentQuestionAnswers[i].answer;
   			var wasCorrect = this.state.currentQuestionAnswers[i].isCorrect;
   			if (currAnswer == "") wasCorrect = false; /* If current still unanswered, mark as incorrect */ 
@@ -247,7 +277,7 @@ var TeacherView = React.createClass({
   			/* Find that student in our array for past questions */
   			for (var j=0; j < this.state.allQuestionsByStudent.length; j++) {
   				var currEntry = this.state.allQuestionsByStudent[j];
-  				if (currEntry.deviceID == currStudentDeviceID) {
+  				if (currEntry.device_uid == currStudentDeviceID) {
   					/* Add to their list of answers */
   					var answerDict = {
   					"question": questionToSave,
@@ -283,7 +313,7 @@ var TeacherView = React.createClass({
         var currentAnswers = [];
         for (var i=0; i < this.state.currentQuestionAnswers.length; i++) {
           var curStudentAnswer = {};
-          curStudentAnswer["name"] = this.state.currentQuestionAnswers[i].name;
+          curStudentAnswer["nickname"] = this.state.currentQuestionAnswers[i].nickname;
           curStudentAnswer["answer"] =  "";
           curStudentAnswer["isCorrect"] = false;
           currentAnswers.push(curStudentAnswer);
@@ -311,32 +341,58 @@ var TeacherView = React.createClass({
             currentQuestionStats: stats,
             responsesForStudents: responsesForStudents,
             buttonsEnabled: false
-         });
-        /* TO DO: POST here */
-        var dictionaryToPost = this.getDictionaryToPost();
-        this.post(dictionaryToPost);
+         }, function() {
+            /* TO DO: POST here */
+            var dictionaryToPost = this.getDictionaryToPost();
+            var params = {
+              "status": dictionaryToPost
+            };
+            this.post("custom_status", params);
+          });
       }
   	},
+    /* Returns an array of cards for a student to set up on their board. 
+     * The cards will be randomly shuffled and contain the following 
+     * fields: id (int), answer (string), hasChip (boolean), teacherApproved (boolean)
+     */
+    createStudentBoard: function() {
+      /* Create a copy of our cards but w/o answers and with hasChip and teacherApproved fields */
+      var studentCards = [];
+      for (var i=0; i < this.state.cards.length; i++) {
+        var card = {};
+        card["id"] = this.state.cards[i].id;
+        card["answer"] = this.state.cards[i].answer;
+        card["hasChip"] = false;
+        card["teacherApproved"] = false;
+        studentCards.push(card);
+      }
+      /* Shuffle new copy and return it */
+      return this.shuffleCards(studentCards);
+    },
   	/* Looks at the current student responses and sees if there are any students 
      * that are currently not in this.state.allQuestionsByStudent record. If so, 
      * adds an entry for those new students to this.state.allQuestionsByStudent and
-     * this.state.responsesForStudents */
+     * this.state.responsesForStudents. Shuffles the cards and adds them to this.state.responsesForStudents
+     * entry (since student can't get cards directly from CT) */
 	addNewStudents: function(studentResponses) {
+    console.log(studentResponses);
+    var didAddAStudent = false;
 		for (var i=0; i < studentResponses.length; i++) {
-			var name = studentResponses[i].name;
+			var device_uid = studentResponses[i].device_uid;
 			var studentIsNew = true;
 			for (var j=0; j < this.state.allQuestionsByStudent.length; j++) {
 				var currentEntry = this.state.allQuestionsByStudent[j];
-				if (currentEntry.name == name) {
+				if (currentEntry.device_uid == device_uid) {
 					studentIsNew = false;
 					break;
 				}
 			}
 			if (studentIsNew) {
+        didAddAStudent = true;
         /* 1. Create entry in allQuestionsByStudent */
 				var newStudent = {};
-				newStudent["name"] = name;
-        newStudent["deviceID"] = studentResponses[i].deviceID;
+				newStudent["nickname"] = studentResponses[i].nickname;
+        newStudent["device_uid"] = studentResponses[i].device_uid;
 				newStudent["answers"] = [];
 				newStudent["stats"] = {
 					"numCorrect": 0,
@@ -345,14 +401,25 @@ var TeacherView = React.createClass({
 				this.state.allQuestionsByStudent.push(newStudent);
         /* 2. Create entry in responsesForStudents */
         var newStudentResponse = {};
-        var deviceID = studentResponses[i].deviceID;
+        var device_uid = studentResponses[i].device_uid;
         var currentQuestion = this.state.cards[this.state.indexOfCurrQuestion].question;
         newStudentResponse["nextQuestion"] = currentQuestion;
-        newStudentResponse["cards"] = studentResponses[i].cards;
+        newStudentResponse["cards"] = this.createStudentBoard();
         newStudentResponse["gameOver"] = this.state.gameOver;
-        this.state.responsesForStudents[deviceID] = newStudentResponse;
+        this.state.responsesForStudents[device_uid] = newStudentResponse;
 			}
 		}
+    /* If we got a new student, do a POST so they can get cards & set up board. */
+    if (didAddAStudent) {
+      var dictionaryToPost = this.getDictionaryToPost();
+      var params = {
+        "status": dictionaryToPost
+      };
+      
+      this.post("custom_status", params);
+    }
+    if (debug) console.log("Added new students! Here are cards: ");
+    if (debug) console.log(this.state.cards);
 	},
 	/*
 	 * When the student passes on a question, returns true if that pass was correct (i.e., the correct answer was not on their board)
@@ -382,8 +449,8 @@ var TeacherView = React.createClass({
    * sets that card as "teacherApproved" in this.state.responsesForStudents
    * for that particular student. 
    */
-  approveCardForStudent: function(deviceID, cardID) {
-    var studentCards = this.state.responsesForStudents[deviceID].cards;
+  approveCardForStudent: function(device_uid, cardID) {
+    var studentCards = this.state.responsesForStudents[device_uid].cards;
     for (var i=0; i < studentCards.length; i++) {
       var currCard = studentCards[i];
       if (currCard.id == cardID) {
@@ -392,20 +459,20 @@ var TeacherView = React.createClass({
         break;
       }
     } 
-    this.state.responsesForStudents[deviceID].cards = studentCards;
+    this.state.responsesForStudents[device_uid].cards = studentCards;
   },
   /*
    * Updates the given student's board in this.state.responsesForStudents
    * so that the card they got wrong holds the correct answer + question they
    * were answering. 
    * 
-   * deviceID: ID of student that got question wrong
+   * device_uid: ID of student that got question wrong
    * studentAnswer (string): whatever the student answered (that was incorrect)
    * correctCardID (int): ID of the card they should have answered
    * question (string): question they answered incorrectly 
    */
-  markCardIncorrectForStudent: function(deviceID, studentAnswer, correctCardID, question) {
-    var studentCards = this.state.responsesForStudents[deviceID].cards;
+  markCardIncorrectForStudent: function(device_uid, studentAnswer, correctCardID, question) {
+    var studentCards = this.state.responsesForStudents[device_uid].cards;
     for (var i=0; i < studentCards.length; i++) {
       var currCard = studentCards[i];
       if (currCard.answer == studentAnswer) {
@@ -416,11 +483,11 @@ var TeacherView = React.createClass({
         break;
       }
     }
-    this.state.responsesForStudents[deviceID].cards = studentCards;
+    this.state.responsesForStudents[device_uid].cards = studentCards;
   },
   	/*
   	 * Given the student responses from the API, this method returns an array of the student answers
-  	 * with 1 dictionary per student, where each dictionary contains "name" "answer" and "isCorrect"
+  	 * with 1 dictionary per student, where each dictionary contains "nickname" "answer" and "isCorrect"
   	 * (What this.state.currentQuestionAnswers should be)
      * 
      * Along the way, it also updates this.state.responsesForStudent based on their current
@@ -434,20 +501,20 @@ var TeacherView = React.createClass({
   			var currentQuestion = this.state.cards[this.state.indexOfCurrQuestion].question;
   			
   			var curStudentAnswer = {};
-  			curStudentAnswer["name"] = studentResponses[i].name;
-        curStudentAnswer["deviceID"] = studentResponses[i].deviceID;
+  			curStudentAnswer["nickname"] = studentResponses[i].nickname;
+        curStudentAnswer["device_uid"] = studentResponses[i].device_uid;
 
         /* If student got bingo, add them to leader board */
         if (studentResponses[i].hasBingo) {
           var alreadyInLeaderboard = false;
           for (var j=0; j<this.state.leaderBoard.length; j++) {
-            if (this.state.leaderBoard[j] == studentResponses[i].deviceID) {
+            if (this.state.leaderBoard[j] == studentResponses[i].device_uid) {
               alreadyInLeaderboard = true;
               break;
             }
           }
           if (!alreadyInLeaderboard) {
-            this.state.leaderBoard.push(studentResponses[i].deviceID);
+            this.state.leaderBoard.push(studentResponses[i].device_uid);
           }
         }
       
@@ -466,11 +533,11 @@ var TeacherView = React.createClass({
           if (studentResponses[i].answer == this.state.cards[this.state.indexOfCurrQuestion].answer) {
             /* 3) CORRECT: Mark this card in the student's board as teacher approved */
             curStudentAnswer["isCorrect"] = true;
-            this.approveCardForStudent(studentResponses[i].deviceID, this.state.cards[this.state.indexOfCurrQuestion].id);
+            this.approveCardForStudent(studentResponses[i].device_uid, this.state.cards[this.state.indexOfCurrQuestion].id);
           } else {
             /* 4) INCORRECT: Mark this card in student's board as NOT teacher approved, give correct answer */
             curStudentAnswer["isCorrect"] = false;
-            this.markCardIncorrectForStudent(studentResponses[i].deviceID, studentResponses[i].answer, this.state.cards[this.state.indexOfCurrQuestion].id, currentQuestion);
+            this.markCardIncorrectForStudent(studentResponses[i].device_uid, studentResponses[i].answer, this.state.cards[this.state.indexOfCurrQuestion].id, currentQuestion);
           }
   			}
   			answers.push(curStudentAnswer);
@@ -529,7 +596,10 @@ var TeacherView = React.createClass({
           });
           /* TO DO: POST here. */
           var dictionaryToPost = this.getDictionaryToPost();
-          this.post(dictionaryToPost);
+          var params = {
+            "status": dictionaryToPost
+          };
+          this.post("custom_status", params);
           break;
         default:
           /* Close modal */
@@ -703,7 +773,7 @@ var Graph = React.createClass({
  * Props
  * -----
  * studentAnswers (array): the students' answers to the current question. An array of dictionaries, where each dictionary looks like:
- * 		- "name": student's name
+ * 		- "nickname": student's name
  * 		- "answer": the student's answer, or "" if no answer yet
  *		- "isCorrect": whether the student's answer was correct, or false if still hasn't answered
  * leaderBoard (array): array of students that have bingo 
@@ -715,12 +785,12 @@ var CurrentQuestionAnswers = React.createClass({
 		for (var i=0; i < this.props.studentAnswers.length; i++) {
 			var cur = this.props.studentAnswers[i];	
       var studentName = [];
-      studentName.push(cur.name + " ");
+      studentName.push(cur.nickname + " ");
 
       /* See if this student has bingo */
       var leaderBoardPos = -1;
       for (var j=0; j < this.props.leaderBoard.length; j++) {
-        if (this.props.leaderBoard[j] == this.props.studentAnswers[i].deviceID) {
+        if (this.props.leaderBoard[j] == this.props.studentAnswers[i].device_uid) {
           leaderBoardPos = j;
         }
       }
@@ -854,10 +924,10 @@ var AllAnswers = React.createClass({
 
         /* See if this student has bingo */
         var studentName = [];
-        studentName.push(cur.name + " ");
+        studentName.push(cur.nickname + " ");
         var leaderBoardPos = -1;
         for (var j=0; j < this.props.leaderBoard.length; j++) {
-          if (this.props.leaderBoard[j] == cur.deviceID) {
+          if (this.props.leaderBoard[j] == cur.device_uid) {
             leaderBoardPos = j;
           }
         }
@@ -991,10 +1061,10 @@ var ResultsTable = React.createClass({
 
         /* See if this student has bingo */
         var studentName = [];
-        studentName.push(currStudentInfo.name + " ");
+        studentName.push(currStudentInfo.nickname + " ");
         var leaderBoardPos = -1;
         for (var j=0; j < this.props.leaderBoard.length; j++) {
-          if (this.props.leaderBoard[j] == currStudentInfo.deviceID) {
+          if (this.props.leaderBoard[j] == currStudentInfo.device_uid) {
             leaderBoardPos = j;
           }
         }
