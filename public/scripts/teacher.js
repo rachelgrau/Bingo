@@ -67,7 +67,7 @@ var debug = true;
 			}
  		}
  */
-var jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJDVCIsImV4cCI6MTQ2Mzk4Mjc5MSwiYXVkIjoiN2RhYmFjNjQ2ODFhN2MxMmMxY2I5NzE4M2M0NGRlOTMiLCJyZWZyZXNoIjo3MjAwLCJ0a24iOiIiLCJ1aWQiOiIiLCJpYXQiOjE0NjM5NzU1OTEsImlkIjoiMTYwMTciLCJlbnYiOiJodHRwczpcL1wvY3QtZGV2Lm5lYXJwb2QuY29tXC8ifQ.vC3-5x9pT2ZElfzQxc0N5xI-jWkSm35NHm0YpMeequE";
+var jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJDVCIsImV4cCI6MTQ2NDQ5MDUxNCwicmVmcmVzaCI6NzIwMCwiYXVkIjoiN2RhYmFjNjQ2ODFhN2MxMmMxY2I5NzE4M2M0NGRlOTMiLCJpYXQiOjE0NjQ0ODMzMTQsInVpZCI6InQ5cHZ4azhtbG91NzlwaHRiZXRyZzhmd2dod3U2bGlucHlmb2NzeCIsInRrbiI6IiIsImlzVGVhY2hlciI6IjEiLCJwZXJtcyI6WyJ0ZWFjaGVyXC9jdXN0b21fc3RhdHVzIiwidGVhY2hlclwvcmVzcG9uc2VzIl0sImV4dHJhIjp7ImN1c3RvbV9zbGlkZV9pZCI6IjEwMDAwNDgiLCJzbGlkZSI6IjEiLCJzZXNzaW9uX3VpZCI6IiJ9fQ.8tBJdwxEskIsNnMkN8doDcmDh5ikPflIxRH66ZIZ6nQ";
 var presentationId = "118814";
 var TeacherView = React.createClass({
       /* Returns a dictionary of all the variables in the URL */
@@ -153,7 +153,7 @@ var TeacherView = React.createClass({
     if (debug) console.log("Making GET request with path: " + path);
     if (!this.state.gameOver) {
       $.ajax({
-        url: "https://api-dev.nearpod.com/v1/hub/teacher" + path,
+        url: "https://api-dev.nearpod.com/v1/hub/teacher/" + path,
         method: "GET",
         async: false,
         data: params,

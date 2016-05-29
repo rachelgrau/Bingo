@@ -15,7 +15,7 @@ var debug = true;
  * name (string): student's nickname
  */
 
-var jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJDVCIsImV4cCI6MTQ2Mzk4Mjc5MSwiYXVkIjoiN2RhYmFjNjQ2ODFhN2MxMmMxY2I5NzE4M2M0NGRlOTMiLCJyZWZyZXNoIjo3MjAwLCJ0a24iOiIiLCJ1aWQiOiIiLCJpYXQiOjE0NjM5NzU1OTEsImlkIjoiMTYwMTciLCJlbnYiOiJodHRwczpcL1wvY3QtZGV2Lm5lYXJwb2QuY29tXC8ifQ.vC3-5x9pT2ZElfzQxc0N5xI-jWkSm35NHm0YpMeequE";
+var jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJDVCIsImV4cCI6MTQ2NDQ5MDUzMiwicmVmcmVzaCI6NzIwMCwiYXVkIjoiN2RhYmFjNjQ2ODFhN2MxMmMxY2I5NzE4M2M0NGRlOTMiLCJpYXQiOjE0NjQ0ODMzMzIsInVpZCI6InNzdjVvZmsyd3A1YmJpbHpubWdidnllODlyd3FoNjI4YjU5cjgydCIsInRrbiI6IiIsImlzVGVhY2hlciI6IjAiLCJwZXJtcyI6WyJzdHVkZW50XC9jdXN0b21fc3RhdHVzIiwic3R1ZGVudFwvcmVzcG9uc2VzIl0sImV4dHJhIjp7ImN1c3RvbV9zbGlkZV9pZCI6IjEwMDAwNDgiLCJzbGlkZSI6IjEiLCJzZXNzaW9uX3VpZCI6IiJ9fQ.n2SC1cMwNUg1puye_6dDWldGa1n6KtK7I81ChWptbbg";
 var presentationId = "118814";
 
 var StudentView = React.createClass({
@@ -169,7 +169,7 @@ var StudentView = React.createClass({
   	},
 	loadCardsFromServer: function() {
 		var params = "";
-		this.get("custom_status", params, this.loadCardsSuccess);
+		this.get("responses", params, this.loadCardsSuccess);
     // $.ajax({
 	   //    url: this.props.url,
 	   //    dataType: 'json',
