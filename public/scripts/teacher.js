@@ -7,9 +7,15 @@ var leaderBoardPositions = {
 }
 
 var debug = true;
+var CONTENT_TOOL_URL = "https://api-dev.nearpod.com/v1/ct/";
+var LIVE_PRES_URL = "https://api-dev.nearpod.com/v1/";
+var TEACHER_URL = "https://api-dev.nearpod.com/v1/hub/teacher/";
 
 /* State
  * -------
+ * slideID (int): the ID of this slide in the presentation (from URL)
+ * jwt (string): JWT token from URL (from URL)
+ * presentaitonID (int): the ID of this particular presentation (from URL)
  * gameOver (boolean): true when the teacher has ended the game, false otherwise
  * cards (array): an array of all the questions/answers. Gets shuffled at beginning, then doesn't change
  * indexOfCurrQuestion (int): the index of the current question in the cards array 
@@ -70,96 +76,78 @@ var debug = true;
 var jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJDVCIsImV4cCI6MTQ2NDQ5MDUxNCwicmVmcmVzaCI6NzIwMCwiYXVkIjoiN2RhYmFjNjQ2ODFhN2MxMmMxY2I5NzE4M2M0NGRlOTMiLCJpYXQiOjE0NjQ0ODMzMTQsInVpZCI6InQ5cHZ4azhtbG91NzlwaHRiZXRyZzhmd2dod3U2bGlucHlmb2NzeCIsInRrbiI6IiIsImlzVGVhY2hlciI6IjEiLCJwZXJtcyI6WyJ0ZWFjaGVyXC9jdXN0b21fc3RhdHVzIiwidGVhY2hlclwvcmVzcG9uc2VzIl0sImV4dHJhIjp7ImN1c3RvbV9zbGlkZV9pZCI6IjEwMDAwNDgiLCJzbGlkZSI6IjEiLCJzZXNzaW9uX3VpZCI6IiJ9fQ.8tBJdwxEskIsNnMkN8doDcmDh5ikPflIxRH66ZIZ6nQ";
 var presentationId = "118814";
 var TeacherView = React.createClass({
-      /* Returns a dictionary of all the variables in the URL */
-    getUrlVars: function() {
-        var vars = {};
-        var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
-            vars[key] = value;
-        });
-        return vars;
-    },
-    /* Returns a header dictionary with the App ID and JWT in the header */
-    setHeaders: function(){
-      if (debug) console.log("Setting JWT: " + this.state.jwt);
-      return {"x-api-key":"7dabac64681a7c12c1cb97183c44de93", "JWT": this.state.jwt};
-    },
-
-    showError: function(json){
-      alert("error: " + json.error_code + "\nmessage: " + json.message + "\n\nfull: " + JSON.stringify(json) );
-    },
-
-    showSuccess: function(json){
-      alert("code: " + json.error_code + "\nmessage: " + json.message + "\n\nfull: " + JSON.stringify(json) );
-    },
-    /* 
-     * Callback for when GET request succeeds.
-     * Updates the state to hold the cards returned by the GET request. 
-     */
-    handleGetSuccess: function(data, textStatus, jqXHR) {
-      if (debug) console.log("Get succeeded");
-      // var cards = data.payload.custom_slide.data_teacher;
-      // if (cards.length == 0) {
-      //  if (debug) console.log("No cards returned, so creating initial cards");
-      //     cards = this.getInitialCards();
-      // }      
-      // this.setState({
-      //     cards: cards,
-      //     isCompleted: data.completed
-      // });  
-    },
-    /* 
-     * Callback for when POST request succeeds.
-     * Grabs the slide ID from the response and updates the state's slide ID.
-     */
-    handlePostSuccess: function(data, textStatus, jqXHR) {
-      if (debug) console.log("Post succeeded");
-      // var slideID = jqXHR.responseJSON.payload.custom_slide.id;
-      // if (debug) console.log("Returned slide ID: " + slideID);
-      // this.setState({slideID: slideID});
-    },
-  	getInitialState: function() {
-  		return {
-  			gameOver: false,
-  			cards:[], 
-  			indexOfCurrQuestion: 0,
-  			currentQuestionAnswers: [],
-  			currentQuestionStats: [],
-  			responsesForStudents: {},
-  			allQuestionsByQuestion: [],
-  			allQuestionsByStudent: [],
-        leaderBoard: [],
-        buttonsEnabled: false,
-        isModalOpen: false,
-        modalType: "",
-        jwt: jwt, //should be urlVars["jwt"] 
-        presentationID: presentationId//should be urlVars["presentation_id"]
-      };
-  	},
-  /* Only do GET requests if the game isn't over */
-  // get: function() {
-  //   /* TO DO!! */
-  //   if (!this.state.gameOver) {
-  //     if (debug) console.log("GET");
-  //      TO DO: on Get success, do all the stuff in success method of loadCardsFromServer 
-  //     // this.loadCardsFromServer();
-  //   }
-  // },
-          /* Performs a GET request. 
-     * path (string): the URL path (e.g. "custom_slides/3") 
-     * params: (probably empty string for GET request)
-     * successCallback (function): function that gets called when the GET request succeeds. Passed the data, textStatus, and jqXHR
-     */
-  get: function(path, params, successCallback){
-    if (debug) console.log("Making GET request with path: " + path);
+  getUrlVars: function() {
+      var vars = {};
+      var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+          vars[key] = value;
+      });
+      return vars;
+  },
+  setHeaders: function(){
+    if (debug) console.log("Setting JWT: " + this.state.jwt);
+    return {"x-api-key":"7dabac64681a7c12c1cb97183c44de93", "JWT": this.state.jwt};
+  },
+	getInitialState: function() {
+    var urlVars = this.getUrlVars();
+		return {
+      slideID: urlVars["id"],
+      jwt: urlVars["jwt"],
+      presentationID: urlVars["presentation_id"],
+			gameOver: false,
+			cards:[], 
+			indexOfCurrQuestion: 0,
+			currentQuestionAnswers: [],
+			currentQuestionStats: [],
+			responsesForStudents: {},
+			allQuestionsByQuestion: [],
+			allQuestionsByStudent: [],
+      leaderBoard: [],
+      buttonsEnabled: false,
+      isModalOpen: false,
+      modalType: ""
+		};
+	},
+  /* Callback for when the card are loaded successfully from content tool. 
+   * Shuffles & stores the cards correctly in the this.state.cards 
+   */
+  loadGameSuccess: function (data, textStatus, jqXHR) {
+    if (debug) console.log("GET success, returning data: ");
+    if (debug) console.log(data);
+    var cards = this.shuffleCards(data.payload.custom_slide.data_teacher); 
+    this.setState({cards: cards})
+    if (debug) console.log("Cards:");
+    if (debug) console.log(cards);     
+    /* Read in the student responses for current question */
+  },
+  /* POST request
+   * --------------------------------------------------
+   * urlStr (string): the entire URL string (e.g. "https://api-dev.nearpod.com/v1/ct/custom_slides/1") 
+   * params: dictionary of parameters to post 
+   * successCallback (function): function that gets called when the POST request succeeds. Passed the data, textStatus, and jqXHR
+   */
+  post: function(path, params, successCallback, dictionaryToPost) {
+    /* TO DO!!! */
+    if (debug) console.log("POST");
+    if (debug) console.log(dictionaryToPost);
+  },
+  /* GET request (only performed if game is not over)
+   * --------------------------------------------------
+   * isContentTool (boolean): true if you are making a GET request to content tool, false otherwise
+   * urlStr (string): the entire URL string (e.g. "https://api-dev.nearpod.com/v1/ct/custom_slides/1") 
+   * params: (probably empty string for GET request)
+   * successCallback (function): function that gets called when the GET request succeeds. Passed the data, textStatus, and jqXHR
+   */
+  get: function(urlStr, params, successCallback) {
     if (!this.state.gameOver) {
+      if (debug) console.log("GET request with url: " + urlStr);
       $.ajax({
-        url: "https://api-dev.nearpod.com/v1/hub/teacher/" + path,
+        url: urlStr,
         method: "GET",
         async: false,
         data: params,
         headers: this.setHeaders(),
         success: function(data, textStatus, jqXHR){                 
-        successCallback(data, textStatus, jqXHR);
+          successCallback(data, textStatus, jqXHR);
         },
         error: function(jqXHR, textStatus, errorThrown){
           this.showError(jqXHR.responseJSON);
@@ -182,7 +170,7 @@ var TeacherView = React.createClass({
     if (debug) console.log("Params: ");
     if (debug) console.log(params);
     $.ajax({
-      url: "https://api-dev.nearpod.com/v1/hub/teacher" + path,
+      url: TEACHER_URL + path,
       method: "POST",
       async: false,
       data: JSON.stringify(params),
@@ -239,38 +227,6 @@ var TeacherView = React.createClass({
   		}
 		return cards;
 	},
-	loadCardsFromServer: function() {
-    var params = "";
-    this.get("responses", params, this.loadCardsSuccess);
-    // $.ajax({
-	   //    url: this.props.url,
-	   //    dataType: 'json',
-	   //    cache: false,
-	   //    success: function(data) {	      
-    // 		/* If we don't have any cards yet, store them */
-    // 		if (this.state.cards.length == 0) {
-    // 			var cards = this.shuffleCards(data["cards"]); 
-    // 			this.state.cards = cards;   		
-    // 		}
-    // 		/* Read in the student responses for current question */
-    // 		this.addNewStudents(data["studentResponses"]);
-    //     this.update(data["studentResponses"]);
-	   //    }.bind(this),
-	   //    error: function(xhr, status, err) {
-	   //      console.error(this.props.url, status, err.toString());
-	   //    }.bind(this)
-	   //  });
-  	},
-    loadCardsSuccess: function(data, textStatus, jqXHR) {
-      /* If we don't have any cards yet, store them */
-        if (this.state.cards.length == 0) {
-          var cards = this.shuffleCards(data["cards"]); 
-          this.state.cards = cards;       
-        }
-        /* Read in the student responses for current question */
-        this.addNewStudents(data["studentResponses"]);
-        this.update(data["studentResponses"]);
-    },
     /*
      * Update (very important)
      * ------------------------
@@ -289,10 +245,14 @@ var TeacherView = React.createClass({
       });
     },
   	componentDidMount: function() {
-    	this.loadCardsFromServer();
-      /* TO DO: change this.loadCardsFromServer to a GET request. Call loadCardsFromServer 
-       * on a GET request success. */
-    	// setInterval(this.get, this.props.pollInterval);
+      /* Load initial data from content tool */
+      var urlStr = CONTENT_TOOL_URL + "custom_slides/" + this.state.slideID;
+      this.get(urlStr, "", this.loadGameSuccess);
+      
+      /* TO DO: on an interval, make GET request to get student responses
+         on success, do following something like following two lines:
+          this.addNewStudents(data["studentResponses"]);
+          this.update(data["studentResponses"]); */
   	},
   	/* Goes through all of the student responses for the current question and 
   	   moves them to the repositories of "past" questions (e.g. this.state.allQuestionsByStudent and this.state.allQuestionsByQuestion) 
@@ -759,15 +719,15 @@ var Graph = React.createClass({
 					<table className="statsTable">
 						<tbody>
 							<tr>
-								<td><img src="../assets/greenCircle.png"/></td>
+								<td><img src="assets/greenCircle.png"/></td>
 								<td>{this.props.stats.numCorrect}/{numStudents} correct</td>
 							</tr>
 							<tr >
-								<td><img src="../assets/redCircle.png"/></td>
+								<td><img src="assets/redCircle.png"/></td>
 								<td>{this.props.stats.numIncorrect}/{numStudents} incorrect</td>
 							</tr>
 							<tr>
-								<td><img src="../assets/grayCircle.png"/></td>
+								<td><img src="assets/grayCircle.png"/></td>
 								<td>{this.props.stats.numUnanswered}/{numStudents} unanswered</td>
 							</tr>
 						</tbody>
@@ -1276,7 +1236,7 @@ var PieChart = React.createClass({
 });
 
 ReactDOM.render(
-	<TeacherView url="/api/teacher" pollInterval={2000}/>,
+	<TeacherView url="/api/teacher"/>,
 	document.getElementById('content')
 );
 
