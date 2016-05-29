@@ -26,7 +26,7 @@ var LIVE_PRES_URL = "https://api-dev.nearpod.com/v1/";
  * currentQuestionAnswers (array): abbreviated version of student responses. An array of the students' answers to the current question. Each dictionary in the array contains:
  * 		- "deviceID": student's deviceID
  *    - "hasBingo" (boolean): whether the student has bingo 
- *    - "name" (string): student's name
+ *    - "nickname" (string): student's name
  * 		- "answer" (string): the student's answer, or "" if no answer yet
  *		- "isCorrect" (boolean): whether the student's answer was correct, or false if still hasn't answered
  * currentQuestionStats (dictionary): the stats for the current question overall
@@ -48,7 +48,7 @@ var LIVE_PRES_URL = "https://api-dev.nearpod.com/v1/";
  		}
  * allQuestionsByStudent (array): array of dictionaries that look like:
  * 		 {
- 			"name": "Ricky",
+ 			"nickname": "Ricky",
       "deviceID": 1,
 			"answers": [
 				{ 
@@ -114,7 +114,16 @@ var TeacherView = React.createClass({
     this.setState({cards: cards})
     if (debug) console.log("Cards:");
     if (debug) console.log(cards);     
-    /* Read in the student responses for current question */
+  },
+  /* Callback for when the student responses are loaded successfully. 
+   * Updates the state to reflect the most current student resopnses. 
+   */
+  loadStudentResponsesSuccess: function (data, textStatus, jqXHR) {
+    if (debug) console.log("GET student responses succeeded");
+    if (debug) console.log(data);
+    /* Check if new students have joined */
+    this.addNewStudents(data.payload); // data.payload.studentResponses?
+    this.update(data.payload); // data.payload.studentResponses?
   },
   /* POST request
    * --------------------------------------------------
@@ -151,6 +160,13 @@ var TeacherView = React.createClass({
         }
     });
     }
+  },
+  /*
+   * Makes a GET request to the API to get the student responses. On success,
+   * update the state's student responses and add any new students. 
+   */
+  loadStudentResponses: function() {
+      this.get(LIVE_PRES_URL + "hub/teacher/responses", "", this.loadStudentResponsesSuccess);
   },
   /* Returns a dictionary that the teacher should post at the given moment. 
    * ----------------------------------------------------------------------
@@ -211,16 +227,15 @@ var TeacherView = React.createClass({
           buttonsEnabled: true
       });
     },
+    /*
+     * Load initial cards and start polling for student responses.  
+     */
   	componentDidMount: function() {
       /* Load initial data from content tool */
       var urlStr = CONTENT_TOOL_URL + "custom_slides/" + this.state.slideID;
       this.get(urlStr, "", this.loadGameSuccess);
-      
-      /* TO DO: on an interval, make GET request to get student responses
-         on success, do following something like following two lines:
-          this.addNewStudents(data["studentResponses"]);
-          this.update(data["studentResponses"]); */
-    	// setInterval(this.get, this.props.pollInterval);
+      /* Every X seconds, poll for student responses */
+      setInterval(this.loadStudentResponses, 2000);  
   	},
   	/* Goes through all of the student responses for the current question and 
   	   moves them to the repositories of "past" questions (e.g. this.state.allQuestionsByStudent and this.state.allQuestionsByQuestion) 
@@ -283,7 +298,7 @@ var TeacherView = React.createClass({
         var currentAnswers = [];
         for (var i=0; i < this.state.currentQuestionAnswers.length; i++) {
           var curStudentAnswer = {};
-          curStudentAnswer["name"] = this.state.currentQuestionAnswers[i].name;
+          curStudentAnswer["nickname"] = this.state.currentQuestionAnswers[i].nickname;
           curStudentAnswer["answer"] =  "";
           curStudentAnswer["isCorrect"] = false;
           currentAnswers.push(curStudentAnswer);
@@ -323,11 +338,11 @@ var TeacherView = React.createClass({
      * this.state.responsesForStudents */
 	addNewStudents: function(studentResponses) {
 		for (var i=0; i < studentResponses.length; i++) {
-			var name = studentResponses[i].name;
+			var nickname = studentResponses[i].nickname;
 			var studentIsNew = true;
 			for (var j=0; j < this.state.allQuestionsByStudent.length; j++) {
 				var currentEntry = this.state.allQuestionsByStudent[j];
-				if (currentEntry.name == name) {
+				if (currentEntry.nickname == nickname) {
 					studentIsNew = false;
 					break;
 				}
@@ -335,7 +350,7 @@ var TeacherView = React.createClass({
 			if (studentIsNew) {
         /* 1. Create entry in allQuestionsByStudent */
 				var newStudent = {};
-				newStudent["name"] = name;
+				newStudent["nickname"] = nickname;
         newStudent["deviceID"] = studentResponses[i].deviceID;
 				newStudent["answers"] = [];
 				newStudent["stats"] = {
@@ -420,7 +435,7 @@ var TeacherView = React.createClass({
   },
   	/*
   	 * Given the student responses from the API, this method returns an array of the student answers
-  	 * with 1 dictionary per student, where each dictionary contains "name" "answer" and "isCorrect"
+  	 * with 1 dictionary per student, where each dictionary contains "nickname" "answer" and "isCorrect"
   	 * (What this.state.currentQuestionAnswers should be)
      * 
      * Along the way, it also updates this.state.responsesForStudent based on their current
@@ -434,7 +449,7 @@ var TeacherView = React.createClass({
   			var currentQuestion = this.state.cards[this.state.indexOfCurrQuestion].question;
   			
   			var curStudentAnswer = {};
-  			curStudentAnswer["name"] = studentResponses[i].name;
+  			curStudentAnswer["nickname"] = studentResponses[i].nickname;
         curStudentAnswer["deviceID"] = studentResponses[i].deviceID;
 
         /* If student got bingo, add them to leader board */
@@ -703,7 +718,7 @@ var Graph = React.createClass({
  * Props
  * -----
  * studentAnswers (array): the students' answers to the current question. An array of dictionaries, where each dictionary looks like:
- * 		- "name": student's name
+ * 		- "nickname": student's name
  * 		- "answer": the student's answer, or "" if no answer yet
  *		- "isCorrect": whether the student's answer was correct, or false if still hasn't answered
  * leaderBoard (array): array of students that have bingo 
@@ -715,7 +730,7 @@ var CurrentQuestionAnswers = React.createClass({
 		for (var i=0; i < this.props.studentAnswers.length; i++) {
 			var cur = this.props.studentAnswers[i];	
       var studentName = [];
-      studentName.push(cur.name + " ");
+      studentName.push(cur.nickname + " ");
 
       /* See if this student has bingo */
       var leaderBoardPos = -1;
@@ -854,7 +869,7 @@ var AllAnswers = React.createClass({
 
         /* See if this student has bingo */
         var studentName = [];
-        studentName.push(cur.name + " ");
+        studentName.push(cur.nickname + " ");
         var leaderBoardPos = -1;
         for (var j=0; j < this.props.leaderBoard.length; j++) {
           if (this.props.leaderBoard[j] == cur.deviceID) {
@@ -991,7 +1006,7 @@ var ResultsTable = React.createClass({
 
         /* See if this student has bingo */
         var studentName = [];
-        studentName.push(currStudentInfo.name + " ");
+        studentName.push(currStudentInfo.nickname + " ");
         var leaderBoardPos = -1;
         for (var j=0; j < this.props.leaderBoard.length; j++) {
           if (this.props.leaderBoard[j] == currStudentInfo.deviceID) {
