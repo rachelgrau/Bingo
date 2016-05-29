@@ -18,13 +18,13 @@ var LIVE_PRES_URL = "https://api-dev.nearpod.com/v1/";
  * gameOver (boolean): true when the teacher has ended the game, false otherwise
  * cards (array): an array of all the questions/answers. Gets shuffled at beginning, then doesn't change
  * indexOfCurrQuestion (int): the index of the current question in the cards array 
- * responsesForStudents (dictionary): dictionary mapping student deviceIDs to their individualized responses
+ * responsesForStudents (dictionary): dictionary mapping student device IDs to their individualized responses
  * 		- each response has:
  * 				- nextQuestion (string): the current question
  *        - cards (array): the student's board
  *        - gameOver (boolean): whether the game is over
  * currentQuestionAnswers (array): abbreviated version of student responses. An array of the students' answers to the current question. Each dictionary in the array contains:
- * 		- "deviceID": student's deviceID
+ * 		- "device_uid": student's device ID
  *    - "hasBingo" (boolean): whether the student has bingo 
  *    - "nickname" (string): student's name
  * 		- "answer" (string): the student's answer, or "" if no answer yet
@@ -49,7 +49,7 @@ var LIVE_PRES_URL = "https://api-dev.nearpod.com/v1/";
  * allQuestionsByStudent (array): array of dictionaries that look like:
  * 		 {
  			"nickname": "Ricky",
-      "deviceID": 1,
+      "device_uid": 1,
 			"answers": [
 				{ 
 					"question": "Brazenly obvious; flagrant; offensively noisy or loud",
@@ -81,7 +81,6 @@ var TeacherView = React.createClass({
       return vars;
   },
   setHeaders: function(){
-    if (debug) console.log("Setting JWT: " + this.state.jwt);
     return {"x-api-key":"7dabac64681a7c12c1cb97183c44de93", "JWT": this.state.jwt};
   },
 	getInitialState: function() {
@@ -128,13 +127,26 @@ var TeacherView = React.createClass({
   /* POST request
    * --------------------------------------------------
    * urlStr (string): the entire URL string (e.g. "https://api-dev.nearpod.com/v1/ct/custom_slides/1") 
-   * params: dictionary of parameters to post 
+   * params: dictionary of parameters to post ("response" = main response data) 
    * successCallback (function): function that gets called when the POST request succeeds. Passed the data, textStatus, and jqXHR
    */
-  post: function(path, params, successCallback, dictionaryToPost) {
-    /* TO DO!!! */
-    if (debug) console.log("POST");
-    if (debug) console.log(dictionaryToPost);
+  post: function(urlStr, params) {
+    if (debug) console.log("Making POST request with path: " + urlStr);
+    if (debug) console.log("Params: ");
+    if (debug) console.log(params);
+    $.ajax({
+        url: urlStr,
+        method: "POST",
+        async: false,
+        data: JSON.stringify(params),
+        headers: this.setHeaders(),
+        success: function(data, textStatus, jqXHR){
+          if (debug) console.log("Successful post!");
+        },
+        error: function(jqXHR, textStatus, errorThrown){
+          if (debug) console.log("Error posting");
+        }
+    });
   },
   /* GET request (only performed if game is not over)
    * --------------------------------------------------
@@ -171,7 +183,7 @@ var TeacherView = React.createClass({
   /* Returns a dictionary that the teacher should post at the given moment. 
    * ----------------------------------------------------------------------
    * The teacher creates an individualized response for each student and 
-   * creates a dictionary mapping students' deviceIDs to their individualize
+   * creates a dictionary mapping students' device IDs to their individualize
    * response. Call this dictionary "studentResponses." The teacher posts a 
    * dictionary with the following keys/values:
    *        key                     value
@@ -252,7 +264,7 @@ var TeacherView = React.createClass({
   		};
   		/* Loop over all the students' answers to the question we are about to leave */
   		for (var i=0; i < this.state.currentQuestionAnswers.length; i++) {
-        var currStudentDeviceID = this.state.currentQuestionAnswers[i].deviceID;
+        var currStudentDeviceID = this.state.currentQuestionAnswers[i].device_uid;
   			var currAnswer = this.state.currentQuestionAnswers[i].answer;
   			var wasCorrect = this.state.currentQuestionAnswers[i].isCorrect;
   			if (currAnswer == "") wasCorrect = false; /* If current still unanswered, mark as incorrect */ 
@@ -262,7 +274,7 @@ var TeacherView = React.createClass({
   			/* Find that student in our array for past questions */
   			for (var j=0; j < this.state.allQuestionsByStudent.length; j++) {
   				var currEntry = this.state.allQuestionsByStudent[j];
-  				if (currEntry.deviceID == currStudentDeviceID) {
+  				if (currEntry.device_uid == currStudentDeviceID) {
   					/* Add to their list of answers */
   					var answerDict = {
   					"question": questionToSave,
@@ -329,7 +341,10 @@ var TeacherView = React.createClass({
          });
         /* TO DO: POST here */
         var dictionaryToPost = this.getDictionaryToPost();
-        this.post(dictionaryToPost);
+        var params = {
+          "status": dictionaryToPost
+        };
+        this.post(LIVE_PRES_URL + "hub/teacher/custom_status", params);
       }
   	},
   	/* Looks at the current student responses and sees if there are any students 
@@ -337,21 +352,25 @@ var TeacherView = React.createClass({
      * adds an entry for those new students to this.state.allQuestionsByStudent and
      * this.state.responsesForStudents */
 	addNewStudents: function(studentResponses) {
+    console.log(studentResponses);
 		for (var i=0; i < studentResponses.length; i++) {
 			var nickname = studentResponses[i].nickname;
+      console.log("Looking at..." + nickname);
 			var studentIsNew = true;
 			for (var j=0; j < this.state.allQuestionsByStudent.length; j++) {
 				var currentEntry = this.state.allQuestionsByStudent[j];
 				if (currentEntry.nickname == nickname) {
+          console.log("Not new! Moving along.");
 					studentIsNew = false;
 					break;
 				}
 			}
 			if (studentIsNew) {
+        console.log("New student! Creating entry.");
         /* 1. Create entry in allQuestionsByStudent */
 				var newStudent = {};
 				newStudent["nickname"] = nickname;
-        newStudent["deviceID"] = studentResponses[i].deviceID;
+        newStudent["device_uid"] = studentResponses[i].device_uid;
 				newStudent["answers"] = [];
 				newStudent["stats"] = {
 					"numCorrect": 0,
@@ -360,12 +379,14 @@ var TeacherView = React.createClass({
 				this.state.allQuestionsByStudent.push(newStudent);
         /* 2. Create entry in responsesForStudents */
         var newStudentResponse = {};
-        var deviceID = studentResponses[i].deviceID;
+        var device_uid = studentResponses[i].device_uid;
         var currentQuestion = this.state.cards[this.state.indexOfCurrQuestion].question;
         newStudentResponse["nextQuestion"] = currentQuestion;
         newStudentResponse["cards"] = studentResponses[i].cards;
         newStudentResponse["gameOver"] = this.state.gameOver;
-        this.state.responsesForStudents[deviceID] = newStudentResponse;
+        this.state.responsesForStudents[device_uid] = newStudentResponse;
+        console.log("New student added!");
+        console.log(this.state.responsesForStudents);
 			}
 		}
 	},
@@ -397,8 +418,8 @@ var TeacherView = React.createClass({
    * sets that card as "teacherApproved" in this.state.responsesForStudents
    * for that particular student. 
    */
-  approveCardForStudent: function(deviceID, cardID) {
-    var studentCards = this.state.responsesForStudents[deviceID].cards;
+  approveCardForStudent: function(device_uid, cardID) {
+    var studentCards = this.state.responsesForStudents[device_uid].cards;
     for (var i=0; i < studentCards.length; i++) {
       var currCard = studentCards[i];
       if (currCard.id == cardID) {
@@ -407,20 +428,20 @@ var TeacherView = React.createClass({
         break;
       }
     } 
-    this.state.responsesForStudents[deviceID].cards = studentCards;
+    this.state.responsesForStudents[device_uid].cards = studentCards;
   },
   /*
    * Updates the given student's board in this.state.responsesForStudents
    * so that the card they got wrong holds the correct answer + question they
    * were answering. 
    * 
-   * deviceID: ID of student that got question wrong
+   * device_uid: ID of student that got question wrong
    * studentAnswer (string): whatever the student answered (that was incorrect)
    * correctCardID (int): ID of the card they should have answered
    * question (string): question they answered incorrectly 
    */
-  markCardIncorrectForStudent: function(deviceID, studentAnswer, correctCardID, question) {
-    var studentCards = this.state.responsesForStudents[deviceID].cards;
+  markCardIncorrectForStudent: function(device_uid, studentAnswer, correctCardID, question) {
+    var studentCards = this.state.responsesForStudents[device_uid].cards;
     for (var i=0; i < studentCards.length; i++) {
       var currCard = studentCards[i];
       if (currCard.answer == studentAnswer) {
@@ -431,7 +452,7 @@ var TeacherView = React.createClass({
         break;
       }
     }
-    this.state.responsesForStudents[deviceID].cards = studentCards;
+    this.state.responsesForStudents[device_uid].cards = studentCards;
   },
   	/*
   	 * Given the student responses from the API, this method returns an array of the student answers
@@ -450,19 +471,19 @@ var TeacherView = React.createClass({
   			
   			var curStudentAnswer = {};
   			curStudentAnswer["nickname"] = studentResponses[i].nickname;
-        curStudentAnswer["deviceID"] = studentResponses[i].deviceID;
+        curStudentAnswer["device_uid"] = studentResponses[i].device_uid;
 
         /* If student got bingo, add them to leader board */
         if (studentResponses[i].hasBingo) {
           var alreadyInLeaderboard = false;
           for (var j=0; j<this.state.leaderBoard.length; j++) {
-            if (this.state.leaderBoard[j] == studentResponses[i].deviceID) {
+            if (this.state.leaderBoard[j] == studentResponses[i].device_uid) {
               alreadyInLeaderboard = true;
               break;
             }
           }
           if (!alreadyInLeaderboard) {
-            this.state.leaderBoard.push(studentResponses[i].deviceID);
+            this.state.leaderBoard.push(studentResponses[i].device_uid);
           }
         }
       
@@ -481,11 +502,11 @@ var TeacherView = React.createClass({
           if (studentResponses[i].answer == this.state.cards[this.state.indexOfCurrQuestion].answer) {
             /* 3) CORRECT: Mark this card in the student's board as teacher approved */
             curStudentAnswer["isCorrect"] = true;
-            this.approveCardForStudent(studentResponses[i].deviceID, this.state.cards[this.state.indexOfCurrQuestion].id);
+            this.approveCardForStudent(studentResponses[i].device_uid, this.state.cards[this.state.indexOfCurrQuestion].id);
           } else {
             /* 4) INCORRECT: Mark this card in student's board as NOT teacher approved, give correct answer */
             curStudentAnswer["isCorrect"] = false;
-            this.markCardIncorrectForStudent(studentResponses[i].deviceID, studentResponses[i].answer, this.state.cards[this.state.indexOfCurrQuestion].id, currentQuestion);
+            this.markCardIncorrectForStudent(studentResponses[i].device_uid, studentResponses[i].answer, this.state.cards[this.state.indexOfCurrQuestion].id, currentQuestion);
           }
   			}
   			answers.push(curStudentAnswer);
@@ -544,7 +565,10 @@ var TeacherView = React.createClass({
           });
           /* TO DO: POST here. */
           var dictionaryToPost = this.getDictionaryToPost();
-          this.post(dictionaryToPost);
+          var params = {
+            "status": dictionaryToPost
+          };
+          this.post(LIVE_PRES_URL + "hub/teacher/custom_status", params);
           break;
         default:
           /* Close modal */
@@ -735,7 +759,7 @@ var CurrentQuestionAnswers = React.createClass({
       /* See if this student has bingo */
       var leaderBoardPos = -1;
       for (var j=0; j < this.props.leaderBoard.length; j++) {
-        if (this.props.leaderBoard[j] == this.props.studentAnswers[i].deviceID) {
+        if (this.props.leaderBoard[j] == this.props.studentAnswers[i].device_uid) {
           leaderBoardPos = j;
         }
       }
@@ -872,7 +896,7 @@ var AllAnswers = React.createClass({
         studentName.push(cur.nickname + " ");
         var leaderBoardPos = -1;
         for (var j=0; j < this.props.leaderBoard.length; j++) {
-          if (this.props.leaderBoard[j] == cur.deviceID) {
+          if (this.props.leaderBoard[j] == cur.device_uid) {
             leaderBoardPos = j;
           }
         }
@@ -1009,7 +1033,7 @@ var ResultsTable = React.createClass({
         studentName.push(currStudentInfo.nickname + " ");
         var leaderBoardPos = -1;
         for (var j=0; j < this.props.leaderBoard.length; j++) {
-          if (this.props.leaderBoard[j] == currStudentInfo.deviceID) {
+          if (this.props.leaderBoard[j] == currStudentInfo.device_uid) {
             leaderBoardPos = j;
           }
         }
