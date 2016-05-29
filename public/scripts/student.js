@@ -1,4 +1,6 @@
 var debug = true;
+var STUDENT_URL = "https://api-dev.nearpod.com/v1/hub/student/";
+
 /* State
  * -------
  * cards (array): an array of this students bingo cards, in the order that they appear on his/her board.
@@ -15,7 +17,7 @@ var debug = true;
  * name (string): student's nickname
  */
 
-var jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJDVCIsImV4cCI6MTQ2NDQ5MDUzMiwicmVmcmVzaCI6NzIwMCwiYXVkIjoiN2RhYmFjNjQ2ODFhN2MxMmMxY2I5NzE4M2M0NGRlOTMiLCJpYXQiOjE0NjQ0ODMzMzIsInVpZCI6InNzdjVvZmsyd3A1YmJpbHpubWdidnllODlyd3FoNjI4YjU5cjgydCIsInRrbiI6IiIsImlzVGVhY2hlciI6IjAiLCJwZXJtcyI6WyJzdHVkZW50XC9jdXN0b21fc3RhdHVzIiwic3R1ZGVudFwvcmVzcG9uc2VzIl0sImV4dHJhIjp7ImN1c3RvbV9zbGlkZV9pZCI6IjEwMDAwNDgiLCJzbGlkZSI6IjEiLCJzZXNzaW9uX3VpZCI6IiJ9fQ.n2SC1cMwNUg1puye_6dDWldGa1n6KtK7I81ChWptbbg";
+var jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJDVCIsImV4cCI6MTQ2NDQ5NjYzMiwicmVmcmVzaCI6NzIwMCwiYXVkIjoiN2RhYmFjNjQ2ODFhN2MxMmMxY2I5NzE4M2M0NGRlOTMiLCJpYXQiOjE0NjQ0ODk0MzIsInVpZCI6InNzdjVvZmsyd3A1YmJpbHpubWdidnllODlyd3FoNjI4YjU5cjgydCIsInRrbiI6IiIsImlzVGVhY2hlciI6IjAiLCJwZXJtcyI6WyJzdHVkZW50XC9jdXN0b21fc3RhdHVzIiwic3R1ZGVudFwvcmVzcG9uc2VzIl0sImV4dHJhIjp7ImN1c3RvbV9zbGlkZV9pZCI6IjEwMDAwNDgiLCJzbGlkZSI6IjEiLCJzZXNzaW9uX3VpZCI6IiJ9fQ.9xQTIfOwT00fHtDJ_DHAPkaF_IrUScI61ApXtqShpQQ";
 var presentationId = "118814";
 
 var StudentView = React.createClass({
@@ -44,18 +46,18 @@ var StudentView = React.createClass({
 	 * Callback for when GET request succeeds.
 	 * Updates the state to hold the cards returned by the GET request. 
 	 */
-	handleGetSuccess: function(data, textStatus, jqXHR) {
-		if (debug) console.log("Get succeeded");
-		// var cards = data.payload.custom_slide.data_teacher;
-		// if (cards.length == 0) {
-		// 	if (debug) console.log("No cards returned, so creating initial cards");
-		//     cards = this.getInitialCards();
-		// }	    
-		// this.setState({
-		//     cards: cards,
-		//     isCompleted: data.completed
-		// });	
-	},
+	// handleGetSuccess: function(data, textStatus, jqXHR) {
+	// 	if (debug) console.log("Get succeeded");
+	// 	var cards = data.payload.custom_slide.data_teacher;
+	// 	if (cards.length == 0) {
+	// 		if (debug) console.log("No cards returned, so creating initial cards");
+	// 	    cards = this.getInitialCards();
+	// 	}	    
+	// 	this.setState({
+	// 	    cards: cards,
+	// 	    isCompleted: data.completed
+	// 	});	
+	// },
 	/* 
 	 * Callback for when POST request succeeds.
 	 * Grabs the slide ID from the response and updates the state's slide ID.
@@ -129,7 +131,7 @@ var StudentView = React.createClass({
 	get: function(path, params, successCallback){
 		if (debug) console.log("Making GET request with path: " + path);
 		$.ajax({
-		  url: "https://api-dev.nearpod.com/v1/hub/student/" + path,
+		  url: path,
 		  method: "GET",
 		  async: false,
 		  data: params,
@@ -169,7 +171,7 @@ var StudentView = React.createClass({
   	},
 	loadCardsFromServer: function() {
 		var params = "";
-		this.get("responses", params, this.loadCardsSuccess);
+		this.get(STUDENT_URL + "custom_status", params, this.loadCardsSuccess);
     // $.ajax({
 	   //    url: this.props.url,
 	   //    dataType: 'json',
@@ -204,25 +206,29 @@ var StudentView = React.createClass({
 	   //  });
   	},
   	loadCardsSuccess: function(data, textStatus, jqXHR) {
+  		if (debug) console.log("Get succeeded");
+  		if(debug) console.log(data.payload.status);
+  		var studentData = data.payload.status;
+
 		/* If we dont' have any cards, do initial board setup 
       	 * Otherwise ignore cards 
       	 */
       	var cards = this.state.cards;
       	if (cards.length == 0) {
-			cards = this.shuffleCards(data["cards"]);
-			cards = data["cards"];
+			cards = this.shuffleCards(studentData["cards"]);
+			cards = studentData["cards"];
 		}
 
 		/* See if it's time for next question */
 		var readyForNext = this.state.readyForNextQuestion;
-		var nextQuestion = data["nextQuestion"];
+		var nextQuestion = studentData["nextQuestion"];
 		if (nextQuestion != this.state.question) {
 			readyForNext = false;
 		}
 		
 		/* Update state! */
       	this.setState({
-      		question: data["nextQuestion"], 
+      		question: studentData["nextQuestion"], 
       		cards: cards,
       		readyForNextQuestion: readyForNext
       	});

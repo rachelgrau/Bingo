@@ -73,8 +73,9 @@ var TEACHER_URL = "https://api-dev.nearpod.com/v1/hub/teacher/";
 			}
  		}
  */
-var jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJDVCIsImV4cCI6MTQ2NDQ5MDUxNCwicmVmcmVzaCI6NzIwMCwiYXVkIjoiN2RhYmFjNjQ2ODFhN2MxMmMxY2I5NzE4M2M0NGRlOTMiLCJpYXQiOjE0NjQ0ODMzMTQsInVpZCI6InQ5cHZ4azhtbG91NzlwaHRiZXRyZzhmd2dod3U2bGlucHlmb2NzeCIsInRrbiI6IiIsImlzVGVhY2hlciI6IjEiLCJwZXJtcyI6WyJ0ZWFjaGVyXC9jdXN0b21fc3RhdHVzIiwidGVhY2hlclwvcmVzcG9uc2VzIl0sImV4dHJhIjp7ImN1c3RvbV9zbGlkZV9pZCI6IjEwMDAwNDgiLCJzbGlkZSI6IjEiLCJzZXNzaW9uX3VpZCI6IiJ9fQ.8tBJdwxEskIsNnMkN8doDcmDh5ikPflIxRH66ZIZ6nQ";
+var jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJDVCIsImV4cCI6MTQ2NDQ5ODA4MSwicmVmcmVzaCI6NzIwMCwiYXVkIjoiN2RhYmFjNjQ2ODFhN2MxMmMxY2I5NzE4M2M0NGRlOTMiLCJpYXQiOjE0NjQ0OTA4ODEsInVpZCI6InQ5cHZ4azhtbG91NzlwaHRiZXRyZzhmd2dod3U2bGlucHlmb2NzeCIsInRrbiI6IiIsImlzVGVhY2hlciI6IjEiLCJwZXJtcyI6WyJ0ZWFjaGVyXC9jdXN0b21fc3RhdHVzIiwidGVhY2hlclwvcmVzcG9uc2VzIl0sImV4dHJhIjp7ImN1c3RvbV9zbGlkZV9pZCI6IjEwMDAwNDgiLCJzbGlkZSI6IjEiLCJzZXNzaW9uX3VpZCI6IiJ9fQ.iugrpDK8KaAl_mhiK0Y7SwZUdU0nXMXCVbJewL621Ik";
 var presentationId = "118814";
+var slideID = "1000048";
 var TeacherView = React.createClass({
   getUrlVars: function() {
       var vars = {};
@@ -90,9 +91,9 @@ var TeacherView = React.createClass({
 	getInitialState: function() {
     var urlVars = this.getUrlVars();
 		return {
-      slideID: urlVars["id"],
-      jwt: urlVars["jwt"],
-      presentationID: urlVars["presentation_id"],
+      slideID: slideID, //urlVars["id"],
+      jwt: jwt,//urlVars["jwt"],
+      presentationID: presentationId,//urlVars["presentation_id"],
 			gameOver: false,
 			cards:[], 
 			indexOfCurrQuestion: 0,
@@ -114,21 +115,16 @@ var TeacherView = React.createClass({
     if (debug) console.log("GET success, returning data: ");
     if (debug) console.log(data);
     var cards = this.shuffleCards(data.payload.custom_slide.data_teacher); 
-    this.setState({cards: cards})
+    this.setState({cards: cards});
+    if (debug) console.log(data.payload.custom_slide.data_teacher);
     if (debug) console.log("Cards:");
-    if (debug) console.log(cards);     
+    if (debug) console.log(this.state.cards);     
     /* Read in the student responses for current question */
   },
-  /* POST request
-   * --------------------------------------------------
-   * urlStr (string): the entire URL string (e.g. "https://api-dev.nearpod.com/v1/ct/custom_slides/1") 
-   * params: dictionary of parameters to post 
-   * successCallback (function): function that gets called when the POST request succeeds. Passed the data, textStatus, and jqXHR
-   */
-  post: function(path, params, successCallback, dictionaryToPost) {
-    /* TO DO!!! */
-    if (debug) console.log("POST");
-    if (debug) console.log(dictionaryToPost);
+  
+  startGameSuccess: function(data, textStatus, jqXHR) {
+    if(debug) console.log("Post success");
+    if(debug) console.log(data);
   },
   /* GET request (only performed if game is not over)
    * --------------------------------------------------
@@ -210,6 +206,9 @@ var TeacherView = React.createClass({
     toPost["gameOver"] = this.state.gameOver;
     /* "studentResponses" */
     toPost["studentResponses"] = this.state.responsesForStudents;
+    console.log("in dict cards are ");
+    console.log(this.state.cards);
+    toPost["cards"] = this.state.cards;
     return toPost;
   },
 	shuffleCards: function(cards) {
@@ -248,8 +247,12 @@ var TeacherView = React.createClass({
       /* Load initial data from content tool */
       var urlStr = CONTENT_TOOL_URL + "custom_slides/" + this.state.slideID;
       this.get(urlStr, "", this.loadGameSuccess);
-      
-      /* TO DO: on an interval, make GET request to get student responses
+      var dictionaryToPost = this.getDictionaryToPost();
+      var params = {
+          "status": dictionaryToPost
+      };
+      this.post("custom_status", params, this.startGameSuccess);     
+       /* TO DO: on an interval, make GET request to get student responses
          on success, do following something like following two lines:
           this.addNewStudents(data["studentResponses"]);
           this.update(data["studentResponses"]); */
@@ -349,7 +352,7 @@ var TeacherView = React.createClass({
         var params = {
           "status": dictionaryToPost
         };
-        this.post("responses", params, this.handlePostSuccess);
+        this.post("custom_status", params, this.handlePostSuccess);
         //this.post(dictionaryToPost);
       }
   	},
@@ -568,7 +571,7 @@ var TeacherView = React.createClass({
           var params = {
               "status": dictionaryToPost
           };
-          this.post("responses", params, this.handlePostSuccess);
+          this.post("custom_status", params, this.handlePostSuccess);
           break;
         default:
           /* Close modal */
