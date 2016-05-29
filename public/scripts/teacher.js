@@ -347,12 +347,31 @@ var TeacherView = React.createClass({
         this.post(LIVE_PRES_URL + "hub/teacher/custom_status", params);
       }
   	},
+    /* Returns an array of cards for a student to set up on their board. 
+     * The cards will be randomly shuffled and contain the following 
+     * fields: id (int), answer (string), hasChip (boolean), teacherApproved (boolean)
+     */
+    createStudentBoard: function() {
+      var shuffledCards = this.shuffleCards(this.state.cards);
+      var studentCards = [];
+      for (var i=0; i < shuffledCards.length; i++) {
+        var card = {};
+        card["id"] = shuffledCards[i].id;
+        card["answer"] = shuffledCards[i].answer;
+        card["hasChip"] = false;
+        card["teacherApproved"] = false;
+        studentCards.push(card);
+      }
+      return studentCards;
+    },
   	/* Looks at the current student responses and sees if there are any students 
      * that are currently not in this.state.allQuestionsByStudent record. If so, 
      * adds an entry for those new students to this.state.allQuestionsByStudent and
-     * this.state.responsesForStudents */
+     * this.state.responsesForStudents. Shuffles the cards and adds them to this.state.responsesForStudents
+     * entry (since student can't get cards directly from CT) */
 	addNewStudents: function(studentResponses) {
     console.log(studentResponses);
+    var didAddAStudent = false;
 		for (var i=0; i < studentResponses.length; i++) {
 			var nickname = studentResponses[i].nickname;
       console.log("Looking at..." + nickname);
@@ -366,6 +385,7 @@ var TeacherView = React.createClass({
 				}
 			}
 			if (studentIsNew) {
+        didAddAStudent = true;
         console.log("New student! Creating entry.");
         /* 1. Create entry in allQuestionsByStudent */
 				var newStudent = {};
@@ -382,13 +402,21 @@ var TeacherView = React.createClass({
         var device_uid = studentResponses[i].device_uid;
         var currentQuestion = this.state.cards[this.state.indexOfCurrQuestion].question;
         newStudentResponse["nextQuestion"] = currentQuestion;
-        newStudentResponse["cards"] = studentResponses[i].cards;
+        newStudentResponse["cards"] = this.createStudentBoard();
         newStudentResponse["gameOver"] = this.state.gameOver;
         this.state.responsesForStudents[device_uid] = newStudentResponse;
         console.log("New student added!");
         console.log(this.state.responsesForStudents);
 			}
 		}
+    /* If we got a new student, do a POST so they can get cards & set up board. */
+    if (didAddAStudent) {
+      var dictionaryToPost = this.getDictionaryToPost();
+      var params = {
+        "status": dictionaryToPost
+      };
+      this.post(LIVE_PRES_URL + "hub/teacher/custom_status", params);
+    }
 	},
 	/*
 	 * When the student passes on a question, returns true if that pass was correct (i.e., the correct answer was not on their board)
