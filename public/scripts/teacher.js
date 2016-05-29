@@ -9,6 +9,7 @@ var leaderBoardPositions = {
 var debug = true;
 var CONTENT_TOOL_URL = "https://api-dev.nearpod.com/v1/ct/";
 var LIVE_PRES_URL = "https://api-dev.nearpod.com/v1/";
+var TEACHER_URL = "https://api-dev.nearpod.com/v1/hub/teacher/";
 
 /* State
  * -------
@@ -72,6 +73,9 @@ var LIVE_PRES_URL = "https://api-dev.nearpod.com/v1/";
 			}
  		}
  */
+var jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJDVCIsImV4cCI6MTQ2NDQ5ODA4MSwicmVmcmVzaCI6NzIwMCwiYXVkIjoiN2RhYmFjNjQ2ODFhN2MxMmMxY2I5NzE4M2M0NGRlOTMiLCJpYXQiOjE0NjQ0OTA4ODEsInVpZCI6InQ5cHZ4azhtbG91NzlwaHRiZXRyZzhmd2dod3U2bGlucHlmb2NzeCIsInRrbiI6IiIsImlzVGVhY2hlciI6IjEiLCJwZXJtcyI6WyJ0ZWFjaGVyXC9jdXN0b21fc3RhdHVzIiwidGVhY2hlclwvcmVzcG9uc2VzIl0sImV4dHJhIjp7ImN1c3RvbV9zbGlkZV9pZCI6IjEwMDAwNDgiLCJzbGlkZSI6IjEiLCJzZXNzaW9uX3VpZCI6IiJ9fQ.iugrpDK8KaAl_mhiK0Y7SwZUdU0nXMXCVbJewL621Ik";
+var presentationId = "118814";
+var slideID = "1000048";
 var TeacherView = React.createClass({
   getUrlVars: function() {
       var vars = {};
@@ -81,6 +85,7 @@ var TeacherView = React.createClass({
       return vars;
   },
   setHeaders: function(){
+    // if (debug) console.log("Setting JWT: " + this.state.jwt);
     return {"x-api-key":"7dabac64681a7c12c1cb97183c44de93", "JWT": this.state.jwt};
   },
 	getInitialState: function() {
@@ -130,12 +135,12 @@ var TeacherView = React.createClass({
    * params: dictionary of parameters to post ("response" = main response data) 
    * successCallback (function): function that gets called when the POST request succeeds. Passed the data, textStatus, and jqXHR
    */
-  post: function(urlStr, params) {
+  post: function(path, params) {
     if (debug) console.log("Making POST request with path: " + urlStr);
     if (debug) console.log("Params: ");
     if (debug) console.log(params);
     $.ajax({
-        url: urlStr,
+        url: TEACHER_URL + path,
         method: "POST",
         async: false,
         data: JSON.stringify(params),
@@ -147,6 +152,10 @@ var TeacherView = React.createClass({
           if (debug) console.log("Error posting");
         }
     });
+  },
+  startGameSuccess: function(data, textStatus, jqXHR) {
+    if(debug) console.log("Post success");
+    if(debug) console.log(data);
   },
   /* GET request (only performed if game is not over)
    * --------------------------------------------------
@@ -178,7 +187,7 @@ var TeacherView = React.createClass({
    * update the state's student responses and add any new students. 
    */
   loadStudentResponses: function() {
-      this.get(LIVE_PRES_URL + "hub/teacher/responses", "", this.loadStudentResponsesSuccess);
+      this.get(TEACHER_URL + "responses", "", this.loadStudentResponsesSuccess);
   },
   /* Returns a dictionary that the teacher should post at the given moment. 
    * ----------------------------------------------------------------------
@@ -344,7 +353,7 @@ var TeacherView = React.createClass({
         var params = {
           "status": dictionaryToPost
         };
-        this.post(LIVE_PRES_URL + "hub/teacher/custom_status", params);
+        this.post("custom_status", params);
       }
   	},
     /* Returns an array of cards for a student to set up on their board. 
@@ -415,7 +424,8 @@ var TeacherView = React.createClass({
       var params = {
         "status": dictionaryToPost
       };
-      this.post(LIVE_PRES_URL + "hub/teacher/custom_status", params);
+      
+      this.post("custom_status", params);
     }
 	},
 	/*
@@ -596,7 +606,7 @@ var TeacherView = React.createClass({
           var params = {
             "status": dictionaryToPost
           };
-          this.post(LIVE_PRES_URL + "hub/teacher/custom_status", params);
+          this.post("custom_status", params);
           break;
         default:
           /* Close modal */
