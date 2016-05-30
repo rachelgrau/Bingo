@@ -16,8 +16,9 @@ var STUDENT_URL = "https://api-dev.nearpod.com/v1/";
  * name (string): student's nickname
  */
 
-var jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJDVCIsImV4cCI6MTQ2NDQ5NjYzMiwicmVmcmVzaCI6NzIwMCwiYXVkIjoiN2RhYmFjNjQ2ODFhN2MxMmMxY2I5NzE4M2M0NGRlOTMiLCJpYXQiOjE0NjQ0ODk0MzIsInVpZCI6InNzdjVvZmsyd3A1YmJpbHpubWdidnllODlyd3FoNjI4YjU5cjgydCIsInRrbiI6IiIsImlzVGVhY2hlciI6IjAiLCJwZXJtcyI6WyJzdHVkZW50XC9jdXN0b21fc3RhdHVzIiwic3R1ZGVudFwvcmVzcG9uc2VzIl0sImV4dHJhIjp7ImN1c3RvbV9zbGlkZV9pZCI6IjEwMDAwNDgiLCJzbGlkZSI6IjEiLCJzZXNzaW9uX3VpZCI6IiJ9fQ.9xQTIfOwT00fHtDJ_DHAPkaF_IrUScI61ApXtqShpQQ";
+var jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJDVCIsImV4cCI6MTQ2NDY0NjU0NywicmVmcmVzaCI6NzIwMCwiYXVkIjoiN2RhYmFjNjQ2ODFhN2MxMmMxY2I5NzE4M2M0NGRlOTMiLCJpYXQiOjE0NjQ2MzkzNDcsInVpZCI6InNmaXI4cWgzMGdtMXBqbXd2dHE0bjNjbTM2ZnlnbnFuaGZwbWRnOCIsInRrbiI6IiIsImlzVGVhY2hlciI6IjAiLCJwZXJtcyI6WyJzdHVkZW50XC9jdXN0b21fc3RhdHVzIiwic3R1ZGVudFwvcmVzcG9uc2VzIl0sImV4dHJhIjp7ImN1c3RvbV9zbGlkZV9pZCI6IjEwMDAwNDgiLCJzbGlkZSI6IjEiLCJzZXNzaW9uX3VpZCI6IiJ9fQ.zf-NHHQMU92Jiqhk5Ag3FLPktFwVgCR24m5Y_14iqec";
 var presentationId = "118814";
+var slideID = "1000048";
 
 var StudentView = React.createClass({
 	getUrlVars: function() {
@@ -101,6 +102,15 @@ var StudentView = React.createClass({
 	      	question: nextQuestion, 
 	      	cards: cards,
 	      	readyForNextQuestion: readyForNext
+	    });
+  	},
+  	didGetDeviceUID: function(data, textStatus, jqXHR) {
+  		if (debug) console.log("GET for uid succeeded");
+  		if (debug) console.log(data);
+  		var myDeviceUid = data.payload["student_id"];
+  		if (debug) console.log("device id is " + myDeviceUid);
+  		this.setState({
+	      	deviceUID: myDeviceUid
 	    });
   	},
   	/* GET request (only performed if game is not over)
@@ -286,7 +296,7 @@ var StudentView = React.createClass({
     	/* Poll for teacher response every X seconds */
     	setInterval(this.loadTeacherResponses, this.props.pollInterval);
     	/* Trying to get device_uid (not working) */
-    	this.get(STUDENT_URL + "hub/student", "", this.didGetDeviceUID);
+    	this.get(STUDENT_URL + "hub/student/responses", "", this.didGetDeviceUID);
   	},
   	/* The app uses one shared modal, so we open & close it as needed and just change its inner content.
   	 * modalType (string): the type of modal you want to open
