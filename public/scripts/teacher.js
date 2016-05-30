@@ -496,6 +496,8 @@ var TeacherView = React.createClass({
   	 */
   	getCurrentAnswers: function (studentResponses) {
   		var answers = [];
+      if (debug) console.log("In getCurrentAnswers");
+      if (debug) console.log(studentResponses);
   		for (var i=0; i < studentResponses.length; i++) {
   			var questionStudentIsAnswering = studentResponses[i].question;
   			var currentQuestion = this.state.cards[this.state.indexOfCurrQuestion].question;
