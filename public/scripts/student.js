@@ -28,7 +28,12 @@ var StudentView = React.createClass({
   	},
 	getInitialState: function() {
 		var urlVars = this.getUrlVars();
-		return {
+		if (debug) console.log("URL vars: ");
+		if (debug) console.log(urlVars);
+		if (debug) console.log("JWT: " + urlVars["jwt"]);
+ 		return {
+ 			/* TO DO: DON'T HARDCODE DEVICE_UID */
+ 			deviceUID: "s1lcpe4kmelnxfti57xxobyy97t71gek1lalfq2",
 			slideID: urlVars["id"],
       		jwt: urlVars["jwt"],
       		presentationID: urlVars["presentation_id"],
@@ -70,25 +75,38 @@ var StudentView = React.createClass({
 		/* TO DO: left off here. Once you get the device uid of yourself, 
 		 * you can load the initial cards :) 
 		 */
-		var my_device_uid = ""; // here !
-		/* If we dont' have any cards, do initial board setup 
-	     * Otherwise ignore cards */
-	    var cards;
+		var myDeviceUid = this.state.deviceUID; // TO DO: update to not be hard coded !
+		/* UPDATE CARDS */
+	    var cards = this.state.cards;
 	    if (cards.length == 0) {
-    		cards = this.data.payload.status.studentResponses[my_device_uid].cards;
+	    	if (debug) console.log("Don't have cards yet, so getting them from response...");
+    		cards = data.payload.status.studentResponses[myDeviceUid].cards;
+    		if (debug) console.log("Cards: ");
+    		if (debug) console.log(cards);
     	}
-    	// /* See if it's time for next question */
-    	// var readyForNext = this.state.readyForNextQuestion;
-    	// var nextQuestion = data["nextQuestion"];
-    	// if (nextQuestion != this.state.question) {
-    	// 	readyForNext = false;
-    	// }
-    	// /* Update state! */
-	    // this.setState({
-	    //   	question: data["nextQuestion"], 
-	    //   	cards: cards,
-	    //   	readyForNextQuestion: readyForNext
-	    // });
+    	/* UPDATE NEXT QUESTION (see if it's time for next question) */
+    	var readyForNext = this.state.readyForNextQuestion;
+    	var nextQuestion = data.payload.status.studentResponses[myDeviceUid].nextQuestion;
+    	if (debug) console.log("Next question from response: " + nextQuestion);
+    	if (debug) console.log("The current state question: " + this.state.question);
+    	if (nextQuestion != this.state.question) {
+    		readyForNext = false;
+    	}
+    	/* Update state */
+    	if (debug) {
+    		console.log("Updating state to: ");
+    		console.log("CARDS: ");
+    		console.log(cards);
+    		console.log("Next question: ");
+    		console.log(nextQuestion);
+    		console.log("Ready for next? ");
+    		console.log(readyForNext);
+    	}
+	    this.setState({
+	      	question: nextQuestion, 
+	      	cards: cards,
+	      	readyForNextQuestion: readyForNext
+	    });
   	},
   	/* GET request (only performed if game is not over)
    	 * --------------------------------------------------
