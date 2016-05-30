@@ -276,6 +276,7 @@ var StudentView = React.createClass({
 		this.get(STUDENT_URL + "hub/student/custom_status", "", this.loadTeacherResponsesSuccess);
 	},
   	componentDidMount: function() {
+  		/* JULIANNA TO DO: get device UID here, then set state "deviceUID" to be the device UID */
     	/* Poll for teacher response every X seconds */
     	setInterval(this.loadTeacherResponses, this.props.pollInterval);
     	/* Trying to get device_uid (not working) */
