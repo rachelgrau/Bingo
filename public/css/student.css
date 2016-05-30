@@ -157,7 +157,7 @@ body {
 }
 
 .bingoChipCard {
-	background-image: url("../assets/bingoChip.png");
+	background-image: url(bingoChip.png);
 	background-repeat: no-repeat;
 	background-position: 50% 50%;
 }

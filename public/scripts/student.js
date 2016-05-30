@@ -33,7 +33,7 @@ var StudentView = React.createClass({
 		if (debug) console.log("JWT: " + urlVars["jwt"]);
  		return {
  			/* TO DO: DON'T HARDCODE DEVICE_UID */
- 			deviceUID: "s1lcpe4kmelnxfti57xxobyy97t71gek1lalfq2",
+ 			deviceUID: "ssgcpfjv8d7ayqpnkskguo80rswxcym4q5jqv8w",
 			slideID: urlVars["id"],
       		jwt: urlVars["jwt"],
       		presentationID: urlVars["presentation_id"],
@@ -87,21 +87,10 @@ var StudentView = React.createClass({
     	/* UPDATE NEXT QUESTION (see if it's time for next question) */
     	var readyForNext = this.state.readyForNextQuestion;
     	var nextQuestion = data.payload.status.studentResponses[myDeviceUid].nextQuestion;
-    	if (debug) console.log("Next question from response: " + nextQuestion);
-    	if (debug) console.log("The current state question: " + this.state.question);
     	if (nextQuestion != this.state.question) {
     		readyForNext = false;
     	}
     	/* Update state */
-    	if (debug) {
-    		console.log("Updating state to: ");
-    		console.log("CARDS: ");
-    		console.log(cards);
-    		console.log("Next question: ");
-    		console.log(nextQuestion);
-    		console.log("Ready for next? ");
-    		console.log(readyForNext);
-    	}
 	    this.setState({
 	      	question: nextQuestion, 
 	      	cards: cards,
@@ -156,21 +145,6 @@ var StudentView = React.createClass({
     	toPost["hasBingo"] = this.state.hasBingo;
     	return toPost;
   	},
-	shuffleCards: function(cards) {
-		if (!cards) return [];
-		var currentIndex = cards.length, temporaryValue, randomIndex;
-  		// While there remain elements to shuffle...
- 		 while (0 !== currentIndex) {
-    		// Pick a remaining element...
-    		randomIndex = Math.floor(Math.random() * currentIndex);
-    		currentIndex -= 1;
-    		// And swap it with the current element.
-    		temporaryValue = cards[currentIndex];
-    		cards[currentIndex] = cards[randomIndex];
-    		cards[randomIndex] = temporaryValue;
-  		}
-		return cards;
-	},
 	/* 
 	 * Returns true if the given row has a chip on every spot, 
 	 * and false if any chips are missing.
@@ -706,6 +680,8 @@ var BingoBoard = React.createClass ({
 		}
 	},
 	render: function() {
+		if (debug) console.log("IN bingo board...going to display these cards: ");
+		if (debug) console.log(this.props.cards);
 		var bingoCards = []; // will become array of bingo card components
 		/* add a bingo card component for every card with a word */
 		for (var i=0; i < this.props.cards.length; i++) {
@@ -750,7 +726,7 @@ var BingoCard = React.createClass ({
 		if (this.props.isWild) {
 			return (
 				<div className="bingoCard" onClick={this.handleClick}>
-					<div className="verticallyCenteredText"><img src="../assets/nearpodIcon.png" width="43" height="36" className="wildCardImage"/></div>
+					<div className="verticallyCenteredText"><img src="assets/nearpodIcon.png" width="43" height="36" className="wildCardImage"/></div>
 				</div>
 			);
 		} else if (this.props.isIncorrect) {
@@ -762,6 +738,7 @@ var BingoCard = React.createClass ({
 		} else  {
 			var chipClassName = "bingoCard";
 			if (this.props.hasChip) chipClassName += " bingoChipCard";
+			console.log("Chip class name: " + chipClassName);
 			return (
 				<div className={chipClassName} onClick={this.handleClick}>
 					<div className="verticallyCenteredText"> {this.props.word} </div>
