@@ -499,7 +499,7 @@ var TeacherView = React.createClass({
       if (debug) console.log("In getCurrentAnswers");
       if (debug) console.log(studentResponses);
   		for (var i=0; i < studentResponses.length; i++) {
-  			var questionStudentIsAnswering = studentResponses[i].question;
+  			var questionStudentIsAnswering = studentResponses[i].response.question;
   			var currentQuestion = this.state.cards[this.state.indexOfCurrQuestion].question;
   			
   			var curStudentAnswer = {};
@@ -507,7 +507,7 @@ var TeacherView = React.createClass({
         curStudentAnswer["device_uid"] = studentResponses[i].device_uid;
 
         /* If student got bingo, add them to leader board */
-        if (studentResponses[i].hasBingo) {
+        if (studentResponses[i].response.hasBingo) {
           var alreadyInLeaderboard = false;
           for (var j=0; j<this.state.leaderBoard.length; j++) {
             if (this.state.leaderBoard[j] == studentResponses[i].device_uid) {
@@ -520,7 +520,7 @@ var TeacherView = React.createClass({
           }
         }
       
-  			var answer = studentResponses[i].answer;
+  			var answer = studentResponses[i].response.answer;
   			if (questionStudentIsAnswering != currentQuestion) {
   				/* 1) NOT YET ANSWERED: We have not yet received the student's answer to this question */
   				curStudentAnswer["answer"] = "";
@@ -528,18 +528,18 @@ var TeacherView = React.createClass({
   			} else if (studentResponses[i].didPass) {
   				/* 2) PASSED: They passed the current question; check if valid */
   				curStudentAnswer["answer"] = "Pass";
-  				curStudentAnswer["isCorrect"] = this.passWasCorrect(studentResponses[i].cards, this.state.cards[this.state.indexOfCurrQuestion].answer);
+  				curStudentAnswer["isCorrect"] = this.passWasCorrect(studentResponses[i].response.cards, this.state.cards[this.state.indexOfCurrQuestion].answer);
   			} else {
   				/* We received this student's answer for this question */
-  				curStudentAnswer["answer"] =  studentResponses[i].answer;
-          if (studentResponses[i].answer == this.state.cards[this.state.indexOfCurrQuestion].answer) {
+  				curStudentAnswer["answer"] =  studentResponses[i].response.answer;
+          if (studentResponses[i].response.answer == this.state.cards[this.state.indexOfCurrQuestion].answer) {
             /* 3) CORRECT: Mark this card in the student's board as teacher approved */
             curStudentAnswer["isCorrect"] = true;
             this.approveCardForStudent(studentResponses[i].device_uid, this.state.cards[this.state.indexOfCurrQuestion].id);
           } else {
             /* 4) INCORRECT: Mark this card in student's board as NOT teacher approved, give correct answer */
             curStudentAnswer["isCorrect"] = false;
-            this.markCardIncorrectForStudent(studentResponses[i].device_uid, studentResponses[i].answer, this.state.cards[this.state.indexOfCurrQuestion].id, currentQuestion);
+            this.markCardIncorrectForStudent(studentResponses[i].device_uid, studentResponses[i].response.answer, this.state.cards[this.state.indexOfCurrQuestion].id, currentQuestion);
           }
   			}
   			answers.push(curStudentAnswer);
@@ -560,16 +560,16 @@ var TeacherView = React.createClass({
   			"totalStudents": studentResponses.length
   		};
   		for (var i=0; i < studentResponses.length; i++) {
-  			var questionStudentIsAnswering = studentResponses[i].question;
+  			var questionStudentIsAnswering = studentResponses[i].response.question;
   			var currentQuestion = this.state.cards[this.state.indexOfCurrQuestion].question;
-  			var answer = studentResponses[i].answer;
+  			var answer = studentResponses[i].response.answer;
   			if (questionStudentIsAnswering != currentQuestion) {
   				answer = "";
   			}
   			if (answer == "") {
   				stats.numUnanswered++;
   			} else {
-  				var isCorrect = (studentResponses[i].answer == this.state.cards[this.state.indexOfCurrQuestion].answer);
+  				var isCorrect = (studentResponses[i].response.answer == this.state.cards[this.state.indexOfCurrQuestion].answer);
   				if (isCorrect) {
   					stats.numCorrect++;
   				} else {
