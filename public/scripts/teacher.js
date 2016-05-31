@@ -73,7 +73,6 @@ var TEACHER_URL = "https://api-dev.nearpod.com/v1/hub/teacher/";
 			}
  		}
  */
-
 var jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJDVCIsImV4cCI6MTQ2NDQ5ODA4MSwicmVmcmVzaCI6NzIwMCwiYXVkIjoiN2RhYmFjNjQ2ODFhN2MxMmMxY2I5NzE4M2M0NGRlOTMiLCJpYXQiOjE0NjQ0OTA4ODEsInVpZCI6InQ5cHZ4azhtbG91NzlwaHRiZXRyZzhmd2dod3U2bGlucHlmb2NzeCIsInRrbiI6IiIsImlzVGVhY2hlciI6IjEiLCJwZXJtcyI6WyJ0ZWFjaGVyXC9jdXN0b21fc3RhdHVzIiwidGVhY2hlclwvcmVzcG9uc2VzIl0sImV4dHJhIjp7ImN1c3RvbV9zbGlkZV9pZCI6IjEwMDAwNDgiLCJzbGlkZSI6IjEiLCJzZXNzaW9uX3VpZCI6IiJ9fQ.iugrpDK8KaAl_mhiK0Y7SwZUdU0nXMXCVbJewL621Ik";
 var presentationId = "118814";
 var slideID = "1000048";
@@ -92,9 +91,9 @@ var TeacherView = React.createClass({
 	getInitialState: function() {
     var urlVars = this.getUrlVars();
 		return {
-      slideID: urlVars["id"],
-      jwt: urlVars["jwt"],
-      presentationID: urlVars["presentation_id"],
+      slideID: slideID, //urlVars["id"],
+      jwt: jwt,//urlVars["jwt"],
+      presentationID: presentationId,//urlVars["presentation_id"],
 			gameOver: false,
 			cards:[], 
 			indexOfCurrQuestion: 0,
@@ -209,6 +208,9 @@ var TeacherView = React.createClass({
     toPost["gameOver"] = this.state.gameOver;
     /* "studentResponses" */
     toPost["studentResponses"] = this.state.responsesForStudents;
+    console.log("in dict cards are ");
+    console.log(this.state.cards);
+    toPost["cards"] = this.state.cards;
     return toPost;
   },
 	shuffleCards: function(cards) {

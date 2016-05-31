@@ -16,8 +16,9 @@ var STUDENT_URL = "https://api-dev.nearpod.com/v1/";
  * name (string): student's nickname
  */
 
-var jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJDVCIsImV4cCI6MTQ2Mzk4Mjc5MSwiYXVkIjoiN2RhYmFjNjQ2ODFhN2MxMmMxY2I5NzE4M2M0NGRlOTMiLCJyZWZyZXNoIjo3MjAwLCJ0a24iOiIiLCJ1aWQiOiIiLCJpYXQiOjE0NjM5NzU1OTEsImlkIjoiMTYwMTciLCJlbnYiOiJodHRwczpcL1wvY3QtZGV2Lm5lYXJwb2QuY29tXC8ifQ.vC3-5x9pT2ZElfzQxc0N5xI-jWkSm35NHm0YpMeequE";
+var jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJDVCIsImV4cCI6MTQ2NDY0NjU0NywicmVmcmVzaCI6NzIwMCwiYXVkIjoiN2RhYmFjNjQ2ODFhN2MxMmMxY2I5NzE4M2M0NGRlOTMiLCJpYXQiOjE0NjQ2MzkzNDcsInVpZCI6InNmaXI4cWgzMGdtMXBqbXd2dHE0bjNjbTM2ZnlnbnFuaGZwbWRnOCIsInRrbiI6IiIsImlzVGVhY2hlciI6IjAiLCJwZXJtcyI6WyJzdHVkZW50XC9jdXN0b21fc3RhdHVzIiwic3R1ZGVudFwvcmVzcG9uc2VzIl0sImV4dHJhIjp7ImN1c3RvbV9zbGlkZV9pZCI6IjEwMDAwNDgiLCJzbGlkZSI6IjEiLCJzZXNzaW9uX3VpZCI6IiJ9fQ.zf-NHHQMU92Jiqhk5Ag3FLPktFwVgCR24m5Y_14iqec";
 var presentationId = "118814";
+var slideID = "1000048";
 
 var StudentView = React.createClass({
 	getUrlVars: function() {
@@ -72,7 +73,6 @@ var StudentView = React.createClass({
 		  },
 		  error: function(jqXHR, textStatus, errorThrown){
 		  	// alert("error: " + jqXHR.responseJSON.error_code + "\nmessage: " + jqXHR.responseJSON.message + "\n\nfull: " + JSON.stringify(jqXHR.responseJSON) );
-
 		  }
 		});
   	},
@@ -102,6 +102,15 @@ var StudentView = React.createClass({
 	      	question: nextQuestion, 
 	      	cards: cards,
 	      	readyForNextQuestion: readyForNext
+	    });
+  	},
+  	didGetDeviceUID: function(data, textStatus, jqXHR) {
+  		if (debug) console.log("GET for uid succeeded");
+  		if (debug) console.log(data);
+  		var myDeviceUid = data.payload["student_id"];
+  		if (debug) console.log("device id is " + myDeviceUid);
+  		this.setState({
+	      	deviceUID: myDeviceUid
 	    });
   	},
   	/* GET request (only performed if game is not over)
