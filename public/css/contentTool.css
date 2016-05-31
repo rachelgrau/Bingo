@@ -2,6 +2,10 @@ body {
 	min-width: 800px;
 }
 
+#content {
+	background-color: white;
+}
+
 #bingoContentTool {
 	/* Fixed width/height of content tool
 	   If height changes, change line in contentTool.js
@@ -32,11 +36,33 @@ textArea {
 	border-radius: 2px;
 }
 
+/* HEADER STUFF */
+
 #header {
 	font-family: "Avenir LT Std";
+}
+
+.headerText {
 	font-size: 38px;
 	font-weight: 500;
-	line-height: 46px;
+	line-height: 36px;
+}
+
+#headerImage {
+	margin-right: 10px;
+}
+
+#settingImg {
+	width: 30px;
+	height: 30px;
+}
+
+#settingsButton {
+	float: right;
+	font-size: 20px;
+	line-height: 20px;
+	margin-top: 30px;
+	margin-right: 0px;
 }
 
 #footer {
@@ -48,9 +74,7 @@ textArea {
 	height: 130px;
 }
 
-.container {
-	background-color: white;
-}
+/* EDITOR STUFF */
 
 .editor {
 	float: left;
@@ -89,6 +113,8 @@ textArea {
 	line-height: 22px;
 	margin-top: 21px;
 }
+
+/* BINGO BOARD STUFF */
 
 .bingoBoard {
 	float: left;
@@ -216,6 +242,10 @@ textArea {
 }
 
 .greenButtonActive:hover {
+	background-color: #9DEBC3;
+}
+
+.greenButtonInactive {
 	background-color: #9DEBC3;
 }
 
