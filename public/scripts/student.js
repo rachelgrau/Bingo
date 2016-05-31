@@ -113,6 +113,19 @@ var StudentView = React.createClass({
 	      	deviceUID: myDeviceUid
 	    });
   	},
+  	decodeDeviceUID: function(jwt) {
+		var firstIndex = jwt.indexOf(".") + 1;
+		var firstParse = jwt.substr(firstIndex);
+		console.log(firstParse);
+
+		var secondIndex = firstParse.indexOf(".");
+		var secondParse = firstParse.substr(0, firstParse.indexOf("."));
+		console.log(secondParse);
+
+		var decodedJWT = JSON.parse(atob(secondParse));
+		var uid = decodedJWT["uid"];
+		return uid;
+  	}
   	/* GET request (only performed if game is not over)
    	 * --------------------------------------------------
    	 * isContentTool (boolean): true if you are making a GET request to content tool, false otherwise
