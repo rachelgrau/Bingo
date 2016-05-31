@@ -1,5 +1,5 @@
 var debug = true;
-var STUDENT_URL = "https://api-dev.nearpod.com/v1/";
+var STUDENT_URL = "https://api-dev.nearpod.com/v1/hub/student/";
 /* State
  * -------
  * cards (array): an array of this students bingo cards, in the order that they appear on his/her board.
@@ -23,6 +23,20 @@ var StudentView = React.createClass({
       });
       return vars;
   	},
+  	/* Given a JWT, returns the device UID that corresponds to that JWT. */
+  	decodeDeviceUID: function(jwt) {
+		var firstIndex = jwt.indexOf(".") + 1;
+		var firstParse = jwt.substr(firstIndex);
+		console.log(firstParse);
+
+		var secondIndex = firstParse.indexOf(".");
+		var secondParse = firstParse.substr(0, firstParse.indexOf("."));
+		console.log(secondParse);
+
+		var decodedJWT = JSON.parse(atob(secondParse));
+		var uid = decodedJWT["uid"];
+		return uid;
+  	},
   	setHeaders: function(){
     	return {"x-api-key":"7dabac64681a7c12c1cb97183c44de93", "JWT": this.state.jwt};
   	},
@@ -31,9 +45,10 @@ var StudentView = React.createClass({
 		if (debug) console.log("URL vars: ");
 		if (debug) console.log(urlVars);
 		if (debug) console.log("JWT: " + urlVars["jwt"]);
+		var deviceUID = this.decodeDeviceUID(urlVars["jwt"]);
+		if (debug) console.log("Device UID: " + deviceUID);
  		return {
- 			/* TO DO: DON'T HARDCODE DEVICE_UID */
- 			deviceUID: "ssgcpfjv8d7ayqpnkskguo80rswxcym4q5jqv8w",
+ 			deviceUID: deviceUID,
 			slideID: urlVars["id"],
       		jwt: urlVars["jwt"],
       		presentationID: urlVars["presentation_id"],
@@ -51,23 +66,23 @@ var StudentView = React.createClass({
 			name: "Rachel"
 		};
 	},
-	post: function(dictionaryToPost) {
-    	if (debug) console.log("Making POST request with path: " + path);		
-		if (debug) console.log("Params: ");
-		if (debug) console.log(params);
-		$.ajax({
-		  url: "https://api-dev.nearpod.com/v1/hub/student/" + path,
-		  method: "POST",
-		  async: false,
-		  data: JSON.stringify(params),
-		  headers: this.setHeaders(),
-		  success: function(data, textStatus, jqXHR){
-			  successCallback(data, textStatus, jqXHR);
-		  },
-		  error: function(jqXHR, textStatus, errorThrown){
-		  	// alert("error: " + jqXHR.responseJSON.error_code + "\nmessage: " + jqXHR.responseJSON.message + "\n\nfull: " + JSON.stringify(jqXHR.responseJSON) );
-		  }
-		});
+	post: function(path, params) {
+	    if (debug) console.log("Making POST request with path: " + path);
+	    if (debug) console.log("Params: ");
+	    if (debug) console.log(params);
+	    $.ajax({
+	        url: STUDENT_URL + path,
+	        method: "POST",
+	        async: false,
+	        data: JSON.stringify(params),
+	        headers: this.setHeaders(),
+	        success: function(data, textStatus, jqXHR){
+	          if (debug) console.log("Successful post!");
+	        },
+	        error: function(jqXHR, textStatus, errorThrown){
+	          if (debug) console.log("Error posting");
+	        }
+	    });
   	},
   	loadTeacherResponsesSuccess: function(data, textStatus, jqXHR) {
   		if (debug) console.log("GET student custom status succeeded");
@@ -83,6 +98,10 @@ var StudentView = React.createClass({
     		cards = data.payload.status.studentResponses[myDeviceUid].cards;
     		if (debug) console.log("Cards: ");
     		if (debug) console.log(cards);
+    	} else {
+    		/* TO DO: The cards we have are updated, we just need to see if the teacher approved any
+    		   ONLY look at "teacherApproved" field of cards and udpate it then. 
+    		   If hasChip but teacherApproved is false, look for correctCardID/questionIncorrectlyAnswered. */
     	}
     	/* UPDATE NEXT QUESTION (see if it's time for next question) */
     	var readyForNext = this.state.readyForNextQuestion;
@@ -136,8 +155,6 @@ var StudentView = React.createClass({
    	*/
   	getDictionaryToPost: function(answer, didPass) {
     	var toPost = {};
-    	toPost["deviceID"] = this.state.deviceID;
-    	toPost["name"] = this.state.name;
     	toPost["cards"] = this.state.cards;
     	toPost["question"] = this.state.question;
     	toPost["answer"] = answer;
@@ -273,14 +290,13 @@ var StudentView = React.createClass({
    	 * Makes a GET request to the API to get the teacher's response. 
    	 */
 	loadTeacherResponses: function() {
-		this.get(STUDENT_URL + "hub/student/custom_status", "", this.loadTeacherResponsesSuccess);
+		this.get(STUDENT_URL + "custom_status", "", this.loadTeacherResponsesSuccess);
 	},
   	componentDidMount: function() {
   		/* JULIANNA TO DO: get device UID here, then set state "deviceUID" to be the device UID */
     	/* Poll for teacher response every X seconds */
     	setInterval(this.loadTeacherResponses, this.props.pollInterval);
     	/* Trying to get device_uid (not working) */
-    	this.get(STUDENT_URL + "hub/student", "", this.didGetDeviceUID);
   	},
   	/* The app uses one shared modal, so we open & close it as needed and just change its inner content.
   	 * modalType (string): the type of modal you want to open
@@ -295,6 +311,8 @@ var StudentView = React.createClass({
      * if there were no mistakes, then returns -1.
      */
     hasIncorrectAnswer: function() {
+    	/* TO DO: If a card has a Chip, teacherApproved is false, but there's no correct card ID, 
+    	   then we need to wait for the teacher to respond. */
     	var incorrectIndex = -1;
     	var numPerRow = Math.sqrt(this.state.cards.length + 1);
 		var wildCardRow = Math.floor(numPerRow/2);
@@ -414,9 +432,18 @@ var StudentView = React.createClass({
 				this.state.myAnswers[this.state.question] = cards[this.state.selectedCardIndex].id;
 				this.bingoButtonShouldActivate();
         		this.setState({cards: cards, isModalOpen: false, modalType:"", selectedCardIndex: -1, readyForNextQuestion: true});
-        		/* TO DO: POST here. */
+        		/* POST student resopnse */
         		var dictionaryToPost = this.getDictionaryToPost(cards[this.state.selectedCardIndex].answer, false);
-        		this.post(dictionaryToPost);
+        	 	var params = {
+              		"status": dictionaryToPost
+            	};
+        	 	if (debug) console.log("Posting dictionary: ");
+        	 	if (debug) console.log(dictionaryToPost);
+        	 	var params = {
+              		"response": dictionaryToPost,
+              		"response_text": ""
+           	 	};
+        		this.post("responses", params);
        			break;
     		case "checkBingo":
     			var numBoardChecksLeft = this.state.numBingoChecksLeft - 1;
@@ -425,9 +452,18 @@ var StudentView = React.createClass({
     			if (incorrectCardIndex == -1) {
     				this.setState({hasBingo: true, numBingoChecksLeft: numBoardChecksLeft, isModalOpen: false, modalType:"", selectedCardIndex: -1, readyForNextQuestion: true});
     				this.openModal("youGotBingo");
-    				/* TO DO: POST here. */  
-    				var dictionaryToPost = this.getDictionaryToPost("", false);
-    				this.post(dictionaryToPost);  				
+    				/* POST student resopnse */
+    				var dictionaryToPost = this.getDictionaryToPost(cards[this.state.selectedCardIndex].answer, false);
+	        	 	var params = {
+	              		"status": dictionaryToPost
+	            	};
+	        	 	if (debug) console.log("Posting dictionary: ");
+	        	 	if (debug) console.log(dictionaryToPost);
+	        	 	var params = {
+	              		"response": dictionaryToPost,
+	              		"response_text": ""
+	           	 	};
+	        		this.post("responses", params);				
     			} else {
     				/* Get the IDs of the incorrect and correct card */
     				/* TO DO: if "correctCardId" and "questionIncorrectlyAnswered" are not
@@ -446,9 +482,18 @@ var StudentView = React.createClass({
         	case "skip":
         		/* Ready for next question */
         		this.setState({isModalOpen: false, modalType:"", selectedCardIndex: -1, readyForNextQuestion: true});
-        		/* TO DO: POST here. */
-        		var dictionaryToPost = this.getDictionaryToPost("", true);
-        		this.post(dictionaryToPost);
+    			/* POST student resopnse */
+    			var dictionaryToPost = this.getDictionaryToPost(cards[this.state.selectedCardIndex].answer, false);
+	        	 var params = {
+	              	"status": dictionaryToPost
+	            };
+	        	if (debug) console.log("Posting dictionary: ");
+	        	if (debug) console.log(dictionaryToPost);
+	        	var params = {
+	              	"response": dictionaryToPost,
+	              	"response_text": ""
+	           	};
+	        	this.post("responses", params);	
         		break;
         	case "incorrect":
         		var cards = this.state.cards;
@@ -681,8 +726,6 @@ var BingoBoard = React.createClass ({
 		}
 	},
 	render: function() {
-		if (debug) console.log("IN bingo board...going to display these cards: ");
-		if (debug) console.log(this.props.cards);
 		var bingoCards = []; // will become array of bingo card components
 		/* add a bingo card component for every card with a word */
 		for (var i=0; i < this.props.cards.length; i++) {
@@ -739,7 +782,6 @@ var BingoCard = React.createClass ({
 		} else  {
 			var chipClassName = "bingoCard";
 			if (this.props.hasChip) chipClassName += " bingoChipCard";
-			console.log("Chip class name: " + chipClassName);
 			return (
 				<div className={chipClassName} onClick={this.handleClick}>
 					<div className="verticallyCenteredText"> {this.props.word} </div>
