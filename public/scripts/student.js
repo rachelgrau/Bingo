@@ -23,6 +23,20 @@ var StudentView = React.createClass({
       });
       return vars;
   	},
+  	/* Given a JWT, returns the device UID that corresponds to that JWT. */
+  	decodeDeviceUID: function(jwt) {
+		var firstIndex = jwt.indexOf(".") + 1;
+		var firstParse = jwt.substr(firstIndex);
+		console.log(firstParse);
+
+		var secondIndex = firstParse.indexOf(".");
+		var secondParse = firstParse.substr(0, firstParse.indexOf("."));
+		console.log(secondParse);
+
+		var decodedJWT = JSON.parse(atob(secondParse));
+		var uid = decodedJWT["uid"];
+		return uid;
+  	},
   	setHeaders: function(){
     	return {"x-api-key":"7dabac64681a7c12c1cb97183c44de93", "JWT": this.state.jwt};
   	},
@@ -31,9 +45,10 @@ var StudentView = React.createClass({
 		if (debug) console.log("URL vars: ");
 		if (debug) console.log(urlVars);
 		if (debug) console.log("JWT: " + urlVars["jwt"]);
+		var deviceUID = this.decodeDeviceUID(urlVars["jwt"]);
+		if (debug) console.log("Device UID: " + deviceUID);
  		return {
- 			/* TO DO: DON'T HARDCODE DEVICE_UID */
- 			deviceUID: "ssd34v6w2qkebw3cjwoxy6cdgaxjv2p6dlladm9",
+ 			deviceUID: deviceUID,
 			slideID: urlVars["id"],
       		jwt: urlVars["jwt"],
       		presentationID: urlVars["presentation_id"],

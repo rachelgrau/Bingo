@@ -499,49 +499,61 @@ var TeacherView = React.createClass({
       if (debug) console.log("In getCurrentAnswers");
       if (debug) console.log(studentResponses);
   		for (var i=0; i < studentResponses.length; i++) {
-  			var questionStudentIsAnswering = studentResponses[i].response.question;
-  			var currentQuestion = this.state.cards[this.state.indexOfCurrQuestion].question;
-  			
+ 			
   			var curStudentAnswer = {};
-  			curStudentAnswer["nickname"] = studentResponses[i].nickname;
-        curStudentAnswer["device_uid"] = studentResponses[i].device_uid;
+        /* First, check if the student has repsonded at all (has "response" field)*/
+        if (studentResponses[i].response) {
+          /* The student HAS responded, so create entry based on their response */
+          var questionStudentIsAnswering = studentResponses[i].response.question;
+          var currentQuestion = this.state.cards[this.state.indexOfCurrQuestion].question;
+ 
+          curStudentAnswer["nickname"] = studentResponses[i].nickname;
+          curStudentAnswer["device_uid"] = studentResponses[i].device_uid;
 
-        /* If student got bingo, add them to leader board */
-        if (studentResponses[i].response.hasBingo) {
-          var alreadyInLeaderboard = false;
-          for (var j=0; j<this.state.leaderBoard.length; j++) {
-            if (this.state.leaderBoard[j] == studentResponses[i].device_uid) {
-              alreadyInLeaderboard = true;
-              break;
+          /* If student got bingo, add them to leader board */
+          if (studentResponses[i].response.hasBingo) {
+            var alreadyInLeaderboard = false;
+            for (var j=0; j<this.state.leaderBoard.length; j++) {
+              if (this.state.leaderBoard[j] == studentResponses[i].device_uid) {
+                alreadyInLeaderboard = true;
+                break;
+              }
+            }
+            if (!alreadyInLeaderboard) {
+              this.state.leaderBoard.push(studentResponses[i].device_uid);
             }
           }
-          if (!alreadyInLeaderboard) {
-            this.state.leaderBoard.push(studentResponses[i].device_uid);
-          }
-        }
-      
-  			var answer = studentResponses[i].response.answer;
-  			if (questionStudentIsAnswering != currentQuestion) {
-  				/* 1) NOT YET ANSWERED: We have not yet received the student's answer to this question */
-  				curStudentAnswer["answer"] = "";
-  				curStudentAnswer["isCorrect"] = false;
-  			} else if (studentResponses[i].didPass) {
-  				/* 2) PASSED: They passed the current question; check if valid */
-  				curStudentAnswer["answer"] = "Pass";
-  				curStudentAnswer["isCorrect"] = this.passWasCorrect(studentResponses[i].response.cards, this.state.cards[this.state.indexOfCurrQuestion].answer);
-  			} else {
-  				/* We received this student's answer for this question */
-  				curStudentAnswer["answer"] =  studentResponses[i].response.answer;
-          if (studentResponses[i].response.answer == this.state.cards[this.state.indexOfCurrQuestion].answer) {
-            /* 3) CORRECT: Mark this card in the student's board as teacher approved */
-            curStudentAnswer["isCorrect"] = true;
-            this.approveCardForStudent(studentResponses[i].device_uid, this.state.cards[this.state.indexOfCurrQuestion].id);
-          } else {
-            /* 4) INCORRECT: Mark this card in student's board as NOT teacher approved, give correct answer */
+        
+          var answer = studentResponses[i].response.answer;
+          if (questionStudentIsAnswering != currentQuestion) {
+            /* 1) NOT YET ANSWERED: We have not yet received the student's answer to this question */
+            curStudentAnswer["answer"] = "";
             curStudentAnswer["isCorrect"] = false;
-            this.markCardIncorrectForStudent(studentResponses[i].device_uid, studentResponses[i].response.answer, this.state.cards[this.state.indexOfCurrQuestion].id, currentQuestion);
+          } else if (studentResponses[i].didPass) {
+            /* 2) PASSED: They passed the current question; check if valid */
+            curStudentAnswer["answer"] = "Pass";
+            curStudentAnswer["isCorrect"] = this.passWasCorrect(studentResponses[i].response.cards, this.state.cards[this.state.indexOfCurrQuestion].answer);
+          } else {
+            /* We received this student's answer for this question */
+            curStudentAnswer["answer"] =  studentResponses[i].response.answer;
+            if (studentResponses[i].response.answer == this.state.cards[this.state.indexOfCurrQuestion].answer) {
+              /* 3) CORRECT: Mark this card in the student's board as teacher approved */
+              curStudentAnswer["isCorrect"] = true;
+              this.approveCardForStudent(studentResponses[i].device_uid, this.state.cards[this.state.indexOfCurrQuestion].id);
+            } else {
+              /* 4) INCORRECT: Mark this card in student's board as NOT teacher approved, give correct answer */
+              curStudentAnswer["isCorrect"] = false;
+              this.markCardIncorrectForStudent(studentResponses[i].device_uid, studentResponses[i].response.answer, this.state.cards[this.state.indexOfCurrQuestion].id, currentQuestion);
+            }
           }
-  			}
+        } else {
+          /* The student HAS NOT responded, so create unanswered entry */
+          curStudentAnswer["nickname"] = studentResponses[i].nickname;
+          curStudentAnswer["device_uid"] = studentResponses[i].device_uid;
+          curStudentAnswer["answer"] = "";
+          curStudentAnswer["isCorrect"] = false;
+        }
+  			
   			answers.push(curStudentAnswer);
   		}
 
@@ -560,22 +572,29 @@ var TeacherView = React.createClass({
   			"totalStudents": studentResponses.length
   		};
   		for (var i=0; i < studentResponses.length; i++) {
-  			var questionStudentIsAnswering = studentResponses[i].response.question;
-  			var currentQuestion = this.state.cards[this.state.indexOfCurrQuestion].question;
-  			var answer = studentResponses[i].response.answer;
-  			if (questionStudentIsAnswering != currentQuestion) {
-  				answer = "";
-  			}
-  			if (answer == "") {
-  				stats.numUnanswered++;
-  			} else {
-  				var isCorrect = (studentResponses[i].response.answer == this.state.cards[this.state.indexOfCurrQuestion].answer);
-  				if (isCorrect) {
-  					stats.numCorrect++;
-  				} else {
-  					stats.numIncorrect++;
-  				}
-  			}
+        /* First, check if the student HAS responded at all (has a "response" field) */
+        if (studentResponses[i].response) {
+          /* If the student has responded, figure out what their response is */
+          var questionStudentIsAnswering = studentResponses[i].response.question;
+          var currentQuestion = this.state.cards[this.state.indexOfCurrQuestion].question;
+          var answer = studentResponses[i].response.answer;
+          if (questionStudentIsAnswering != currentQuestion) {
+            answer = "";
+          }
+          if (answer == "") {
+            stats.numUnanswered++;
+          } else {
+            var isCorrect = (studentResponses[i].response.answer == this.state.cards[this.state.indexOfCurrQuestion].answer);
+            if (isCorrect) {
+              stats.numCorrect++;
+            } else {
+              stats.numIncorrect++;
+            }
+          }
+        } else {
+          /* If they haven't responded, count it as unanswered */
+          stats.numUnanswered++;
+        }
   		}
   		return stats;
   	},
