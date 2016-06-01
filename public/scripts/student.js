@@ -619,6 +619,10 @@ var StudentView = React.createClass({
   		if ((correctCardIndex != -1) && (this.state.cards[correctCardIndex].hasChip)) {
   			incorrectButtonMessage = "Continue";
   		}
+  		if (this.state.modalType == "incorrect") {
+  			/* The question is the one they were trying to answer but got incorrect */
+  			question = this.state.cards[incorrectCardIndex].questionIncorrectlyAnswered;
+  		}
 		return (
 			<div className="studentView ">
 				<Header/>
