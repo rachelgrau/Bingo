@@ -93,15 +93,25 @@ var StudentView = React.createClass({
 		var myDeviceUid = this.state.deviceUID; // TO DO: update to not be hard coded !
 		/* UPDATE CARDS */
 	    var cards = this.state.cards;
+	    var teacherResponseCards = data.payload.status.studentResponses[myDeviceUid].cards;
 	    if (cards.length == 0) {
 	    	if (debug) console.log("Don't have cards yet, so getting them from response...");
-    		cards = data.payload.status.studentResponses[myDeviceUid].cards;
+    		cards = teacherResponseCards;
     		if (debug) console.log("Cards: ");
     		if (debug) console.log(cards);
     	} else {
-    		/* TO DO: The cards we have are updated, we just need to see if the teacher approved any
+    		/* The cards we have are updated, we just need to see if the teacher approved any
     		   ONLY look at "teacherApproved" field of cards and udpate it then. 
     		   If hasChip but teacherApproved is false, look for correctCardID/questionIncorrectlyAnswered. */
+    		for (var i=0; i < teacherResponseCards.length; i++) {
+    			var teacherCard = teacherResponseCards[i];
+    			cards[i].teacherApproved = teacherCard.teacherApproved;
+    			/* If teacher has not set correct card ID, it's -1 */
+    			if (teacherCard.correctCardID >= 0) {
+    				cards[i].correctCardID = teacherCard.correctCardID;
+    				cards[i].questionIncorrectlyAnswered = teacherCard.questionIncorrectlyAnswered;
+    			}
+    		}
     	}
     	/* UPDATE NEXT QUESTION (see if it's time for next question) */
     	var readyForNext = this.state.readyForNextQuestion;
@@ -109,6 +119,8 @@ var StudentView = React.createClass({
     	if (nextQuestion != this.state.question) {
     		readyForNext = false;
     	}
+    	if (debug) console.log ("Updating my cards to...");
+    	if (debug) console.log(cards);
     	/* Update state */
 	    this.setState({
 	      	question: nextQuestion, 
@@ -258,6 +270,9 @@ var StudentView = React.createClass({
 	   correctly), and false if bingo is not possible with current chip 
 	   layout */
 	bingoButtonShouldActivate: function() {
+		/* If we are waiting for the next question, return false b/c we need to wait for a teacher 
+		   response */
+		if (this.state.readyForNextQuestion) return false; 
 		var numPerRow = Math.sqrt(this.state.cards.length + 1);
 		var wildCardRow = Math.floor(numPerRow/2);
 		var wildCardIndex = Math.floor(this.state.cards.length/2);
@@ -419,7 +434,7 @@ var StudentView = React.createClass({
      * "confirmChipPlacement": place a chip on the card they selected, and update our map of questions --> my answers 
      * "checkBingo": check if they have bingo
      * "skip": don't place any chips, just become ready for next question
-     * "incorrect": place a chip on the correct answer, and set incorrectCardIndex to -1
+     * "incorrect": place a chip on the correct answer (after getting one wrong), and set correctCardIndex to -1
      */
     closeModalAccept: function() {
     	switch(this.state.modalType) {
@@ -472,8 +487,6 @@ var StudentView = React.createClass({
     					hasBingo: false, 
     					numBingoChecksLeft: numBoardChecksLeft, 
     					isModalOpen: false, modalType:"", 
-    					selectedCardIndex: -1, 
-    					readyForNextQuestion: true, 
     					indexOfIncorrectCard: incorrectCardIndex });
     				this.openModal("incorrect");
     			}
@@ -506,7 +519,7 @@ var StudentView = React.createClass({
         		cards[correctCardIndex].teacherApproved = true;
         		cards[correctCardIndex].correctCardID = -1;
         		cards[correctCardIndex].questionIncorrectlyAnswered = "";
-        		this.setState({isModalOpen: false, cards: cards, modalType:"", selectedCardIndex: -1, indexOfIncorrectCard: -1});
+        		this.setState({isModalOpen: false, cards: cards, modalType:"", indexOfIncorrectCard: -1});
         		break;
     		default:
     			/* Close modal */
@@ -796,7 +809,7 @@ var BingoCard = React.createClass ({
  * "checkBingo": "Are you sure you sure you want to check your board for bingo?" + yes/no button
  * "skip": "Are you sure you want to skip" + question + yes/no buttons 
  * "youGotBingo": "You just got bingo" + list of people who got bingo + keep playing button
- * "incorrect": When they check 
+ * "incorrect": When they check Bingo but had an incorrect answer, shows them that incorrect answer + lets them place chip on correct answer
  *
  * Props
  * -----

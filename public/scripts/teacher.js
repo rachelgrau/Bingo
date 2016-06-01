@@ -364,6 +364,8 @@ var TeacherView = React.createClass({
         card["answer"] = this.state.cards[i].answer;
         card["hasChip"] = false;
         card["teacherApproved"] = false;
+        card["correctCardID"] = -1;
+        card["questionIncorrectlyAnswered"] = "";
         studentCards.push(card);
       }
       /* Shuffle new copy and return it */
