@@ -364,6 +364,8 @@ var TeacherView = React.createClass({
         card["answer"] = this.state.cards[i].answer;
         card["hasChip"] = false;
         card["teacherApproved"] = false;
+        card["correctCardID"] = -1;
+        card["questionIncorrectlyAnswered"] = "";
         studentCards.push(card);
       }
       /* Shuffle new copy and return it */
@@ -411,6 +413,7 @@ var TeacherView = React.createClass({
 		}
     /* If we got a new student, do a POST so they can get cards & set up board. */
     if (didAddAStudent) {
+      if (debug) console.log("Added new student(s)!");
       var dictionaryToPost = this.getDictionaryToPost();
       var params = {
         "status": dictionaryToPost
@@ -418,8 +421,6 @@ var TeacherView = React.createClass({
       
       this.post("custom_status", params);
     }
-    if (debug) console.log("Added new students! Here are cards: ");
-    if (debug) console.log(this.state.cards);
 	},
 	/*
 	 * When the student passes on a question, returns true if that pass was correct (i.e., the correct answer was not on their board)
@@ -496,8 +497,6 @@ var TeacherView = React.createClass({
   	 */
   	getCurrentAnswers: function (studentResponses) {
   		var answers = [];
-      if (debug) console.log("In getCurrentAnswers");
-      if (debug) console.log(studentResponses);
   		for (var i=0; i < studentResponses.length; i++) {
  			
   			var curStudentAnswer = {};
@@ -546,6 +545,16 @@ var TeacherView = React.createClass({
               this.markCardIncorrectForStudent(studentResponses[i].device_uid, studentResponses[i].response.answer, this.state.cards[this.state.indexOfCurrQuestion].id, currentQuestion);
             }
           }
+
+          /* See if student marked any card as teacherApproved (meaning they got something incorrect, checked, and 
+             re-placed that chip) */
+          for (var j=0; j < studentResponses[i].response.cards.length; j++) {
+            var studentCard = studentResponses[i].response.cards[j];
+            if (studentCard.teacherApproved) {
+              this.approveCardForStudent(studentResponses[i].device_uid, studentCard.id);
+            }
+          }
+
         } else {
           /* The student HAS NOT responded, so create unanswered entry */
           curStudentAnswer["nickname"] = studentResponses[i].nickname;
