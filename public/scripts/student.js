@@ -105,6 +105,12 @@ var StudentView = React.createClass({
     		   If hasChip but teacherApproved is false, look for correctCardID/questionIncorrectlyAnswered. */
     		for (var i=0; i < teacherResponseCards.length; i++) {
     			var teacherCard = teacherResponseCards[i];
+    			if (cards[i].teacherApproved) {
+    				/* Special case: when we get a chip incorrect & re-place it, we will have 
+    			  	   marked it as true but teacher still might have it as false. Ignore 
+    			       teacher. A card should never go from teacherApproved = true to false. */
+    				continue; 
+    			}
     			cards[i].teacherApproved = teacherCard.teacherApproved;
     			/* If teacher has not set correct card ID, it's -1 */
     			if (teacherCard.correctCardID >= 0) {
