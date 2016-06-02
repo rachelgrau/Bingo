@@ -469,6 +469,7 @@ var StudentView = React.createClass({
     			var numBoardChecksLeft = this.state.numBingoChecksLeft - 1;
     			/* Check if they have bingo */
     			var incorrectCardIndex = this.hasIncorrectAnswer();
+    			console.log("Incorrect card index found: " + incorrectCardIndex);
     			if (incorrectCardIndex == -1) {
     				this.setState({hasBingo: true, numBingoChecksLeft: numBoardChecksLeft, isModalOpen: false, modalType:"", selectedCardIndex: -1, readyForNextQuestion: true});
     				this.openModal("youGotBingo");
@@ -608,6 +609,7 @@ var StudentView = React.createClass({
   		var correctCardIndex = -1;
   		var incorrectlyAnsweredQuestion = "";
   		if (incorrectCardIndex != -1) {
+  			console.log("Incorrect card index in render: " + incorrectCardIndex);
   			incorrectCard = this.state.cards[incorrectCardIndex];
   			incorrectAnswer = incorrectCard.answer;
   			correctCardIndex = this.getCardIndexFromId(incorrectCard.correctCardID);

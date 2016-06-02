@@ -500,7 +500,7 @@ var TeacherView = React.createClass({
   		for (var i=0; i < studentResponses.length; i++) {
  			
   			var curStudentAnswer = {};
-        /* First, check if the student has repsonded at all (has "response" field)*/
+        /* First, check if the student has repsonded at all (has "response" field) */
         if (studentResponses[i].response) {
           /* The student HAS responded, so create entry based on their response */
           var questionStudentIsAnswering = studentResponses[i].response.question;
@@ -522,7 +522,8 @@ var TeacherView = React.createClass({
               this.state.leaderBoard.push(studentResponses[i].device_uid);
             }
           }
-        
+
+          /* 1) CHECK THEIR ANSWER TO THE CURRENT QUESTION */
           var answer = studentResponses[i].response.answer;
           if (questionStudentIsAnswering != currentQuestion) {
             /* 1) NOT YET ANSWERED: We have not yet received the student's answer to this question */
@@ -545,12 +546,17 @@ var TeacherView = React.createClass({
               this.markCardIncorrectForStudent(studentResponses[i].device_uid, studentResponses[i].response.answer, this.state.cards[this.state.indexOfCurrQuestion].id, currentQuestion);
             }
           }
-
-          /* See if student marked any card as teacherApproved (meaning they got something incorrect, checked, and 
-             re-placed that chip) */
+          /* 2) RE-PLACED CHIPS: See if student marked any card as teacherApproved (meaning they got something incorrect, checked, and re-placed that chip)
+           * 3) ACCIDENTALLY CORRECT: See if the student has a chip on the answer to the current question (meaning they answered
+           *    another question incorrectly with this answer, but now that's ok, we'll count it as correct)
+           */
           for (var j=0; j < studentResponses[i].response.cards.length; j++) {
             var studentCard = studentResponses[i].response.cards[j];
             if (studentCard.teacherApproved) {
+              this.approveCardForStudent(studentResponses[i].device_uid, studentCard.id);
+            } 
+            var answerOfCurrentQuestion = this.state.cards[this.state.indexOfCurrQuestion].answer;
+            if ((studentCard.answer == answerOfCurrentQuestion) && (studentCard.hasChip)) {
               this.approveCardForStudent(studentResponses[i].device_uid, studentCard.id);
             }
           }
