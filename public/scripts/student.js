@@ -1,4 +1,4 @@
-var debug = false;
+var debug = true;
 var STUDENT_URL = "https://api-dev.nearpod.com/v1/hub/student/";
 /* State
  * -------
@@ -133,12 +133,16 @@ var StudentView = React.createClass({
 	      	question: nextQuestion, 
 	      	cards: cards,
 	      	readyForNextQuestion: readyForNext,
-	      	bingoWinners: ["Alex", "Daniel"] // TO DO: change to data.payload.status.bingoWinners
 	    });
 
 	    /* CHECK IF GAME IS OVER */
 	    if (data.payload.status.gameOver) {
-	    	this.openModal("gameOver");
+	    	if (debug) console.log(data.payload.status.leaderBoard);
+	    	this.setState({
+	    		modalType: "gameOver",
+	    		isModalOpen: true,
+	    		bingoWinners: data.payload.status.leaderBoard
+	    	})
 	    }
   	},
   	/* GET request (only performed if game is not over)
@@ -479,7 +483,6 @@ var StudentView = React.createClass({
     			/* Check if they have bingo */
     			var incorrectCardIndex = this.hasIncorrectAnswer();
     			if (incorrectCardIndex == -1) {
-    				console.log("Selected card index: " + this.state.selectedCardIndex);
     				this.setState({hasBingo: true, numBingoChecksLeft: numBoardChecksLeft, isModalOpen: false, modalType:"", selectedCardIndex: -1, readyForNextQuestion: true});
     				this.openModal("youGotBingo");
     				/* POST student resopnse */    					        	 	
@@ -492,8 +495,6 @@ var StudentView = React.createClass({
 	        	 	var params = {
 	              		"status": dictionaryToPost
 	            	};
-	            	console.log("GETTING HERE");
-	            	console.log(dictionaryToPost);
 	        	 	var params = {
 	              		"response": dictionaryToPost,
 	              		"response_text": ""

@@ -207,6 +207,9 @@ var TeacherView = React.createClass({
     var toPost = {};
     /* "gameOver" */
     toPost["gameOver"] = gameOver;
+    if (debug) console.log("LEADER BOARD: ")
+    if (debug) console.log(this.state.leaderBoard);
+    toPost["leaderBoard"] = this.getNicknamesOfWinners();
     /* "studentResponses" */
     toPost["studentResponses"] = this.state.responsesForStudents;
     return toPost;
@@ -236,6 +239,8 @@ var TeacherView = React.createClass({
      */
     update: function(studentResponses) {
       var currentQuestionAnswers = this.getCurrentAnswers(studentResponses);
+      if (debug) console.log("Setting current question answers to: ");
+      if (debug) console.log(currentQuestionAnswers);
       var currentQuestionStats = this.getCurrentStats(studentResponses);
       this.setState({
           currentQuestionAnswers: currentQuestionAnswers,
@@ -317,6 +322,7 @@ var TeacherView = React.createClass({
           curStudentAnswer["nickname"] = this.state.currentQuestionAnswers[i].nickname;
           curStudentAnswer["answer"] =  "";
           curStudentAnswer["isCorrect"] = false;
+          curStudentAnswer["device_uid"] = this.state.currentQuestionAnswers[i].device_uid;
           currentAnswers.push(curStudentAnswer);
         }
         /* Clear stats */
@@ -619,6 +625,29 @@ var TeacherView = React.createClass({
         this.openModal("endGame");
       }
   	},
+    /*
+     * Returns an array with the nicknames of anyone who has gotten Bingo. Does this
+     * by looking at the leaderBoard array (part of state) which keeps track of device UIDs
+     * of anyone who's gotten bingo.
+     */
+    getNicknamesOfWinners: function() {
+      if (debug) console.log("CURRENT QUESITON ANSWERS");
+      if (debug) console.log(this.state.currentQuestionAnswers);
+      var winners = [];
+      for (var i=0; i < this.state.leaderBoard.length; i++) {
+        var device_uid = this.state.leaderBoard[i];
+        console.log("Looking for device UID: " + device_uid);
+        for (var j=0; j < this.state.currentQuestionAnswers.length; j++) {
+          var cur = this.state.currentQuestionAnswers[j];
+          console.log("Looking at cur: ");
+          console.log(cur);
+          if (cur.device_uid == device_uid) {
+            winners.push(cur.nickname);
+          }
+        }
+      }
+      return winners;
+    },
     /* Called when the user clicks "yes" to close the modal. Check what the curent modal type is and act accordingly.
      * "endGame": set gameOver to true 
      */
@@ -631,8 +660,8 @@ var TeacherView = React.createClass({
             modalType: "",
             isModalOpen: false
           });
-          /* TO DO: POST here. */
-          var dictionaryToPost = this.getDictionaryToPost(true);
+          /* TO DO: POST here. */          
+          var dictionaryToPost = this.getDictionaryToPost(true);          
           var params = {
             "status": dictionaryToPost
           };
