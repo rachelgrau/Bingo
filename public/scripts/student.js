@@ -292,6 +292,13 @@ var StudentView = React.createClass({
 		/* If we are waiting for the next question, return false b/c we need to wait for a teacher 
 		   response */
 		if (this.state.readyForNextQuestion) return false; 
+		/* If we already got bingo, disable it */
+		if (this.state.hasBingo) {
+			if (debug) console.log("ALREADY GOT BINGO!!");
+			return false;
+		}
+		if (debug) console.log("HERE");
+		if (debug) console.log(this.state.hasBingo);
 		var numPerRow = Math.sqrt(this.state.cards.length + 1);
 		var wildCardRow = Math.floor(numPerRow/2);
 		var wildCardIndex = Math.floor(this.state.cards.length/2);
@@ -721,7 +728,7 @@ var BingoChecker = React.createClass ({
 		if (this.props.gotBingo) {
 			return (
 				<div className="bingoChecker">
-    				<div className="button grayButtonInactive" onClick={this.props.onBingoClicked}>
+    				<div className="button grayButtonInactive">
 						I have bingo!
 					</div><br/>
 					<div className="textDisabled">Board checks left: <b>{this.props.numBingoChecksLeft}</b></div>
