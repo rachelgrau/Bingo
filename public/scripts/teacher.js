@@ -192,6 +192,7 @@ var TeacherView = React.createClass({
   },
   /* Returns a dictionary that the teacher should post at the given moment. 
    * ----------------------------------------------------------------------
+   * "gameOver" (boolean): whether or not the game is over
    * The teacher creates an individualized response for each student and 
    * creates a dictionary mapping students' device IDs to their individualize
    * response. Call this dictionary "studentResponses." The teacher posts a 
@@ -202,10 +203,10 @@ var TeacherView = React.createClass({
    *        "gameOver"              (Boolean): whether the game has ended
    *        "studentResponses"      (Dictionary): the dictionary described above
    */
-  getDictionaryToPost: function() {
+  getDictionaryToPost: function(gameOver) {
     var toPost = {};
     /* "gameOver" */
-    toPost["gameOver"] = this.state.gameOver;
+    toPost["gameOver"] = gameOver;
     /* "studentResponses" */
     toPost["studentResponses"] = this.state.responsesForStudents;
     return toPost;
@@ -343,7 +344,7 @@ var TeacherView = React.createClass({
             buttonsEnabled: false
          }, function() {
             /* TO DO: POST here */
-            var dictionaryToPost = this.getDictionaryToPost();
+            var dictionaryToPost = this.getDictionaryToPost(this.state.gameOver);
             var params = {
               "status": dictionaryToPost
             };
@@ -414,7 +415,7 @@ var TeacherView = React.createClass({
     /* If we got a new student, do a POST so they can get cards & set up board. */
     if (didAddAStudent) {
       if (debug) console.log("Added new student(s)!");
-      var dictionaryToPost = this.getDictionaryToPost();
+      var dictionaryToPost = this.getDictionaryToPost(this.state.gameOver);
       var params = {
         "status": dictionaryToPost
       };
@@ -631,7 +632,7 @@ var TeacherView = React.createClass({
             isModalOpen: false
           });
           /* TO DO: POST here. */
-          var dictionaryToPost = this.getDictionaryToPost();
+          var dictionaryToPost = this.getDictionaryToPost(true);
           var params = {
             "status": dictionaryToPost
           };
