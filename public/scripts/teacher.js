@@ -415,6 +415,7 @@ var TeacherView = React.createClass({
         newStudentResponse["nextQuestion"] = currentQuestion;
         newStudentResponse["cards"] = this.createStudentBoard();
         newStudentResponse["gameOver"] = this.state.gameOver;
+        newStudentResponse["nickname"] = studentResponses[i].nickname;
         this.state.responsesForStudents[device_uid] = newStudentResponse;
 			}
 		}

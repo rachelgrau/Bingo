@@ -14,7 +14,8 @@ var STUDENT_URL = "https://api-dev.nearpod.com/v1/hub/student/";
  * indexOfIncorrectCard (int): if there is an incorrect card to display, this variable holds the index (in state.cards) of that card
  * deviceID 
  * bingoWinners (array): list of people who have won bingo (if any), given by the teacher
- * name (string): student's nickname
+ * nickname (string): student's nickname
+ * position (int): if the student had bingo, holds their position in leader board; otherwise -1
  */
 var StudentView = React.createClass({
 	getUrlVars: function() {
@@ -62,8 +63,9 @@ var StudentView = React.createClass({
 			hasBingo: false, 
 			indexOfIncorrectCard: -1,
 			deviceID: 0,
-			name: "Rachel",
-			bingoWinners: []
+			nickname: "",
+			bingoWinners: [],
+			position: -1		
 		};
 	},
 	post: function(path, params) {
@@ -85,12 +87,27 @@ var StudentView = React.createClass({
 	    });
   	},
   	loadTeacherResponsesSuccess: function(data, textStatus, jqXHR) {
-  		// if (debug) console.log("GET student custom status succeeded");
-  		// if (debug) console.log(data);
-		/* TO DO: left off here. Once you get the device uid of yourself, 
-		 * you can load the initial cards :) 
-		 */
+  		if (debug) console.log("GET teacher resopnses success");
+  		if (debug) console.log(data);
 		var myDeviceUid = this.state.deviceUID; // TO DO: update to not be hard coded !
+		
+		/* If we don't know our own nickname yet, get it from teacher */
+		var myName = data.payload.status.studentResponses[myDeviceUid].nickname;
+
+		/* If we have bingo and haven't figured out what our position is, get that */
+		var myPos = this.state.position;
+		if (this.state.hasBingo && (this.state.position == -1)) {
+			if (debug) console.log("LEADER BOARD: ");
+			if (debug) console.log(data.payload.status.leaderBoard);
+			for (var i=0; i < data.payload.status.leaderBoard.length; i++) {
+				if (debug) console.log("Looking at: " + data.payload.status.leaderBoard[i]);
+				if (debug) console.log("My nickname: " + this.state.nickname);
+				if (data.payload.status.leaderBoard[i] == this.state.nickname) {
+					myPos = i + 1;
+					break;
+				}
+			}
+		}
 		/* UPDATE CARDS */
 	    var cards = this.state.cards;
 	    var teacherResponseCards = data.payload.status.studentResponses[myDeviceUid].cards;
@@ -128,11 +145,13 @@ var StudentView = React.createClass({
     	if (debug) console.log ("Updating my cards to...");
     	if (debug) console.log(cards);
     	/* Update state */
-
+    	if (debug) console.log("Setting position to: " + myPos);
 	    this.setState({
 	      	question: nextQuestion, 
 	      	cards: cards,
 	      	readyForNextQuestion: readyForNext,
+	      	position: myPos,
+	      	nickname: myName
 	    });
 
 	    /* CHECK IF GAME IS OVER */
@@ -611,6 +630,19 @@ var StudentView = React.createClass({
     },
   	render: function() {
   		var hasBingo = this.bingoButtonShouldActivate();
+  		/* Message to display below "I have Bingo!" button */
+  		var message = "Board checks left: " + this.state.numBingoChecksLeft;
+  		if (this.state.hasBingo) {
+  			message = "You got ";
+  			if (this.state.position == -1) message = "You got Bingo!";
+  			else if (this.state.position == 1) message += " 1st place!";
+  			else if (this.state.position == 2) message += "2nd place!";
+  			else if (this.state.position == 3) message += "3rd place!";
+  			else {
+  				message += this.state.position;
+  				message += "th place";
+  			}
+  		}
   		var question = this.state.question;
   		/* If the user just selected a card, figure out what the word was so we
   		   can display it in modal */
@@ -652,7 +684,7 @@ var StudentView = React.createClass({
 				<div className="studentContent"> 
 					<div className="leftBar">
 						<Question question={this.state.question} readyForNextQuestion={this.state.readyForNextQuestion} onSkip={this.handleSkipQuestion}/>
-						<BingoChecker hasBingo={hasBingo} onBingoClicked={this.handleBingoClicked} numBingoChecksLeft={this.state.numBingoChecksLeft} gotBingo={this.state.hasBingo}/>
+						<BingoChecker hasBingo={hasBingo} onBingoClicked={this.handleBingoClicked} numBingoChecksLeft={this.state.numBingoChecksLeft} gotBingo={this.state.hasBingo} message={message}/>
 					</div>
 					<BingoBoard cards={this.state.cards} handleClickedCard={this.handleClickedCard} clicksEnabled={canSelectCard} incorrectCardIndex={incorrectCardIndex}/>
 				</div>				
@@ -722,6 +754,7 @@ var Question = React.createClass({
  * hasBingo (boolean): if true, then the "I have bingo" button will activate (should happen when the board currently looks like the student has bingo, regardless of whether their answers were correct)
  * onBingoClicked (function): this function gets called when the student clicks "I have bingo!"
  * gotBingo (boolean): if true, the student already got bingo correctly and all buttons in this section are disabled
+ * message (string): message to display below button 
  */
 var BingoChecker = React.createClass ({
 	render: function() {
@@ -731,7 +764,7 @@ var BingoChecker = React.createClass ({
     				<div className="button grayButtonInactive">
 						I have bingo!
 					</div><br/>
-					<div className="textDisabled">Board checks left: <b>{this.props.numBingoChecksLeft}</b></div>
+					{this.props.message}
 				</div>
 			);
 		} else if (this.props.hasBingo) {
@@ -740,7 +773,7 @@ var BingoChecker = React.createClass ({
 	    			<div className="button blueButton" id="checkBingoButton" onClick={this.props.onBingoClicked}>
 						I have bingo!
 					</div><br/>
-					Board checks left: <b>{this.props.numBingoChecksLeft}</b>
+					{this.props.message}
 				</div>
 			);
 		} else {
@@ -749,7 +782,7 @@ var BingoChecker = React.createClass ({
     				<div className="button grayButtonInactive">
 						I have bingo!
 					</div><br/>
-					Board checks left: <b>3</b>
+					{this.props.message}
 				</div>
 			);
 		}
