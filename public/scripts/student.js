@@ -316,6 +316,8 @@ var StudentView = React.createClass({
 			if (debug) console.log("ALREADY GOT BINGO!!");
 			return false;
 		}
+		/* If we are out of bingo checks, return false */
+		if (this.state.numBingoChecksLeft <= 0) return false; 
 		if (debug) console.log("HERE");
 		if (debug) console.log(this.state.hasBingo);
 		var numPerRow = Math.sqrt(this.state.cards.length + 1);
@@ -509,6 +511,7 @@ var StudentView = React.createClass({
     			/* Check if they have bingo */
     			var incorrectCardIndex = this.hasIncorrectAnswer();
     			if (incorrectCardIndex == -1) {
+    				/* They have bingo!! */
     				this.setState({hasBingo: true, numBingoChecksLeft: numBoardChecksLeft, isModalOpen: false, modalType:"", selectedCardIndex: -1, readyForNextQuestion: true});
     				this.openModal("youGotBingo");
     				/* POST student resopnse */    					        	 	
@@ -527,6 +530,7 @@ var StudentView = React.createClass({
 	           	 	};
 	        		this.post("responses", params);				
     			} else {
+    				/* They don't have Bingo. */
     				/* Get the IDs of the incorrect and correct card */
     				/* TO DO: if "correctCardId" and "questionIncorrectlyAnswered" are not
     				   yet filled out for the unapproved card, then keep waiting for a teacher
@@ -567,7 +571,12 @@ var StudentView = React.createClass({
         		cards[correctCardIndex].teacherApproved = true;
         		cards[correctCardIndex].correctCardID = -1;
         		cards[correctCardIndex].questionIncorrectlyAnswered = "";
-        		this.setState({isModalOpen: false, cards: cards, modalType:"", indexOfIncorrectCard: -1});
+        		if (this.state.numBingoChecksLeft <= 0) {
+        			this.setState({cards: cards, modalType:"", indexOfIncorrectCard: -1});
+        			this.openModal("outOfChecks");
+        		} else {
+        			this.setState({isModalOpen: false, cards: cards, modalType:"", indexOfIncorrectCard: -1});
+        		}
         		break;
     		default:
     			/* Close modal */
@@ -1003,6 +1012,24 @@ var Modal = React.createClass({
         						<b>Winners:</b> <br/>
         						{winnersStr}
         					</div>
+	              		</div>
+	                </div>
+        		);
+        	} else if (this.props.modalType == "outOfChecks") {
+        		return (
+        			<div className="modalBg">
+	                 	<div className="modal">	                 		
+        					<div className="modalHeader">
+        						Uh oh!
+        					</div>
+        					<div className="modalSubheader" id="modalConfirmation">
+        						You are out of bingo checks. You can still play for fun! <br/>
+        					</div>
+        					<div className="modalFooter">
+        						<div id="singleButtonContainer">
+									<div className="modalButton blueButton" id="rightModalButton" onClick={this.props.onCancel}>Keep playing!</div>
+								</div>
+							</div>
 	              		</div>
 	                </div>
         		);
