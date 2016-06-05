@@ -513,7 +513,7 @@ var StudentView = React.createClass({
     			var incorrectCardIndex = this.hasIncorrectAnswer();
     			if (incorrectCardIndex == -1) {
     				/* They have bingo!! */
-    				this.setState({hasBingo: true, numBingoChecksLeft: numBoardChecksLeft, isModalOpen: false, modalType:"", selectedCardIndex: -1, readyForNextQuestion: true});
+    				this.setState({hasBingo: true, numBingoChecksLeft: numBoardChecksLeft, isModalOpen: false, modalType:"", readyForNextQuestion: false});
     				this.openModal("youGotBingo");
     				/* POST student resopnse */    					        	 	
     				var dictionaryToPost = {};
@@ -599,13 +599,13 @@ var StudentView = React.createClass({
        			break;
     		case "checkBingo":
     			/* Close modal */
-    			this.setState({isModalOpen: false, modalType:"", selectedCardIndex: -1});
+    			this.setState({isModalOpen: false, modalType:""});
         		break;
         	case "skip":
         		this.setState({isModalOpen: false, modalType:"", selectedCardIndex: -1});
         		break;
         	case "youGotBingo":
-        		this.setState({isModalOpen: false, modalType:"", selectedCardIndex: -1});
+        		this.setState({isModalOpen: false, modalType:""});
         		break;
     		default:
     			/* Close modal */
