@@ -622,9 +622,7 @@ var TeacherView = React.createClass({
   		return stats;
   	},
   	handleEndGame: function() {
-      if (this.state.buttonsEnabled) {
-        this.openModal("endGame");
-      }
+      this.openModal("endGame");
   	},
     /*
      * Returns an array with the nicknames of anyone who has gotten Bingo. Does this
