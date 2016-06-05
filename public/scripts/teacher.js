@@ -209,7 +209,7 @@ var TeacherView = React.createClass({
     toPost["gameOver"] = gameOver;
     if (debug) console.log("LEADER BOARD: ")
     if (debug) console.log(this.state.leaderBoard);
-    toPost["leaderBoard"] = this.getNicknamesOfWinners();
+    toPost["leaderBoard"] = this.getDictionaryOfWinners();
     /* "studentResponses" */
     toPost["studentResponses"] = this.state.responsesForStudents;
     return toPost;
@@ -625,11 +625,15 @@ var TeacherView = React.createClass({
       this.openModal("endGame");
   	},
     /*
-     * Returns an array with the nicknames of anyone who has gotten Bingo. Does this
+     * Returns an array with the nicknames & device_uids of anyone who has gotten Bingo. Does this
      * by looking at the leaderBoard array (part of state) which keeps track of device UIDs
      * of anyone who's gotten bingo.
+     * Example: [
+        { "nickname": Rachel, "device_uid": "s43khl2j4h53"},
+        { "nickname": Ricky, "device_uid": "s9e08234390" }
+      ]
      */
-    getNicknamesOfWinners: function() {
+    getDictionaryOfWinners: function() {
       if (debug) console.log("CURRENT QUESITON ANSWERS");
       if (debug) console.log(this.state.currentQuestionAnswers);
       var winners = [];
@@ -637,11 +641,12 @@ var TeacherView = React.createClass({
         var device_uid = this.state.leaderBoard[i];
         console.log("Looking for device UID: " + device_uid);
         for (var j=0; j < this.state.currentQuestionAnswers.length; j++) {
-          var cur = this.state.currentQuestionAnswers[j];
-          console.log("Looking at cur: ");
-          console.log(cur);
+          var cur = this.state.currentQuestionAnswers[j];        
           if (cur.device_uid == device_uid) {
-            winners.push(cur.nickname);
+            var entry = {};
+            entry["nickname"] = cur.nickname;
+            entry["device_uid"] = cur.device_uid;
+            winners.push(entry);
           }
         }
       }
