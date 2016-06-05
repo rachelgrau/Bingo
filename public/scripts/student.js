@@ -13,7 +13,9 @@ var STUDENT_URL = "https://api-dev.nearpod.com/v1/hub/student/";
  * hasBingo (boolean): false until the student gets bingo correctly!
  * indexOfIncorrectCard (int): if there is an incorrect card to display, this variable holds the index (in state.cards) of that card
  * deviceID 
- * name (string): student's nickname
+ * bingoWinners (array): list of people who have won bingo (if any), given by the teacher
+ * nickname (string): student's nickname
+ * position (int): if the student had bingo, holds their position in leader board; otherwise -1
  */
 var StudentView = React.createClass({
 	getUrlVars: function() {
@@ -27,11 +29,9 @@ var StudentView = React.createClass({
   	decodeDeviceUID: function(jwt) {
 		var firstIndex = jwt.indexOf(".") + 1;
 		var firstParse = jwt.substr(firstIndex);
-		console.log(firstParse);
 
 		var secondIndex = firstParse.indexOf(".");
 		var secondParse = firstParse.substr(0, firstParse.indexOf("."));
-		console.log(secondParse);
 
 		var decodedJWT = JSON.parse(atob(secondParse));
 		var uid = decodedJWT["uid"];
@@ -63,7 +63,9 @@ var StudentView = React.createClass({
 			hasBingo: false, 
 			indexOfIncorrectCard: -1,
 			deviceID: 0,
-			name: "Rachel"
+			nickname: "",
+			bingoWinners: [],
+			position: -1		
 		};
 	},
 	post: function(path, params) {
@@ -85,12 +87,27 @@ var StudentView = React.createClass({
 	    });
   	},
   	loadTeacherResponsesSuccess: function(data, textStatus, jqXHR) {
-  		if (debug) console.log("GET student custom status succeeded");
+  		if (debug) console.log("GET teacher resopnses success");
   		if (debug) console.log(data);
-		/* TO DO: left off here. Once you get the device uid of yourself, 
-		 * you can load the initial cards :) 
-		 */
 		var myDeviceUid = this.state.deviceUID; // TO DO: update to not be hard coded !
+		
+		/* If we don't know our own nickname yet, get it from teacher */
+		var myName = data.payload.status.studentResponses[myDeviceUid].nickname;
+
+		/* If we have bingo and haven't figured out what our position is, get that */
+		var myPos = this.state.position;
+		if (this.state.hasBingo && (this.state.position == -1)) {
+			if (debug) console.log("LEADER BOARD: ");
+			if (debug) console.log(data.payload.status.leaderBoard);
+			for (var i=0; i < data.payload.status.leaderBoard.length; i++) {
+				if (debug) console.log("Looking at: " + data.payload.status.leaderBoard[i]);
+				if (debug) console.log("My nickname: " + this.state.nickname);
+				if (data.payload.status.leaderBoard[i] == this.state.nickname) {
+					myPos = i + 1;
+					break;
+				}
+			}
+		}
 		/* UPDATE CARDS */
 	    var cards = this.state.cards;
 	    var teacherResponseCards = data.payload.status.studentResponses[myDeviceUid].cards;
@@ -128,11 +145,24 @@ var StudentView = React.createClass({
     	if (debug) console.log ("Updating my cards to...");
     	if (debug) console.log(cards);
     	/* Update state */
+    	if (debug) console.log("Setting position to: " + myPos);
 	    this.setState({
 	      	question: nextQuestion, 
 	      	cards: cards,
-	      	readyForNextQuestion: readyForNext
+	      	readyForNextQuestion: readyForNext,
+	      	position: myPos,
+	      	nickname: myName
 	    });
+
+	    /* CHECK IF GAME IS OVER */
+	    if (data.payload.status.gameOver) {
+	    	if (debug) console.log(data.payload.status.leaderBoard);
+	    	this.setState({
+	    		modalType: "gameOver",
+	    		isModalOpen: true,
+	    		bingoWinners: data.payload.status.leaderBoard
+	    	})
+	    }
   	},
   	/* GET request (only performed if game is not over)
    	 * --------------------------------------------------
@@ -178,6 +208,8 @@ var StudentView = React.createClass({
     	toPost["answer"] = answer;
     	toPost["didPass"] = didPass;
     	toPost["hasBingo"] = this.state.hasBingo;
+    	if (debug) console.log("Posting dictionary: ");
+    	if (debug) console.log(toPost);
     	return toPost;
   	},
 	/* 
@@ -279,6 +311,15 @@ var StudentView = React.createClass({
 		/* If we are waiting for the next question, return false b/c we need to wait for a teacher 
 		   response */
 		if (this.state.readyForNextQuestion) return false; 
+		/* If we already got bingo, disable it */
+		if (this.state.hasBingo) {
+			if (debug) console.log("ALREADY GOT BINGO!!");
+			return false;
+		}
+		/* If we are out of bingo checks, return false */
+		if (this.state.numBingoChecksLeft <= 0) return false; 
+		if (debug) console.log("HERE");
+		if (debug) console.log(this.state.hasBingo);
 		var numPerRow = Math.sqrt(this.state.cards.length + 1);
 		var wildCardRow = Math.floor(numPerRow/2);
 		var wildCardIndex = Math.floor(this.state.cards.length/2);
@@ -471,21 +512,26 @@ var StudentView = React.createClass({
     			/* Check if they have bingo */
     			var incorrectCardIndex = this.hasIncorrectAnswer();
     			if (incorrectCardIndex == -1) {
+    				/* They have bingo!! */
     				this.setState({hasBingo: true, numBingoChecksLeft: numBoardChecksLeft, isModalOpen: false, modalType:"", selectedCardIndex: -1, readyForNextQuestion: true});
     				this.openModal("youGotBingo");
-    				/* POST student resopnse */
-    				var dictionaryToPost = this.getDictionaryToPost(cards[this.state.selectedCardIndex].answer, false);
+    				/* POST student resopnse */    					        	 	
+    				var dictionaryToPost = {};
+			    	dictionaryToPost["cards"] = this.state.cards;
+			    	dictionaryToPost["question"] = "";
+			    	dictionaryToPost["answer"] = "";
+			    	dictionaryToPost["didPass"] = false;
+			    	dictionaryToPost["hasBingo"] = true;
 	        	 	var params = {
 	              		"status": dictionaryToPost
 	            	};
-	        	 	if (debug) console.log("Posting dictionary: ");
-	        	 	if (debug) console.log(dictionaryToPost);
 	        	 	var params = {
 	              		"response": dictionaryToPost,
 	              		"response_text": ""
 	           	 	};
 	        		this.post("responses", params);				
     			} else {
+    				/* They don't have Bingo. */
     				/* Get the IDs of the incorrect and correct card */
     				/* TO DO: if "correctCardId" and "questionIncorrectlyAnswered" are not
     				   yet filled out for the unapproved card, then keep waiting for a teacher
@@ -526,7 +572,12 @@ var StudentView = React.createClass({
         		cards[correctCardIndex].teacherApproved = true;
         		cards[correctCardIndex].correctCardID = -1;
         		cards[correctCardIndex].questionIncorrectlyAnswered = "";
-        		this.setState({isModalOpen: false, cards: cards, modalType:"", indexOfIncorrectCard: -1});
+        		if (this.state.numBingoChecksLeft <= 0) {
+        			this.setState({cards: cards, modalType:"", indexOfIncorrectCard: -1});
+        			this.openModal("outOfChecks");
+        		} else {
+        			this.setState({isModalOpen: false, cards: cards, modalType:"", indexOfIncorrectCard: -1});
+        		}
         		break;
     		default:
     			/* Close modal */
@@ -589,6 +640,19 @@ var StudentView = React.createClass({
     },
   	render: function() {
   		var hasBingo = this.bingoButtonShouldActivate();
+  		/* Message to display below "I have Bingo!" button */
+  		var message = "Board checks left: " + this.state.numBingoChecksLeft;
+  		if (this.state.hasBingo) {
+  			message = "You got ";
+  			if (this.state.position == -1) message = "You got Bingo!";
+  			else if (this.state.position == 1) message += " 1st place!";
+  			else if (this.state.position == 2) message += "2nd place!";
+  			else if (this.state.position == 3) message += "3rd place!";
+  			else {
+  				message += this.state.position;
+  				message += "th place";
+  			}
+  		}
   		var question = this.state.question;
   		/* If the user just selected a card, figure out what the word was so we
   		   can display it in modal */
@@ -630,10 +694,10 @@ var StudentView = React.createClass({
 				<div className="studentContent"> 
 					<div className="leftBar">
 						<Question question={this.state.question} readyForNextQuestion={this.state.readyForNextQuestion} onSkip={this.handleSkipQuestion}/>
-						<BingoChecker hasBingo={hasBingo} onBingoClicked={this.handleBingoClicked} numBingoChecksLeft={this.state.numBingoChecksLeft} gotBingo={this.state.hasBingo}/>
+						<BingoChecker hasBingo={hasBingo} onBingoClicked={this.handleBingoClicked} numBingoChecksLeft={this.state.numBingoChecksLeft} gotBingo={this.state.hasBingo} message={message}/>
 					</div>
 					<BingoBoard cards={this.state.cards} handleClickedCard={this.handleClickedCard} clicksEnabled={canSelectCard} incorrectCardIndex={incorrectCardIndex}/>
-				</div>
+				</div>				
 				<Modal 
 					modalType={this.state.modalType} 
 					isOpen={this.state.isModalOpen} 
@@ -644,7 +708,8 @@ var StudentView = React.createClass({
 					numBingoChecksLeft={this.state.numBingoChecksLeft} 
 					incorrectAnswer={incorrectAnswer} 
 					correctAnswer={correctAnswer}
-					incorrectButtonMessage={incorrectButtonMessage}/>
+					incorrectButtonMessage={incorrectButtonMessage}
+					bingoWinners={this.state.bingoWinners} />
 			</div>
 		);
 	}
@@ -699,16 +764,17 @@ var Question = React.createClass({
  * hasBingo (boolean): if true, then the "I have bingo" button will activate (should happen when the board currently looks like the student has bingo, regardless of whether their answers were correct)
  * onBingoClicked (function): this function gets called when the student clicks "I have bingo!"
  * gotBingo (boolean): if true, the student already got bingo correctly and all buttons in this section are disabled
+ * message (string): message to display below button 
  */
 var BingoChecker = React.createClass ({
 	render: function() {
 		if (this.props.gotBingo) {
 			return (
 				<div className="bingoChecker">
-    				<div className="button grayButtonInactive" onClick={this.props.onBingoClicked}>
+    				<div className="button grayButtonInactive">
 						I have bingo!
 					</div><br/>
-					<div className="textDisabled">Board checks left: <b>{this.props.numBingoChecksLeft}</b></div>
+					{this.props.message}
 				</div>
 			);
 		} else if (this.props.hasBingo) {
@@ -717,7 +783,7 @@ var BingoChecker = React.createClass ({
 	    			<div className="button blueButton" id="checkBingoButton" onClick={this.props.onBingoClicked}>
 						I have bingo!
 					</div><br/>
-					Board checks left: <b>{this.props.numBingoChecksLeft}</b>
+					{this.props.message}
 				</div>
 			);
 		} else {
@@ -726,7 +792,7 @@ var BingoChecker = React.createClass ({
     				<div className="button grayButtonInactive">
 						I have bingo!
 					</div><br/>
-					Board checks left: <b>3</b>
+					{this.props.message}
 				</div>
 			);
 		}
@@ -821,6 +887,7 @@ var BingoCard = React.createClass ({
  * "skip": "Are you sure you want to skip" + question + yes/no buttons 
  * "youGotBingo": "You just got bingo" + list of people who got bingo + keep playing button
  * "incorrect": When they check Bingo but had an incorrect answer, shows them that incorrect answer + lets them place chip on correct answer
+ * "gameOver": When the game is over. A modal with no buttons.
  *
  * Props
  * -----
@@ -836,6 +903,7 @@ var BingoCard = React.createClass ({
  * onCancel (function): the callback for when student clicks "cancel" button (regardless of modal type)
  * onAccept (function): the callback for when student clicks "yes" button (regardless of modal type)
  * incorrectButtonMessage (string): the message to display on the button when showing the student they got a card incorrect
+ * bingoWinners (array): if the game is over, we display a list of winners
  */
 var Modal = React.createClass({
     render: function() {
@@ -923,6 +991,48 @@ var Modal = React.createClass({
         					<div className="button transparentOutlineButton" id="placeCorrectChip" onClick={this.props.onAccept}> {this.props.incorrectButtonMessage}</div>
         				</div>
         			</div>
+        		);
+        	} else if (this.props.modalType == "gameOver") {
+        		if (debug) console.log("Bingo winners: ");
+        		if (debug) console.log(this.props.bingoWinners);
+        		var winnersStr = "None"
+        		if (this.props.bingoWinners.length > 0) {
+        			winnersStr = this.props.bingoWinners[0];
+        			for (var i=1; i < this.props.bingoWinners.length; i++) {
+        				winnersStr += ", ";
+        				winnersStr += this.props.bingoWinners[i];
+        			}
+        		}        
+        		return (
+        			<div className="modalBg">
+	                 	<div className="modal">	                 		
+        					<div className="modalHeader">
+        						Game over! 
+        					</div>
+        					<div className="modalSubheader" id="modalConfirmation">
+        						<b>Winners:</b> <br/>
+        						{winnersStr}
+        					</div>
+	              		</div>
+	                </div>
+        		);
+        	} else if (this.props.modalType == "outOfChecks") {
+        		return (
+        			<div className="modalBg">
+	                 	<div className="modal">	                 		
+        					<div className="modalHeader">
+        						Uh oh!
+        					</div>
+        					<div className="modalSubheader" id="modalConfirmation">
+        						You are out of bingo checks. You can still play for fun! <br/>
+        					</div>
+        					<div className="modalFooter">
+        						<div id="singleButtonContainer">
+									<div className="modalButton blueButton" id="rightModalButton" onClick={this.props.onCancel}>Keep playing!</div>
+								</div>
+							</div>
+	              		</div>
+	                </div>
         		);
         	} else {
         		return (
