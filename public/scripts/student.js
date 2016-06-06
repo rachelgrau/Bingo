@@ -101,9 +101,11 @@ var StudentView = React.createClass({
 			if (debug) console.log(data.payload.status.leaderBoard);
 			for (var i=0; i < data.payload.status.leaderBoard.length; i++) {
 				if (debug) console.log("Looking at: " + data.payload.status.leaderBoard[i]);
-				if (debug) console.log("My nickname: " + this.state.nickname);
-				if (data.payload.status.leaderBoard[i] == this.state.nickname) {
+				if (debug) console.log("It has device UID: " + data.payload.status.leaderBoard[i].device_uid);
+				if (debug) console.log("And I have decive UID: " + this.state.deviceUID);
+				if (data.payload.status.leaderBoard[i].device_uid == this.state.deviceUID) {					
 					myPos = i + 1;
+					if (debug) console.log("So yes, setting pos to: " + myPos);
 					break;
 				}
 			}
@@ -155,6 +157,11 @@ var StudentView = React.createClass({
 	    });
 
 	    /* CHECK IF GAME IS OVER */
+	    var leaderNicknames = [];
+	    for (var i=0; i < data.payload.status.leaderBoard.length; i++) {
+	    	var cur = data.payload.status.leaderBoard[i];
+	    	leaderNicknames.push(cur.nickname);
+	    }
 	    if (data.payload.status.gameOver) {
 	    	if (debug) console.log(data.payload.status.leaderBoard);
 	    	this.setState({
@@ -642,6 +649,7 @@ var StudentView = React.createClass({
   		var hasBingo = this.bingoButtonShouldActivate();
   		/* Message to display below "I have Bingo!" button */
   		var message = "Board checks left: " + this.state.numBingoChecksLeft;
+  		var bingoWinnerNicknames = [];
   		if (this.state.hasBingo) {
   			message = "You got ";
   			if (this.state.position == -1) message = "You got Bingo!";
@@ -651,6 +659,12 @@ var StudentView = React.createClass({
   			else {
   				message += this.state.position;
   				message += "th place";
+  			}
+
+  			/* Create array of JUST nicknames (not device UIDs) of winners */
+  			for (var i=0; i < this.state.bingoWinners.length; i++) {
+  				var cur = this.state.bingoWinners[i];
+  				bingoWinnerNicknames.push(cur["nickname"]);
   			}
   		}
   		var question = this.state.question;
@@ -709,7 +723,7 @@ var StudentView = React.createClass({
 					incorrectAnswer={incorrectAnswer} 
 					correctAnswer={correctAnswer}
 					incorrectButtonMessage={incorrectButtonMessage}
-					bingoWinners={this.state.bingoWinners} />
+					bingoWinners={bingoWinnerNicknames} />
 			</div>
 		);
 	}
