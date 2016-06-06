@@ -27,15 +27,19 @@ var StudentView = React.createClass({
   	},
   	/* Given a JWT, returns the device UID that corresponds to that JWT. */
   	decodeDeviceUID: function(jwt) {
-		var firstIndex = jwt.indexOf(".") + 1;
-		var firstParse = jwt.substr(firstIndex);
+  		if (jwt) {
+  			var firstIndex = jwt.indexOf(".") + 1;
+			var firstParse = jwt.substr(firstIndex);
 
-		var secondIndex = firstParse.indexOf(".");
-		var secondParse = firstParse.substr(0, firstParse.indexOf("."));
+			var secondIndex = firstParse.indexOf(".");
+			var secondParse = firstParse.substr(0, firstParse.indexOf("."));
 
-		var decodedJWT = JSON.parse(atob(secondParse));
-		var uid = decodedJWT["uid"];
-		return uid;
+			var decodedJWT = JSON.parse(atob(secondParse));
+			var uid = decodedJWT["uid"];
+			return uid;
+  		} else {
+  			return "";
+  		}
   	},
   	setHeaders: function(){
     	return {"x-api-key":"7dabac64681a7c12c1cb97183c44de93", "JWT": this.state.jwt};
@@ -171,6 +175,16 @@ var StudentView = React.createClass({
 	    	})
 	    }
   	},
+  	/* Called when the GET request to load this student's prior responses to this 
+  	   game succeeded. If there is a response, then reload that game. Otherwise
+  	   it's just a new game. 
+
+  	   Start polling for teacher responses here.
+  	 */
+  	loadPriorStudentResponseSuccess: function(data, textStatus, jqXHR) {
+  		if (debug) console.log("LOAD PRIOR STUDENT RESPONSE SUCCESS!");
+  		if (debug) console.log(data);
+	},
   	/* GET request (only performed if game is not over)
    	 * --------------------------------------------------
    	 * isContentTool (boolean): true if you are making a GET request to content tool, false otherwise
@@ -190,7 +204,7 @@ var StudentView = React.createClass({
 		    	successCallback(data, textStatus, jqXHR);
 		    },
 		    error: function(jqXHR, textStatus, errorThrown){
-		    	this.showError(jqXHR.responseJSON);
+		    	if (debug) console.log("ERROR!");
 		    }
 		});
   	},
@@ -362,10 +376,11 @@ var StudentView = React.createClass({
 		this.get(STUDENT_URL + "custom_status", "", this.loadTeacherResponsesSuccess);
 	},
   	componentDidMount: function() {
-  		/* JULIANNA TO DO: get device UID here, then set state "deviceUID" to be the device UID */
+  		/* First see if student is in middle of game (e.g. reloaded page) */
+  		// this.get(STUDENT_URL + "responses", this.loadPriorStudentResponseSuccess);
     	/* Poll for teacher response every X seconds */
     	setInterval(this.loadTeacherResponses, this.props.pollInterval);
-    	/* Trying to get device_uid (not working) */
+    	
   	},
   	/* The app uses one shared modal, so we open & close it as needed and just change its inner content.
   	 * modalType (string): the type of modal you want to open
