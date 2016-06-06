@@ -163,7 +163,7 @@ var ContentTool = React.createClass({
 			  successCallback(data, textStatus, jqXHR);
 		  },
 		  error: function(jqXHR, textStatus, errorThrown){
-			  showError(jqXHR.responseJSON);
+			  this.showError(jqXHR.responseJSON);
 		  }
 		});	
 	},
@@ -350,6 +350,7 @@ var Editor = React.createClass({
 	},
 	handleAnswerChange: function(e) {
 		this.setState({hasChangedAnswer: true, answer: e.target.value});
+
 	},
 	changedSelection: function() {
     	this.setState(this.getInitialState());
