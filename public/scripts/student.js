@@ -187,7 +187,9 @@ var StudentView = React.createClass({
   		if (data.payload.response) {
   			if (debug) console.log("ALREADY HAS A RESPONSE...");
   			this.setState({
-  				cards: data.payload.response.cards
+  				cards: data.payload.response.cards,
+  				numBingoChecksLeft: data.payload.response.numBingoChecksLeft,
+  				hasBingo: data.payload.hasBingo
   			});
   		} else {
   			if (debug) console.log("NO RESPONSE YET, PROCEED...");
@@ -240,6 +242,7 @@ var StudentView = React.createClass({
     	toPost["answer"] = answer;
     	toPost["didPass"] = didPass;
     	toPost["hasBingo"] = this.state.hasBingo;
+    	toPost["numBingoChecksLeft"] = this.state.numBingoChecksLeft;
     	if (debug) console.log("Posting dictionary: ");
     	if (debug) console.log(toPost);
     	return toPost;
@@ -552,6 +555,7 @@ var StudentView = React.createClass({
 			    	dictionaryToPost["answer"] = "";
 			    	dictionaryToPost["didPass"] = false;
 			    	dictionaryToPost["hasBingo"] = true;
+			    	dictionaryToPost["numBingoChecksLeft"] = this.state.numBingoChecksLeft;
 	        	 	var params = {
 	              		"status": dictionaryToPost
 	            	};
