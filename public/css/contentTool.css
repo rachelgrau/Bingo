@@ -40,6 +40,7 @@ textArea {
 
 #header {
 	font-family: "Avenir LT Std", "Avenir Next", "Avenir", "Helvetica-Neue";
+	font-size: 30px;
 }
 
 .headerText {
@@ -101,7 +102,7 @@ textArea {
 	font-family: "Avenir LT Std", "Avenir Next", "Avenir", "Helvetica-Neue";
 	color: #5b6d79;
 	font-size: 22px;
-	font-weight: 800;
+	font-weight: 400;
 	line-height: 22px;
 }
 
@@ -109,7 +110,7 @@ textArea {
 	font-family: "Avenir LT Std", "Avenir Next", "Avenir", "Helvetica-Neue";
 	color: #5b6d79;
 	font-size: 22px;
-	font-weight: 800;
+	font-weight: 400;
 	line-height: 22px;
 	margin-top: 21px;
 }

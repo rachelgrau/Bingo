@@ -349,7 +349,11 @@ var Editor = React.createClass({
 		});
 	},
 	handleAnswerChange: function(e) {
-		this.setState({hasChangedAnswer: true, answer: e.target.value});
+		var answer = e.target.value;
+		if (answer.length > 27) {
+			answer = answer.substring(0, 27);
+		}
+		this.setState({hasChangedAnswer: true, answer: answer});
 	},
 	changedSelection: function() {
     	this.setState(this.getInitialState());
@@ -391,6 +395,7 @@ var Editor = React.createClass({
 	/* Returns whatever is currently in the answer input field. */
 	getCurrentAnswer: function() {
 		var answer = this.state.answer;
+		if (debug) console.log("Answer: " + answer);
 		/* If they haven't changed answer, use props (saved value for this card) */
 	    if (!this.state.hasChangedAnswer) {
 	    	answer = this.props.card.answer;
@@ -409,11 +414,11 @@ var Editor = React.createClass({
 					<form className="bingoCardForm" onSubmit={this.handleSubmit}>
 						<div className="questionBox">
 							Question:
-							<textArea className="editorInput" type="text" value={question} onChange={this.handleQuestionChange}/>
+							<textArea maxLength={130} className="editorInput" type="text" value={question} onChange={this.handleQuestionChange}/>
 						</div>
 						<div className="answerBox">
 							Answer (On-Tile):
-							<textArea className="editorInput" type="text" value={answer} onChange={this.handleAnswerChange} />
+							<textArea maxLength={27} className="editorInput" type="text" value={answer} onChange={this.handleAnswerChange} />
 						</div>
 						<DoneButton isActive={isActive} />
 					</form>
