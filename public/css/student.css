@@ -19,7 +19,7 @@ body {
 	line-height: 97px;
 	background-color: #06aaff;
 	color: white;
-	font-family: "Avenir Next";
+	font-family: "Avenir Next", "Avenir", "Helvetica-Neue";
 	font-size: 41px;
 	font-weight: 300;
 	text-align: center;
@@ -33,7 +33,7 @@ body {
 	border: 1px solid #00a8ff;
 	border-radius: 4px;
 	color: #06aaff;
-	font-family: "Avenir LT Std";
+	font-family: "Avenir LT Std", "Avenir Next", "Avenir", "Helvetica-Neue";
 	font-size: 11px;
 	font-weight: 400;
 	line-height: 30px;
@@ -55,7 +55,7 @@ body {
 	padding: 10px 46px 20px 46px;
 	background-color: white;
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-	font-family: "Avenir Next";
+	font-family: "Avenir Next", "Avenir", "Helvetica-Neue";
 	font-size: 20px;
 	line-height: 30px;
 	font-weight: 400;
@@ -108,7 +108,7 @@ body {
 	margin-top: 25px;
 	background-color: white;
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-	font-family: "Avenir Next";
+	font-family: "Avenir Next", "Avenir", "Helvetica-Neue";
 	font-size: 18px;
 	font-weight: 400;
 	line-height: 41px;
@@ -142,7 +142,7 @@ body {
 	border: 2px solid #06aaff;
 	border-radius: 8px;
 	color: #181818;
-	font-family: "Avenir Next";
+	font-family: "Avenir Next", "Avenir", "Helvetica-Neue";
 	font-size: 15px;
 	font-weight: 200;
 	line-height: 20px;
@@ -183,7 +183,7 @@ body {
 	border: none;
 	outline: none;
 	text-align: center;
-	font-family: "Avenir LT Std";
+	font-family: "Avenir LT Std", "Avenir Next", "Avenir", "Helvetica-Neue";
 	font-size: 25px;
 	font-weight: 200;
 }
@@ -207,7 +207,7 @@ body {
 	border-radius: 4px;
 	/* Font */
 	color: #06aaff;
-	font-family: "Avenir LT Std";
+	font-family: "Avenir LT Std", "Avenir Next", "Avenir", "Helvetica-Neue";
 	font-size: 13px;
 	font-weight: 400;
 	line-height: 37px;
@@ -273,7 +273,7 @@ body {
     /* Font */
     text-align: center;
     color: #454545;
-	font-family: "Avenir Next";
+	font-family: "Avenir Next", "Avenir", "Helvetica-Neue";
 	font-size: 22px;
 	font-weight: 500;
 	line-height: 30px;
@@ -314,7 +314,7 @@ body {
 	/* Font */
 	word-wrap: break-word;
 	color: black;
-	font-family: "Avenir LT Std";
+	font-family: "Avenir LT Std", "Avenir Next", "Avenir", "Helvetica-Neue";
 	font-size: 16px;
 	font-weight: 400;
 	line-height: 20px;
@@ -364,7 +364,7 @@ body {
 	width: 206px;
 	height: 42px;
 	/* Font */
-	font-family: "Avenir Next";
+	font-family: "Avenir Next", "Avenir", "Helvetica-Neue";
 	font-size: 16px;
 	font-weight: 400;
 	line-height: 42px;
@@ -376,14 +376,14 @@ body {
 
 /* Are you sure you want to check bingo? */
 .modalSubheader {
-	font-family: "Avenir Next";
+	font-family: "Avenir Next", "Avenir", "Helvetica-Neue";
 	font-size: 16px;
 	line-height: 26px;
 	font-weight: 400;
 }
 
 .modalHeader {
-	font-family: "Avenir Next";
+	font-family: "Avenir Next", "Avenir", "Helvetica-Neue";
 	font-size: 20px;
 	line-height: 30px;
 	font-weight: 400;
@@ -441,7 +441,7 @@ body {
     /* Font */
     text-align: left;
     color: #454545;
-	font-family: "Avenir Next";
+	font-family: "Avenir Next", "Avenir", "Helvetica-Neue";
 	font-size: 13px;
 	font-weight: 200;
 	line-height: 15px;
@@ -461,7 +461,7 @@ body {
     /* Font */
     text-align: center;
     color: #454545;
-	font-family: "Avenir Next";
+	font-family: "Avenir Next", "Avenir", "Helvetica-Neue";
 	font-size: 22px;
 	font-weight: 500;
 	line-height: 30px;

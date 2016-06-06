@@ -17,7 +17,7 @@ body {
 
 input[type="text"] {
 	color: #787e83;
-	font-family: "Avenir LT Std";
+	font-family: "Avenir LT Std", "Avenir Next", "Avenir", "Helvetica-Neue";
 	font-size: 22px;
 	font-weight: 500;
 	line-height: 29px;
@@ -27,7 +27,7 @@ textArea {
 	padding: 10px;
 	box-sizing: border-box;
 	color: #787e83;
-	font-family: "Avenir LT Std";
+	font-family: "Avenir LT Std", "Avenir Next", "Avenir", "Helvetica-Neue";
 	font-size: 22px;
 	font-weight: 500;
 	line-height: 29px;
@@ -39,7 +39,7 @@ textArea {
 /* HEADER STUFF */
 
 #header {
-	font-family: "Avenir LT Std";
+	font-family: "Avenir LT Std", "Avenir Next", "Avenir", "Helvetica-Neue";
 }
 
 .headerText {
@@ -89,7 +89,7 @@ textArea {
 
 .editorText {
 	color: #5b6d79;
-	font-family: "Avenir LT Std";
+	font-family: "Avenir LT Std", "Avenir Next", "Avenir", "Helvetica-Neue";
 	font-size: 24px;
 	font-weight: 400;
 	line-height: 25px;
@@ -98,7 +98,7 @@ textArea {
 }
 
 .questionBox {
-	font-family: "Avenir LT Std";
+	font-family: "Avenir LT Std", "Avenir Next", "Avenir", "Helvetica-Neue";
 	color: #5b6d79;
 	font-size: 22px;
 	font-weight: 800;
@@ -106,7 +106,7 @@ textArea {
 }
 
 .answerBox {
-	font-family: "Avenir LT Std";
+	font-family: "Avenir LT Std", "Avenir Next", "Avenir", "Helvetica-Neue";
 	color: #5b6d79;
 	font-size: 22px;
 	font-weight: 800;
@@ -162,7 +162,7 @@ textArea {
 	border: 1px solid #cdd3d7;
 	border-radius: 2px;
 	color: #787e83;
-	font-family: "Avenir LT Std";
+	font-family: "Avenir LT Std", "Avenir Next", "Avenir", "Helvetica-Neue";
 	font-size: 16px;
 	font-weight: 500;
 }
@@ -199,7 +199,7 @@ textArea {
 	border: 1px solid #06aaff;
 	border-radius: 2px;
 	color: black;
-	font-family: "Avenir LT Std";
+	font-family: "Avenir LT Std", "Avenir Next", "Avenir", "Helvetica-Neue";
 	font-size: 16px;
 	font-weight: 500;
 }
@@ -216,7 +216,7 @@ textArea {
 	width: 294px;
 	height: 63px;
 	color: white;
-	font-family: "Avenir LT Std";
+	font-family: "Avenir LT Std", "Avenir Next", "Avenir", "Helvetica-Neue";
 	font-size: 22px;
 	font-weight: 500;
 	line-height: 22px;

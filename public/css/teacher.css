@@ -37,7 +37,7 @@ body {
 
 h1 {
 	/* Font */
-	font-family: "Avenir LT Std";
+	font-family: "Avenir LT Std" "Avenir Next", "Avenir", "Helvetica-Neue";
 	font-size: 18px;
 	font-weight: 500;
 	line-height: 21px;
@@ -67,7 +67,7 @@ h1 {
 	margin-right: 27px;
 	/* Font */
 	color: black;
-	font-family: "Avenir Next";
+	font-family: "Avenir Next", "Avenir", "Helvetica-Neue";
 	/* Centering */
 	/* Vertically centers in Safari */
   	display: table;
@@ -99,7 +99,7 @@ h1 {
 	padding: 10px;
 	/* Font */
 	color: black;
-	font-family: "Avenir Next";
+	font-family: "Avenir Next", "Avenir", "Helvetica-Neue";
 	font-size: 20px;
 	font-weight: 400;
 	line-height: 28px;
@@ -136,7 +136,7 @@ h1 {
 .graphStats {
 	float: left;
 	/* Font */
-	font-family: "Avenir Next";
+	font-family: "Avenir Next", "Avenir", "Helvetica-Neue";
 	font-size: 11px;
 	font-weight: 400;
 	line-height: 11px;
@@ -172,7 +172,7 @@ table.simpleTable {
 	border-collapse: collapse;
 	width: 100%;
 	color: #161e21;
-	font-family: "Avenir LT Std";
+	font-family: "Avenir LT Std", "Avenir Next", "Avenir", "Helvetica-Neue";
 	font-size: 18px;
 	font-weight: 500;
 	line-height: 22px;
@@ -252,7 +252,7 @@ th.tableHeader {
 	background-color: #06aaff;
 	border-radius: 6px;
 	/* Font */
-	font-family: "Avenir LT Std";
+	font-family: "Avenir LT Std", "Avenir Next", "Avenir", "Helvetica-Neue";
 	font-size: 20px;
 	font-weight: 200;
 	line-height: 44px; /* Same as height of button */
@@ -270,7 +270,7 @@ th.tableHeader {
 	background-color: #CDD3D7;
 	border-radius: 6px;
 	/* Font */
-	font-family: "Avenir LT Std";
+	font-family: "Avenir LT Std", "Avenir Next", "Avenir", "Helvetica-Neue";
 	font-size: 20px;
 	font-weight: 200;
 	line-height: 44px; /* Same as height of button */
@@ -287,7 +287,7 @@ th.tableHeader {
 	/* Font */
 	text-align: center;
 	color: #06aaff;
-	font-family: "Avenir LT Std";
+	font-family: "Avenir LT Std", "Avenir Next", "Avenir", "Helvetica-Neue";
 	font-size: 20px;
 	font-weight: 200;
 }
@@ -312,7 +312,7 @@ th.tableHeader {
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 	border-collapse: collapse;
 	color: #161e21;
-	font-family: "Avenir LT Std";
+	font-family: "Avenir LT Std", "Avenir Next", "Avenir", "Helvetica-Neue";
 	font-size: 18px;
 	font-weight: 500;
 	line-height: 22px;
@@ -344,7 +344,7 @@ th.resultsTableHeader {
 }
 
 .sortBy {
-	font-family: "Avenir";
+	font-family: "Avenir", "Helvetica-Neue";
 	font-weight: lighter;
 	color: #6C7A86;
 	border: 1px solid #EBEFF2;
@@ -389,7 +389,7 @@ th.resultsTableHeader {
     /* Font */
     text-align: center;
     color: #454545;
-	font-family: "Avenir Next";
+	font-family: "Avenir Next", "Avenir", "Helvetica-Neue";
 	font-size: 22px;
 	font-weight: 500;
 	line-height: 30px;
@@ -430,7 +430,7 @@ th.resultsTableHeader {
 	width: 206px;
 	height: 42px;
 	/* Font */
-	font-family: "Avenir Next";
+	font-family: "Avenir Next", "Avenir", "Helvetica-Neue";
 	font-size: 16px;
 	font-weight: 400;
 	line-height: 42px;
