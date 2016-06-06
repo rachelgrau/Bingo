@@ -184,6 +184,17 @@ var StudentView = React.createClass({
   	loadPriorStudentResponseSuccess: function(data, textStatus, jqXHR) {
   		if (debug) console.log("LOAD PRIOR STUDENT RESPONSE SUCCESS!");
   		if (debug) console.log(data);
+  		if (data.payload.response) {
+  			if (debug) console.log("ALREADY HAS A RESPONSE...");
+  			this.setState({
+  				cards: data.payload.response.cards
+  			});
+  		} else {
+  			if (debug) console.log("NO RESPONSE YET, PROCEED...");
+  		}
+
+  		/* Poll for teacher response every X seconds */
+    	setInterval(this.loadTeacherResponses, this.props.pollInterval);
 	},
   	/* GET request (only performed if game is not over)
    	 * --------------------------------------------------
@@ -377,10 +388,7 @@ var StudentView = React.createClass({
 	},
   	componentDidMount: function() {
   		/* First see if student is in middle of game (e.g. reloaded page) */
-  		// this.get(STUDENT_URL + "responses", this.loadPriorStudentResponseSuccess);
-    	/* Poll for teacher response every X seconds */
-    	setInterval(this.loadTeacherResponses, this.props.pollInterval);
-    	
+  		this.get(STUDENT_URL + "responses", "", this.loadPriorStudentResponseSuccess); 	
   	},
   	/* The app uses one shared modal, so we open & close it as needed and just change its inner content.
   	 * modalType (string): the type of modal you want to open
