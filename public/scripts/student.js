@@ -776,10 +776,18 @@ var Header = React.createClass ({
 var Question = React.createClass({
 	render: function() {
 		if (this.props.question && !this.props.readyForNextQuestion) {
+			var question = this.props.question;
+			var questionClass = "questionCard";
+			if (debug) console.log("Question length: " + question.length);
+			if (question.length < 27) {
+				if (debug) console.log("Question is short, so making it bigger...");
+				/* Make the font bigger and centered if the question isn't long */
+				questionClass = "questionCard questionCardLarge";
+			}
 			return (
 				<div className="questionBox">
 					Question:
-					<div className="questionCard" id="questionCardId">
+					<div className={questionClass} id="questionCardId">
 						<div className="verticallyCenteredText">{this.props.question}</div>
 					</div>
 					<div className="button outlineButton" id="skipButton" onClick={this.props.onSkip}>
@@ -950,12 +958,17 @@ var Modal = React.createClass({
     render: function() {
         if(this.props.isOpen){
         	if (this.props.modalType == "confirmChipPlacement") {
+        		var question = this.props.question;
+        		var questionClass = "questionSmall";
+        		if (question.length < 27) {
+        			questionClass = "questionSmall questionShort";
+        		}
         		return (
 	                <div className="modalBg">
 	                  <div className="modal">
 	              			Are you sure you want to place this chip?<br/>
 	              			<div id="questionAnswerContainer">
-	              				<div className="questionSmall"><div className="verticallyCenteredText">{this.props.question}</div></div>
+	              				<div className={questionClass}><div className="verticallyCenteredText">{this.props.question}</div></div>
 	              				<div className="answerSmall"><div className="verticallyCenteredText">{this.props.answer}</div></div>
 	              			</div>
 	              			<div className="modalFooter">

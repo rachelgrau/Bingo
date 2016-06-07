@@ -72,6 +72,12 @@ body {
 	display: table;
 }
 
+.questionCardLarge {
+	font-size: 28px;
+	text-align: center;
+	line-height: 34px;
+}
+
 #questionCardId {
 /* Vertically centers */
 	display: flex;
@@ -137,7 +143,7 @@ body {
 	margin: 5px;
 	width: 98px;
 	height: 98px;
-	word-wrap: break-word;
+	word-break: break-all;
 	background-color: white;
 	border: 2px solid #06aaff;
 	border-radius: 8px;
@@ -312,7 +318,6 @@ body {
 	float: left;
 	padding: 5px;
 	/* Font */
-	word-wrap: break-word;
 	color: black;
 	font-family: "Avenir LT Std", "Avenir Next", "Avenir", "Helvetica-Neue";
 	font-size: 16px;
@@ -326,8 +331,18 @@ body {
   	display: table;
 }
 
+/* When the question is short, make the font bigger and centered */
+.questionShort {
+	font-size: 22px;
+	line-height: 26px;
+	word-wrap: break-word;
+	text-align: center;
+}
+
 .answerSmall {
 	/* Look */
+	font-size: 22px;
+	text-align: center;
 	background-color: white;
 	width: 140px;
 	height: 140px;

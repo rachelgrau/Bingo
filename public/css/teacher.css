@@ -58,7 +58,7 @@ h1 {
 
 .question {
 	float: left;
-	background-color: white;
+	background-color: rgba(6, 170, 255, 0.27);
 	border: 2px solid #06aaff;
 	border-radius: 8px;
 	width: 115px;
@@ -89,9 +89,15 @@ h1 {
 	line-height: 16px;
 }
 
+.questionLarge {
+	font-size: 20px;
+	text-align: center;
+	line-height: 22px;
+}
+
 .answer {
 	float: left;
-	background-color: rgba(6, 170, 255, 0.27);
+	background-color: white;
 	border: 2px solid #06aaff;
 	border-radius: 8px;
 	width: 105px;

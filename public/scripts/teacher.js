@@ -773,7 +773,8 @@ var CurrentQuestion = React.createClass({
 var QuestionAnswer = React.createClass({
 	render: function() {
 		var questionClass = "question questionNormal";
-		if (this.props.question.length > 88) questionClass = "question questionSmall";
+    if (this.props.question.length < 27) questionClass = "question questionLarge";
+		else if (this.props.question.length > 88) questionClass = "question questionSmall";
 		return (
 			<div className="questionAnswer">
 				<div className={questionClass}>
@@ -1043,7 +1044,10 @@ var AllAnswers = React.createClass({
 			 */
 			for (var i=0; i<this.props.allQuestionsByQuestion.length; i++) {
 				var currQuestion = this.props.allQuestionsByQuestion[i];
-				var percentage = Math.floor((currQuestion.numCorrect/currQuestion.numAnswered) * 100);
+        var percentage = 0;
+        if (currQuestion.numAnswered > 0) {
+          percentage = Math.floor((currQuestion.numCorrect/currQuestion.numAnswered) * 100);
+        }
 				if (percentage >= 50) {
 					table.push(
 						<tr>

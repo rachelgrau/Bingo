@@ -151,7 +151,11 @@ textArea {
 	margin-bottom: 5px;
 	width: 67px;
 	height: 67px;
-	word-wrap: break-word;
+	word-break: break-all;
+	-webkit-hyphens: auto;
+	-moz-hyphens: auto;
+	-ms-hyphens: auto;
+	hyphens: auto;
 	text-align: center;
 	/* vertically center text */
 	display: table;
