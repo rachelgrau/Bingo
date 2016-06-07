@@ -582,8 +582,8 @@ var StudentView = React.createClass({
         		/* Ready for next question */
         		this.setState({isModalOpen: false, modalType:"", selectedCardIndex: -1, readyForNextQuestion: true});
     			/* POST student resopnse */
-    			var dictionaryToPost = this.getDictionaryToPost(cards[this.state.selectedCardIndex].answer, false);
-	        	 var params = {
+    			var dictionaryToPost = this.getDictionaryToPost("", true);
+	        	var params = {
 	              	"status": dictionaryToPost
 	            };
 	        	if (debug) console.log("Posting dictionary: ");
@@ -981,12 +981,17 @@ var Modal = React.createClass({
 	                </div>
             	);
         	} else if (this.props.modalType == "skip") {
+        		var question = this.props.question;
+        		var questionClass = "questionSmall";
+        		if (question.length < 27) {
+        			questionClass = "questionSmall questionShort";
+        		}
         		return (
 	                <div className="modalBg">
 	                  <div className="modal">
 	              			Are you sure you want to skip?<br/>
 	              			<div id="questionOnlyContainer">
-	              				<div className="questionSmall"><div className="verticallyCenteredText">{this.props.question}</div></div>
+	              				<div className={questionClass}><div className="verticallyCenteredText">{this.props.question}</div></div>
 	              			</div>
 	              			<div className="modalFooter">
 	              				<div id="twoButtonContainer">

@@ -437,6 +437,7 @@ var TeacherView = React.createClass({
 	 * correctAnswer (string): answer to search board for (if this answer is on their board, they incorrectly passed)
 	 */
 	passWasCorrect: function(studentBoard, correctAnswer) {
+    if (debug) console.log("CHECKING IF PASS WAS CORRECT...");
 		for (var i=0; i < studentBoard.length; i++) {
 			var card = studentBoard[i];
 			if (card.answer == correctAnswer) return false;
@@ -537,7 +538,7 @@ var TeacherView = React.createClass({
             /* 1) NOT YET ANSWERED: We have not yet received the student's answer to this question */
             curStudentAnswer["answer"] = "";
             curStudentAnswer["isCorrect"] = false;
-          } else if (studentResponses[i].didPass) {
+          } else if (studentResponses[i].response.didPass) {
             /* 2) PASSED: They passed the current question; check if valid */
             curStudentAnswer["answer"] = "Pass";
             curStudentAnswer["isCorrect"] = this.passWasCorrect(studentResponses[i].response.cards, this.state.cards[this.state.indexOfCurrQuestion].answer);
@@ -602,12 +603,19 @@ var TeacherView = React.createClass({
           var currentQuestion = this.state.cards[this.state.indexOfCurrQuestion].question;
           var answer = studentResponses[i].response.answer;
           if (questionStudentIsAnswering != currentQuestion) {
+            /* Response isn't for the current quesiton. */
             answer = "";
-          }
-          if (answer == "") {
             stats.numUnanswered++;
           } else {
-            var isCorrect = (studentResponses[i].response.answer == this.state.cards[this.state.indexOfCurrQuestion].answer);
+            /* Response is for the current quesiton. */
+            var isCorrect = false;
+            if (studentResponses[i].response.didPass) {
+              /* They passed */
+              isCorrect = this.passWasCorrect(studentResponses[i].response.cards, this.state.cards[this.state.indexOfCurrQuestion].answer);
+            } else {
+              /* They placed a chip */
+              isCorrect = (studentResponses[i].response.answer == this.state.cards[this.state.indexOfCurrQuestion].answer);
+            }
             if (isCorrect) {
               stats.numCorrect++;
             } else {
