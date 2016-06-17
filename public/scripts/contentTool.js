@@ -175,7 +175,7 @@ var ContentTool = React.createClass({
 			dataStudent: [],
 			selectedCard:-1,
 			isCompleted: false,
-			title: "", 
+			title: "Bingo", 
 			numCardsCompleted: 0,
 			slideID: urlVars["id"],
 			jwt: urlVars["jwt"],
