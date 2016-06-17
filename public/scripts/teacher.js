@@ -158,6 +158,22 @@ var TeacherView = React.createClass({
     if(debug) console.log("Post success");
     if(debug) console.log(data);
   },
+  /* Creates and returns a dictionary mapping each student's device_uid to 
+     what his/her reports text should be (of the form "a/b correct, c/d incorrect" */
+  generateReportsText: function() {
+    var dict = {};
+    for (var i=0; i < this.state.allQuestionsByStudent.length; i++) {
+      var curr = this.state.allQuestionsByStudent[i];
+      var numCorrect = curr.stats.numCorrect;
+      var numIncorrect = curr.stats.numIncorrect;
+      var total = curr.answers.length;
+      var device_uid = curr.device_uid;
+
+      var resultsText = "Correct: " + numCorrect + "/" + total + " " + "Incorrect: " + numIncorrect + "/" + total;
+      dict[device_uid] = resultsText;
+    }
+    return dict;
+  },
   /* GET request (only performed if game is not over)
    * --------------------------------------------------
    * isContentTool (boolean): true if you are making a GET request to content tool, false otherwise
@@ -672,8 +688,10 @@ var TeacherView = React.createClass({
             modalType: "",
             isModalOpen: false
           });
-          /* TO DO: POST here. */          
-          var dictionaryToPost = this.getDictionaryToPost(true);          
+          var dictionaryToPost = this.getDictionaryToPost(true); 
+          /* Add the reports text, which teacher only sends when game is over */
+          var reportsText = this.generateReportsText();
+          dictionaryToPost["reportsText"] = reportsText;         
           var params = {
             "status": dictionaryToPost
           };

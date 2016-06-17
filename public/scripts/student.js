@@ -16,6 +16,7 @@ var STUDENT_URL = "https://api-dev.nearpod.com/v1/hub/student/";
  * bingoWinners (array): list of people who have won bingo (if any), given by the teacher
  * nickname (string): student's nickname
  * position (int): if the student had bingo, holds their position in leader board; otherwise -1
+ * responseText (string): empty string until the end of the game, when the teacher sends us what our response text should be (basically a/b correct, c/d incorrect)
  */
 var StudentView = React.createClass({
 	getUrlVars: function() {
@@ -69,7 +70,8 @@ var StudentView = React.createClass({
 			deviceID: 0,
 			nickname: "",
 			bingoWinners: [],
-			position: -1		
+			position: -1,
+			responseText: ""		
 		};
 	},
 	post: function(path, params) {
@@ -167,12 +169,23 @@ var StudentView = React.createClass({
 	    	leaderNicknames.push(cur.nickname);
 	    }
 	    if (data.payload.status.gameOver) {
+	    	if (debug) console.log("GAME OVER! Setting response text...");
 	    	if (debug) console.log(data.payload.status.leaderBoard);
+	    	var reportsStr = data.payload.status.reportsText[this.state.deviceUID];
+	    	if (debug) console.log("Response text is: " + reportsStr);
 	    	this.setState({
+	    		responseText: reportsStr, 
 	    		modalType: "gameOver",
 	    		isModalOpen: true,
 	    		bingoWinners: data.payload.status.leaderBoard
 	    	})
+	    	var dictionaryToPost = this.getDictionaryToPost();
+	    	/* POST one last time */
+	    	var params = {
+	            "response": dictionaryToPost,
+	            "response_text": reportsStr
+	        };
+	        this.post("responses", params);	
 	    }
   	},
   	/* Called when the GET request to load this student's prior responses to this 
@@ -529,14 +542,11 @@ var StudentView = React.createClass({
         		this.setState({cards: cards, isModalOpen: false, modalType:"", selectedCardIndex: -1, readyForNextQuestion: true});
         		/* POST student resopnse */
         		var dictionaryToPost = this.getDictionaryToPost(cards[this.state.selectedCardIndex].answer, false);
-        	 	var params = {
-              		"status": dictionaryToPost
-            	};
         	 	if (debug) console.log("Posting dictionary: ");
         	 	if (debug) console.log(dictionaryToPost);
         	 	var params = {
               		"response": dictionaryToPost,
-              		"response_text": ""
+              		"response_text": this.state.responseText
            	 	};
         		this.post("responses", params);
        			break;
@@ -557,11 +567,8 @@ var StudentView = React.createClass({
 			    	dictionaryToPost["hasBingo"] = true;
 			    	dictionaryToPost["numBingoChecksLeft"] = this.state.numBingoChecksLeft;
 	        	 	var params = {
-	              		"status": dictionaryToPost
-	            	};
-	        	 	var params = {
 	              		"response": dictionaryToPost,
-	              		"response_text": ""
+	              		"response_text": this.state.responseText
 	           	 	};
 	        		this.post("responses", params);				
     			} else {
@@ -583,14 +590,11 @@ var StudentView = React.createClass({
         		this.setState({isModalOpen: false, modalType:"", selectedCardIndex: -1, readyForNextQuestion: true});
     			/* POST student resopnse */
     			var dictionaryToPost = this.getDictionaryToPost("", true);
-	        	var params = {
-	              	"status": dictionaryToPost
-	            };
 	        	if (debug) console.log("Posting dictionary: ");
 	        	if (debug) console.log(dictionaryToPost);
 	        	var params = {
 	              	"response": dictionaryToPost,
-	              	"response_text": ""
+	              	"response_text": this.state.responseText
 	           	};
 	        	this.post("responses", params);	
         		break;
