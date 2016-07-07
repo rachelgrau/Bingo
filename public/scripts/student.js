@@ -143,7 +143,7 @@ var StudentView = React.createClass({
     	}
     	/* UPDATE NEXT QUESTION (see if it's time for next question) */
     	var readyForNext = this.state.readyForNextQuestion;
-    	var nextQuestion = data.payload.status.studentResponses[myDeviceUid].nextQuestion;
+    	var nextQuestion = data.payload.status.nextQuestion;
     	if (nextQuestion != this.state.question) {
     		readyForNext = false;
     	}

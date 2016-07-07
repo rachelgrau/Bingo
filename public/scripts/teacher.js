@@ -223,6 +223,13 @@ var TeacherView = React.createClass({
     var toPost = {};
     /* "gameOver" */
     toPost["gameOver"] = gameOver;
+    /* Update next question, if there is a new question */
+    var nextQuestion = "";
+    if (this.state.indexOfCurrQuestion < this.state.cards.length) {
+      nextQuestion = this.state.cards[this.state.indexOfCurrQuestion].question;
+    }
+    if (debug) console.log("Updating next question: " + nextQuestion);
+    toPost["nextQuestion"] = nextQuestion;
     if (debug) console.log("LEADER BOARD: ")
     if (debug) console.log(this.state.leaderBoard);
     toPost["leaderBoard"] = this.getDictionaryOfWinners();
@@ -356,21 +363,10 @@ var TeacherView = React.createClass({
           "numUnanswered": this.state.currentQuestionAnswers.length,
           "totalStudents": this.state.currentQuestionAnswers.length
         };
-        /* Update responses for students by moving onto next question, if there is another question */ 
-        var responsesForStudents = this.state.responsesForStudents;
-        if (indexOfNextQuestion < this.state.cards.length) {
-          var nextQuestion = this.state.cards[indexOfNextQuestion].question;
-          for (var key in responsesForStudents) {
-            var currResponse = responsesForStudents[key];
-            currResponse["nextQuestion"] = nextQuestion;
-            responsesForStudents[key] = currResponse;
-          }
-        }
         this.setState({
             indexOfCurrQuestion: indexOfNextQuestion,
             currentQuestionAnswers: currentAnswers,
             currentQuestionStats: stats,
-            responsesForStudents: responsesForStudents,
             buttonsEnabled: false
          }, function() {
             /* TO DO: POST here */
@@ -435,7 +431,6 @@ var TeacherView = React.createClass({
         var newStudentResponse = {};
         var device_uid = studentResponses[i].device_uid;
         var currentQuestion = this.state.cards[this.state.indexOfCurrQuestion].question;
-        newStudentResponse["nextQuestion"] = currentQuestion;
         newStudentResponse["cards"] = this.createStudentBoard();
         newStudentResponse["gameOver"] = this.state.gameOver;
         this.state.responsesForStudents[device_uid] = newStudentResponse;
