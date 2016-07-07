@@ -264,6 +264,13 @@ var TeacherView = React.createClass({
           buttonsEnabled: true
       });
     },
+    testSuccess: function (data, textStatus, jqXHR) {
+      if (debug) console.log("LOAD STUDENTS SUCCESS!!!");
+      if (debug) console.log(data);
+    },
+    loadStudents: function() {
+      this.get(TEACHER_URL + "students", "", this.testSuccess);
+    },
     /*
      * Load initial cards and start polling for student responses.  
      */
@@ -273,6 +280,7 @@ var TeacherView = React.createClass({
       this.get(urlStr, "", this.loadGameSuccess);
       /* Every X seconds, poll for student responses */
       setInterval(this.loadStudentResponses, 2000);  
+      setInterval(this.loadStudents, 4000);
   	},
   	/* Goes through all of the student responses for the current question and 
   	   moves them to the repositories of "past" questions (e.g. this.state.allQuestionsByStudent and this.state.allQuestionsByQuestion) 
