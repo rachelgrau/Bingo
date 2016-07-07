@@ -96,9 +96,6 @@ var StudentView = React.createClass({
   		if (debug) console.log("GET teacher resopnses success");
   		if (debug) console.log(data);
 		var myDeviceUid = this.state.deviceUID; // TO DO: update to not be hard coded !
-		
-		/* If we don't know our own nickname yet, get it from teacher */
-		var myName = data.payload.status.studentResponses[myDeviceUid].nickname;
 
 		/* If we have bingo and haven't figured out what our position is, get that */
 		var myPos = this.state.position;
@@ -158,8 +155,7 @@ var StudentView = React.createClass({
 	      	question: nextQuestion, 
 	      	cards: cards,
 	      	readyForNextQuestion: readyForNext,
-	      	position: myPos,
-	      	nickname: myName
+	      	position: myPos
 	    });
 
 	    /* CHECK IF GAME IS OVER */
@@ -192,20 +188,30 @@ var StudentView = React.createClass({
   	   game succeeded. If there is a response, then reload that game. Otherwise
   	   it's just a new game. 
 
+  	   Either way, get the student's nickname here from the response. 
+
   	   Start polling for teacher responses here.
   	 */
   	loadPriorStudentResponseSuccess: function(data, textStatus, jqXHR) {
   		if (debug) console.log("LOAD PRIOR STUDENT RESPONSE SUCCESS!");
   		if (debug) console.log(data);
+  		/* Get the nickname */
+  		var nickname = data.payload.nickname;
+  		if (debug) console.log("SETTING NICKNAME TO: " + nickname);
+  		/* See if there's a response */
   		if (data.payload.response) {
   			if (debug) console.log("ALREADY HAS A RESPONSE...");
   			this.setState({
   				cards: data.payload.response.cards,
   				numBingoChecksLeft: data.payload.response.numBingoChecksLeft,
-  				hasBingo: data.payload.hasBingo
+  				hasBingo: data.payload.hasBingo,
+  				nickname: nickname
   			});
   		} else {
   			if (debug) console.log("NO RESPONSE YET, PROCEED...");
+  			this.setState({
+  				nickname: nickname
+  			});
   		}
 
   		/* Poll for teacher response every X seconds */
@@ -241,7 +247,6 @@ var StudentView = React.createClass({
    	*        key                     value
    	*        ----                    ------
    	*        "deviceID"      		(deviceID): the student's device ID
-	*        "name"              	(String): the student's nickname
 	*        "cards"          		(Array): the student's cards
    	* 		 "question"				(string): the question the student is answering
    	* 		 "answer"				(string): the word that the student placed a chip to answer |question|, or "" if pass

@@ -424,7 +424,6 @@ var TeacherView = React.createClass({
         didAddAStudent = true;
         /* 1. Create entry in allQuestionsByStudent */
 				var newStudent = {};
-				newStudent["nickname"] = studentResponses[i].nickname;
         newStudent["device_uid"] = studentResponses[i].device_uid;
 				newStudent["answers"] = [];
 				newStudent["stats"] = {
@@ -439,7 +438,6 @@ var TeacherView = React.createClass({
         newStudentResponse["nextQuestion"] = currentQuestion;
         newStudentResponse["cards"] = this.createStudentBoard();
         newStudentResponse["gameOver"] = this.state.gameOver;
-        newStudentResponse["nickname"] = studentResponses[i].nickname;
         this.state.responsesForStudents[device_uid] = newStudentResponse;
 			}
 		}
