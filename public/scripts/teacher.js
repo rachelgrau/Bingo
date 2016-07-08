@@ -402,6 +402,7 @@ var TeacherView = React.createClass({
         /* 1. Create entry in allQuestionsByStudent */
 				var newStudent = {};
         newStudent["device_uid"] = studentResponses[i].device_uid;
+        newStudent["nickname"] = studentResponses[i].nickname;
 				newStudent["answers"] = [];
 				newStudent["stats"] = {
 					"numCorrect": 0,
