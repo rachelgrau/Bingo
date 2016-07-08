@@ -108,7 +108,7 @@ var TeacherView = React.createClass({
       modalType: ""
 		};
 	},
-  /* Callback for when the card are loaded successfully from content tool. 
+  /* Callback for when the cards are loaded successfully from content tool. 
    * Shuffles & stores the cards correctly in the this.state.cards 
    */
   loadGameSuccess: function (data, textStatus, jqXHR) {
@@ -378,26 +378,7 @@ var TeacherView = React.createClass({
           });
       }
   	},
-    /* Returns an array of cards for a student to set up on their board. 
-     * The cards will be randomly shuffled and contain the following 
-     * fields: id (int), answer (string), hasChip (boolean), teacherApproved (boolean)
-     */
-    createStudentBoard: function() {
-      /* Create a copy of our cards but w/o answers and with hasChip and teacherApproved fields */
-      var studentCards = [];
-      for (var i=0; i < this.state.cards.length; i++) {
-        var card = {};
-        card["id"] = this.state.cards[i].id;
-        card["answer"] = this.state.cards[i].answer;
-        card["hasChip"] = false;
-        card["teacherApproved"] = false;
-        card["correctCardID"] = -1;
-        card["questionIncorrectlyAnswered"] = "";
-        studentCards.push(card);
-      }
-      /* Shuffle new copy and return it */
-      return this.shuffleCards(studentCards);
-    },
+    
   	/* Looks at the current student responses and sees if there are any students 
      * that are currently not in this.state.allQuestionsByStudent record. If so, 
      * adds an entry for those new students to this.state.allQuestionsByStudent and
@@ -431,14 +412,15 @@ var TeacherView = React.createClass({
         var newStudentResponse = {};
         var device_uid = studentResponses[i].device_uid;
         var currentQuestion = this.state.cards[this.state.indexOfCurrQuestion].question;
-        newStudentResponse["cards"] = this.createStudentBoard();
+        newStudentResponse["cards"] = studentResponses[i].cards; // Set up their cards
         newStudentResponse["gameOver"] = this.state.gameOver;
         this.state.responsesForStudents[device_uid] = newStudentResponse;
 			}
 		}
     /* If we got a new student, do a POST so they can get cards & set up board. */
     if (didAddAStudent) {
-      if (debug) console.log("Added new student(s)!");
+      if (debug) console.log("Added new student(s)! Responses for student: ");
+      if (debug) console.log(this.state.responsesForStudents);
       var dictionaryToPost = this.getDictionaryToPost(this.state.gameOver);
       var params = {
         "status": dictionaryToPost
@@ -528,12 +510,17 @@ var TeacherView = React.createClass({
   			var curStudentAnswer = {};
         /* First, check if the student has repsonded at all (has "response" field) */
         if (studentResponses[i].response) {
+          var deviceUID = studentResponses[i].device_uid;
+          /* The student has posted something. First, check if we have their cards yet. If not, save them
+             in responsesForStudent */
+          this.state.responsesForStudents[deviceUID].cards = studentResponses[i].response.cards;
+
           /* The student HAS responded, so create entry based on their response */
           var questionStudentIsAnswering = studentResponses[i].response.question;
           var currentQuestion = this.state.cards[this.state.indexOfCurrQuestion].question;
  
           curStudentAnswer["nickname"] = studentResponses[i].nickname;
-          curStudentAnswer["device_uid"] = studentResponses[i].device_uid;
+          curStudentAnswer["device_uid"] = deviceUID;
 
           /* If student got bingo, add them to leader board */
           if (studentResponses[i].response.hasBingo) {

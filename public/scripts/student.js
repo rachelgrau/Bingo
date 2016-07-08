@@ -1,5 +1,6 @@
 var debug = true;
 var STUDENT_URL = "https://api-dev.nearpod.com/v1/hub/student/";
+var CONTENT_TOOL_URL = "https://api-dev.nearpod.com/v1/ct/";
 /* State
  * -------
  * cards (array): an array of this students bingo cards, in the order that they appear on his/her board.
@@ -116,21 +117,16 @@ var StudentView = React.createClass({
 		/* UPDATE CARDS */
 	    var cards = this.state.cards;
 	    var teacherResponseCards = data.payload.status.studentResponses[myDeviceUid].cards;
-	    if (cards.length == 0) {
-	    	if (debug) console.log("Don't have cards yet, so getting them from response...");
-    		cards = teacherResponseCards;
-    		if (debug) console.log("Cards: ");
-    		if (debug) console.log(cards);
-    	} else {
-    		/* The cards we have are updated, we just need to see if the teacher approved any
-    		   ONLY look at "teacherApproved" field of cards and udpate it then. 
-    		   If hasChip but teacherApproved is false, look for correctCardID/questionIncorrectlyAnswered. */
+    	/* The cards we have are updated, we just need to see if the teacher approved any
+    	   ONLY look at "teacherApproved" field of cards and udpate it then. 
+    	   If hasChip but teacherApproved is false, look for correctCardID/questionIncorrectlyAnswered. */
+    	if (teacherResponseCards) {
     		for (var i=0; i < teacherResponseCards.length; i++) {
     			var teacherCard = teacherResponseCards[i];
     			if (cards[i].teacherApproved) {
     				/* Special case: when we get a chip incorrect & re-place it, we will have 
-    			  	   marked it as true but teacher still might have it as false. Ignore 
-    			       teacher. A card should never go from teacherApproved = true to false. */
+    			  	 marked it as true but teacher still might have it as false. Ignore 
+    			     teacher. A card should never go from teacherApproved = true to false. */
     				continue; 
     			}
     			cards[i].teacherApproved = teacherCard.teacherApproved;
@@ -141,6 +137,8 @@ var StudentView = React.createClass({
     			}
     		}
     	}
+    	
+  
     	/* UPDATE NEXT QUESTION (see if it's time for next question) */
     	var readyForNext = this.state.readyForNextQuestion;
     	var nextQuestion = data.payload.status.nextQuestion;
@@ -184,13 +182,59 @@ var StudentView = React.createClass({
 	        this.post("responses", params);	
 	    }
   	},
+  	shuffleCards: function(cards) {
+		if (!cards) return [];
+		var currentIndex = cards.length, temporaryValue, randomIndex;
+  		// While there remain elements to shuffle...
+ 		 while (0 !== currentIndex) {
+    		// Pick a remaining element...
+    		randomIndex = Math.floor(Math.random() * currentIndex);
+    		currentIndex -= 1;
+    		// And swap it with the current element.
+    		temporaryValue = cards[currentIndex];
+    		cards[currentIndex] = cards[randomIndex];
+    		cards[randomIndex] = temporaryValue;
+  		}
+		return cards;
+	},
+  	/* Called when the GET request to load the content tool info for this slide succeeds.
+  	   Gets the cards and sets up this student's board.
+  	   Starts polling for the teacher custom_status. 
+  	 */
+  	loadContentToolSuccess: function(data, textStatus, jqXHR) {
+  		/* Poll for teacher response every X seconds */
+  		var cards = this.shuffleCards(data.payload.custom_slide.data_all); 
+  		for (var i=0; i < cards.length; i++) {
+  			cards[i]["teacherApproved"] = false;
+        	cards[i]["correctCardID"] = -1;
+        	cards[i]["questionIncorrectlyAnswered"] = "";
+  		}
+  		this.setState({
+  			cards: cards
+  		});	
+  		/* POST so teacher can see our cards */
+  		var dictionaryToPost = this.getDictionaryToPost("", false);
+  		dictionaryToPost["cards"] = cards;
+        if (debug) console.log("Posting dictionary: ");
+        if (debug) console.log(dictionaryToPost);
+        var params = {
+            "response": dictionaryToPost,
+            "response_text": this.state.responseText
+        };
+        if (debug) console.log("POSTING so teacher can see our cards.");
+        this.post("responses", params);
+
+        /* Start polling */
+    	setInterval(this.loadTeacherResponses, this.props.pollInterval);
+  	},
   	/* Called when the GET request to load this student's prior responses to this 
-  	   game succeeded. If there is a response, then reload that game. Otherwise
-  	   it's just a new game. 
+  	   game succeeded. If there is a response, then reload that game, and start 
+  	   polling for the teacher custom_status. 
+
+	   Otherwise, it's a new game, so DON'T start polling, but make an API request 
+	   to the Content Tool to get the cards to set up the game. 
 
   	   Either way, get the student's nickname here from the response. 
-
-  	   Start polling for teacher responses here.
   	 */
   	loadPriorStudentResponseSuccess: function(data, textStatus, jqXHR) {
   		if (debug) console.log("LOAD PRIOR STUDENT RESPONSE SUCCESS!");
@@ -207,15 +251,17 @@ var StudentView = React.createClass({
   				hasBingo: data.payload.hasBingo,
   				nickname: nickname
   			});
+  			/* They were in the middle of a game, so start polling for teacher responses */
+  			setInterval(this.loadTeacherResponses, this.props.pollInterval);
   		} else {
   			if (debug) console.log("NO RESPONSE YET, PROCEED...");
   			this.setState({
   				nickname: nickname
   			});
+  			/* Make API call to Content Tool to get cards */
+  			var urlStr = CONTENT_TOOL_URL + "custom_slides/" + this.state.slideID;
+      		this.get(urlStr, "", this.loadContentToolSuccess);
   		}
-
-  		/* Poll for teacher response every X seconds */
-    	setInterval(this.loadTeacherResponses, this.props.pollInterval);
 	},
   	/* GET request (only performed if game is not over)
    	 * --------------------------------------------------
