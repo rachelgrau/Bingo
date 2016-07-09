@@ -20,10 +20,24 @@ var TEACHER_URL = "https://api-dev.nearpod.com/v1/hub/teacher/";
  * cards (array): an array of all the questions/answers. Gets shuffled at beginning, then doesn't change
  * indexOfCurrQuestion (int): the index of the current question in the cards array 
  * responsesForStudents (dictionary): dictionary mapping student device IDs to their individualized responses
- * 		- each response has:
- * 				- nextQuestion (string): the current question
- *        - cards (array): the student's board
- *        - gameOver (boolean): whether the game is over
+ * 		- each response is a dictionary with:
+ *    - example dictionary (with only 1 student):
+ *      {
+ *           "a823ajd023": {
+ *              "correctAnswers": [2, 12, 4], // IDs of cards they correctly placed a chip on
+ *              "incorrectAnswers": { // Cards they incorrectly placed a chip on
+ *                  "6": {
+ *                    "correctCardID": 14,
+ *                    "questionIncorrectlyAnswered": "What is 3 + 5?"
+ *                  }, 
+ *                  "22": {
+ *                    "correctCardID": 3,
+ *                    "questionIncorrectlyAnswered": "What is 2 + 2?"
+ *                  }
+ *              }   
+ *          }
+ *      }
+ * 
  * currentQuestionAnswers (array): abbreviated version of student responses. An array of the students' answers to the current question. Each dictionary in the array contains:
  * 		- "device_uid": student's device ID
  *    - "hasBingo" (boolean): whether the student has bingo 
@@ -385,7 +399,6 @@ var TeacherView = React.createClass({
      * this.state.responsesForStudents. Shuffles the cards and adds them to this.state.responsesForStudents
      * entry (since student can't get cards directly from CT) */
 	addNewStudents: function(studentResponses) {
-    console.log(studentResponses);
     var didAddAStudent = false;
 		for (var i=0; i < studentResponses.length; i++) {
 			var device_uid = studentResponses[i].device_uid;
@@ -409,13 +422,12 @@ var TeacherView = React.createClass({
 					"numIncorrect": 0
 				};
 				this.state.allQuestionsByStudent.push(newStudent);
-        /* 2. Create entry in responsesForStudents */
-        var newStudentResponse = {};
+        /* 2. Create blank entry in responsesForStudents */
+        var responseForStudentDict = {};
+        responseForStudentDict["correctAnswers"] = [];
+        responseForStudentDict["incorrectAnswers"] = {};
         var device_uid = studentResponses[i].device_uid;
-        var currentQuestion = this.state.cards[this.state.indexOfCurrQuestion].question;
-        newStudentResponse["cards"] = studentResponses[i].cards; // Set up their cards
-        newStudentResponse["gameOver"] = this.state.gameOver;
-        this.state.responsesForStudents[device_uid] = newStudentResponse;
+        this.state.responsesForStudents[device_uid] = responseForStudentDict;
 			}
 		}
     /* If we got a new student, do a POST so they can get cards & set up board. */
@@ -456,44 +468,60 @@ var TeacherView = React.createClass({
   },
   /*
    * Given a student's device ID and the ID of a card on their board, 
-   * sets that card as "teacherApproved" in this.state.responsesForStudents
-   * for that particular student. 
+   * adds the ID of that card to the array of correctCards in the response 
+   * for this student (if it's not already there).
    */
   approveCardForStudent: function(device_uid, cardID) {
-    var studentCards = this.state.responsesForStudents[device_uid].cards;
-    for (var i=0; i < studentCards.length; i++) {
-      var currCard = studentCards[i];
-      if (currCard.id == cardID) {
-        currCard["teacherApproved"] = true;
-        studentCards[i] = currCard;
-        break;
+    var correctCards = this.state.responsesForStudents[device_uid]["correctAnswers"];
+    /* Check if we already added this correct card */
+    for (var i=0; i < correctCards.length; i++) {
+      if (correctCards[i] == cardID) {
+        return;
       }
-    } 
-    this.state.responsesForStudents[device_uid].cards = studentCards;
+    }
+    correctCards.push(cardID);
+    this.state.responsesForStudents[device_uid]["correctAnswers"] = correctCards;
   },
   /*
-   * Updates the given student's board in this.state.responsesForStudents
-   * so that the card they got wrong holds the correct answer + question they
-   * were answering. 
+   * Updates the response for the given student by adding the ID of the card they incorrectly
+   * placed a chip on to their individualized response (in this.state.responsesForStudents).
+   * 
+   * Does this by adding an entry in this.state.responsesForStudents[device_uid]["incorrectAnswers"].
+   * The entry is a dictionary whose key is the ID of the card they incorrectly placed a chip on. The value
+   * is another dictionary that holds the correctCardID and the question they incorrectly answered.
    * 
    * device_uid: ID of student that got question wrong
-   * studentAnswer (string): whatever the student answered (that was incorrect)
+   * incorrectCardID (int): ID of the card they answered incorrectly
    * correctCardID (int): ID of the card they should have answered
    * question (string): question they answered incorrectly 
    */
-  markCardIncorrectForStudent: function(device_uid, studentAnswer, correctCardID, question) {
-    var studentCards = this.state.responsesForStudents[device_uid].cards;
-    for (var i=0; i < studentCards.length; i++) {
-      var currCard = studentCards[i];
-      if (currCard.answer == studentAnswer) {
-        currCard["teacherApproved"] = false;
-        currCard["correctCardID"] = correctCardID;
-        currCard["questionIncorrectlyAnswered"] = question;
-        studentCards[i] = currCard;
-        break;
+  markCardIncorrectForStudent: function(device_uid, incorrectCardID, correctCardID, question) {
+    if (debug) console.log("Adding incorrect card to student's list of incorrect cards...");
+    var incorrectAnswers = this.state.responsesForStudents[device_uid]["incorrectAnswers"];
+    if (incorrectCardID in incorrectAnswers) {
+      if (debug) console.log("Already seen this incorrect card!");
+      /* There's already an entry for this incorrect card. However, the student might have 
+         incorrectly placed a chip on this card again...so check for that. */
+      var theEntry = incorrectAnswers[incorrectCardID];
+      if (theEntry["correctCardID"] != correctCardID) {
+        if (debug) console.log("Overwriting...");
+        /* We need to overwrite this entry */
+        theEntry["correctCardID"] = correctCardID;
+        theEntry["questionIncorrectlyAnswered"] = question;
+        incorrectAnswers[incorrectCardID] = theEntry;
+        this.state.responsesForStudents[device_uid]["incorrectAnswers"] = incorrectAnswers;
       }
+      return;
     }
-    this.state.responsesForStudents[device_uid].cards = studentCards;
+    var incorrectEntry = {};
+    incorrectEntry["correctCardID"] = correctCardID;
+    incorrectEntry["questionIncorrectlyAnswered"] = question;
+    incorrectAnswers[incorrectCardID] = incorrectEntry;
+
+    this.state.responsesForStudents[device_uid]["incorrectAnswers"] = incorrectAnswers;
+    
+    if (debug) console.log("Updated incorrect answers to: ");
+    if (debug) console.log(incorrectAnswers);
   },
   	/*
   	 * Given the student responses from the API, this method returns an array of the student answers
@@ -512,9 +540,7 @@ var TeacherView = React.createClass({
         /* First, check if the student has repsonded at all (has "response" field) */
         if (studentResponses[i].response) {
           var deviceUID = studentResponses[i].device_uid;
-          /* The student has posted something. First, check if we have their cards yet. If not, save them
-             in responsesForStudent */
-          this.state.responsesForStudents[deviceUID].cards = studentResponses[i].response.cards;
+          /* The student has posted something. */
 
           /* The student HAS responded, so create entry based on their response */
           var questionStudentIsAnswering = studentResponses[i].response.question;
@@ -557,7 +583,8 @@ var TeacherView = React.createClass({
             } else {
               /* 4) INCORRECT: Mark this card in student's board as NOT teacher approved, give correct answer */
               curStudentAnswer["isCorrect"] = false;
-              this.markCardIncorrectForStudent(studentResponses[i].device_uid, studentResponses[i].response.answer, this.state.cards[this.state.indexOfCurrQuestion].id, currentQuestion);
+              var incorrectCardID = this.getCardIdFromAnswer(studentResponses[i].response.answer);
+              this.markCardIncorrectForStudent(studentResponses[i].device_uid, incorrectCardID, this.state.cards[this.state.indexOfCurrQuestion].id, currentQuestion);
             }
           }
           /* 2) RE-PLACED CHIPS: See if student marked any card as teacherApproved (meaning they got something incorrect, checked, and re-placed that chip)

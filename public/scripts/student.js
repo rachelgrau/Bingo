@@ -114,30 +114,44 @@ var StudentView = React.createClass({
 				}
 			}
 		}
-		/* UPDATE CARDS */
-	    var cards = this.state.cards;
-	    var teacherResponseCards = data.payload.status.studentResponses[myDeviceUid].cards;
-    	/* The cards we have are updated, we just need to see if the teacher approved any
-    	   ONLY look at "teacherApproved" field of cards and udpate it then. 
-    	   If hasChip but teacherApproved is false, look for correctCardID/questionIncorrectlyAnswered. */
-    	if (teacherResponseCards) {
-    		for (var i=0; i < teacherResponseCards.length; i++) {
-    			var teacherCard = teacherResponseCards[i];
-    			if (cards[i].teacherApproved) {
-    				/* Special case: when we get a chip incorrect & re-place it, we will have 
-    			  	 marked it as true but teacher still might have it as false. Ignore 
-    			     teacher. A card should never go from teacherApproved = true to false. */
-    				continue; 
+    	
+    	/* The cards we have are updated, we just need to see if the teacher marked any as correct or 
+    	   incorrect. */
+    	var cards = this.state.cards;
+    	var correctAnswers = data.payload.status.studentResponses[myDeviceUid].correctAnswers;
+    	var incorrectAnswers = data.payload.status.studentResponses[myDeviceUid].incorrectAnswers;
+    	for (var i=0; i < cards.length; i++) {
+    		var cardID = cards[i].id;
+    		if (debug) console.log("Checking card with ID: " + cardID);
+    		var wasCorrect = false;
+    		/* If we've already marked this card as correct, just continue; that hasn't changed. */
+    		if (cards[i].teacherApproved) {
+    			if (debug) console.log("Already marked this card as correct. Moving on!");
+    			continue;
+    		} 
+    		/* Now check if teacher marked this card as correct. */
+    		if (debug) console.log("Checking if teacher has marked this card as correct in this array:");
+    		if (debug) console.log(correctAnswers);
+    		for (var j=0; j < correctAnswers.length; j++) {
+    			var correctID = correctAnswers[j];
+    			if (cardID == correctID) {
+    				if (debug) console.log("Found it marked as correct!");
+    				wasCorrect = true;
+    				cards[i].teacherApproved = true;
     			}
-    			cards[i].teacherApproved = teacherCard.teacherApproved;
-    			/* If teacher has not set correct card ID, it's -1 */
-    			if (teacherCard.correctCardID >= 0) {
-    				cards[i].correctCardID = teacherCard.correctCardID;
-    				cards[i].questionIncorrectlyAnswered = teacherCard.questionIncorrectlyAnswered;
+    		}
+    		/* If the teacher didn't mark it as correct, check if they marked it as incorrect. */
+    		if (!wasCorrect) {
+    			if (debug) console.log("Checking if teacher has marked this card as incorrect in this dict:");
+    			if (debug) console.log(incorrectAnswers);
+    			if (cardID in incorrectAnswers) {
+    				/* This card was marked as incorrect, so let's update it */
+    				cards[i].teacherApproved = false;
+    				cards[i].correctCardID = incorrectAnswers[cardID]["correctCardID"];
+    				cards[i].questionIncorrectlyAnswered = incorrectAnswers[cardID]["questionIncorrectlyAnswered"];
     			}
     		}
     	}
-    	
   
     	/* UPDATE NEXT QUESTION (see if it's time for next question) */
     	var readyForNext = this.state.readyForNextQuestion;
@@ -658,9 +672,12 @@ var StudentView = React.createClass({
         		cards[this.state.indexOfIncorrectCard].questionIncorrectlyAnswered = "";
         		cards[correctCardIndex].hasChip = true;
         		/* Set the card as teacher approved, clear other fields associated w/ being incorrect */
-        		cards[correctCardIndex].teacherApproved = true;
+        		if (debug) console.log("Marking card with ID " + cards[correctCardIndex].id + "correct!")
+         		cards[correctCardIndex].teacherApproved = true;
         		cards[correctCardIndex].correctCardID = -1;
         		cards[correctCardIndex].questionIncorrectlyAnswered = "";
+        		if (debug) console.log("Cards are now: ");
+        		if (debug) console.log(cards);
         		if (this.state.numBingoChecksLeft <= 0) {
         			this.setState({cards: cards, modalType:"", indexOfIncorrectCard: -1});
         			this.openModal("outOfChecks");
