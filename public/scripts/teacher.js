@@ -152,7 +152,6 @@ var TeacherView = React.createClass({
    */
   post: function(path, params) {
     if (debug) console.log("Making POST request with path: " + path);
-    if (debug) console.log("Params: ");
     if (debug) console.log(params);
     $.ajax({
         url: TEACHER_URL + path,
@@ -167,6 +166,16 @@ var TeacherView = React.createClass({
           if (debug) console.log("Error posting");
         }
     });
+    if (debug) {
+      var paramsStr = JSON.stringify(params);
+      var studentResponsessss = params.status.studentResponses;
+      console.log("# BYTES: " + paramsStr.length);
+      console.log("# BITS: " + (paramsStr.length * 8));
+
+      var responsesStr = JSON.stringify(studentResponsessss);
+      console.log("# BYTES in student responses: " + responsesStr.length);
+      console.log("# BITS in student responses: " + (responsesStr.length * 8));
+    }
   },
   startGameSuccess: function(data, textStatus, jqXHR) {
     if(debug) console.log("Post success");
